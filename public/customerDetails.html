@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/customerDetails.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="js/customerDetails.js" defer></script>
+    <script src="js/dark-mode.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            Quick Order
+        </div>
+        <div class="nav-links">
+            <a href="#" id="aboutLink">About</a>
+            <a href="#" id="contactsLink">Contact</a>
+            <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <div class="form-header">
+            <button id="backBtn" class="back-btn" title="Go back">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div>
+                <h2>👤 Customer Details</h2>
+                <p>Please provide your delivery information</p>
+            </div>
+        </div>
+
+        <form>
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Juan Dela Cruz" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerPhone">Phone Number</label>
+                <input type="tel" id="customerPhone" name="customerPhone" placeholder="e.g., 09123456789" required>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Delivery Address</label>
+                <textarea id="address" name="address" placeholder="House No., Street, Barangay, City, Province" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="email">
+                    Email <span class="optional-tag">(optional)</span>
+                </label>
+                <input type="email" id="email" name="email" placeholder="juandelacruz@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="specialInstructions">
+                    Special Instructions <span class="optional-tag">(optional)</span>
+                </label>
+                <textarea id="specialInstructions" name="specialInstructions" placeholder="e.g., no onions, extra sauce"></textarea>
+            </div>
+
+            <button type="submit" class="submit-button">Proceed to Payment →</button>
+        </form>
+    </div>
+
+    <!-- Modals -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>About Quick Order</h2>
+                <button class="close-btn" onclick="closeModal('aboutModal')" title="Close about section">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                Welcome to Quick Order! We offer a variety of delicious burgers, pizzas, snacks, and drinks at affordable prices. Our mission is to provide fast, convenient, and quality food ordering for everyone. Enjoy browsing our menu and place your order with ease!
+            </div>
+        </div>
+    </div>
+
+    <div id="contactsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Contact Us</h2>
+                <button class="close-btn" onclick="closeModal('contactsModal')" title="Close contact info">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                For inquiries, feedback, or support, contact us at:<br><br>
+                <strong>Email:</strong> quickorder@example.com<br>
+                <strong>Phone:</strong> 0917-123-4567<br>
+                <strong>Facebook:</strong> <a href="https://facebook.com/quickorder" target="_blank" rel="noopener" class="social-link">facebook.com/quickorder</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const aboutLink = document.getElementById('aboutLink');
+            const contactsLink = document.getElementById('contactsLink');
+            const aboutModal = document.getElementById('aboutModal');
+            const contactsModal = document.getElementById('contactsModal');
+
+            if (aboutLink) {
+                aboutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    aboutModal.style.display = 'flex';
+                });
+            }
+
+            if (contactsLink) {
+                contactsLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    contactsModal.style.display = 'flex';
+                });
+            }
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === aboutModal) aboutModal.style.display = 'none';
+                if (e.target === contactsModal) contactsModal.style.display = 'none';
+            });
+        });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === aboutModal) aboutModal.style.display = 'none';
+                if (e.target === contactsModal) contactsModal.style.display = 'none';
+            });
+        });
+    </script>
+
+    <script src="js/customerDetails.js" type="module"></script>
+</body>
+</html>

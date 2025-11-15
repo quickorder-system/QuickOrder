@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickOrder - Home</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      animation: float 20s infinite;
+    }
+
+    .circle:nth-child(1) {
+      width: 300px;
+      height: 300px;
+      top: -100px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    .circle:nth-child(2) {
+      width: 200px;
+      height: 200px;
+      top: 50%;
+      right: -50px;
+      animation-delay: 5s;
+    }
+
+    .circle:nth-child(3) {
+      width: 400px;
+      height: 400px;
+      bottom: -150px;
+      left: 30%;
+      animation-delay: 10s;
+    }
+
+    .circle:nth-child(4) {
+      width: 150px;
+      height: 150px;
+      top: 20%;
+      right: 20%;
+      animation-delay: 15s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      25% {
+        transform: translate(30px, 30px) rotate(90deg);
+      }
+      50% {
+        transform: translate(0, 60px) rotate(180deg);
+      }
+      75% {
+        transform: translate(-30px, 30px) rotate(270deg);
+      }
+    }
+
+    /* Main Container */
+    .home-container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .content-box {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 4rem 3rem;
+      border-radius: 30px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+      max-width: 700px;
+      width: 100%;
+      backdrop-filter: blur(10px);
+      animation: slideUp 0.8s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Logo */
+    .logo-container {
+      margin-bottom: 2rem;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-15px);
+      }
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+      font-size: 2rem;
+      font-weight: 900;
+      color: white;
+    }
+
+    .logo::before {
+      content: 'QO';
+    }
+
+    
+    .home-title {
+      font-size: 3rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      animation: fadeIn 1s ease-out 0.2s both;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .home-subtitle {
+      font-size: 1.25rem;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      animation: fadeIn 1s ease-out 0.4s both;
+    }
+
+    .home-desc {
+      font-size: 1.05rem;
+      color: #475569;
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+      max-width: 550px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeIn 1s ease-out 0.6s both;
+    }
+
+    
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+      animation: fadeIn 1s ease-out 0.8s both;
+    }
+
+    .feature-item {
+      padding: 1.5rem 1rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 16px;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-5px);
+      border-color: #667eea;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-desc {
+      font-size: 0.85rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+   
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeIn 1s ease-out 1s both;
+    }
+
+    .home-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 1rem 3rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .home-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+    }
+
+    .home-btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 1.5rem;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+      z-index: 1;
+    }
+
+    .footer a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .footer a:hover {
+      color: #ffd93d;
+    }
+
+    
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin: 2rem 0 3rem 0;
+      animation: fadeIn 1s ease-out 0.9s both;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .content-box {
+        padding: 3rem 2rem;
+      }
+
+      .home-title {
+        font-size: 2.25rem;
+      }
+
+      .home-subtitle {
+        font-size: 1.1rem;
+      }
+
+      .home-desc {
+        font-size: 0.95rem;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .home-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* Dark Mode Styles */
+    body.dark-mode {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      color: #ecf0f1;
+    }
+
+    body.dark-mode .content-box {
+      background: rgba(44, 62, 80, 0.95);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    }
+
+    body.dark-mode .home-title {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    body.dark-mode .home-subtitle,
+    body.dark-mode .home-desc {
+      color: #bdc3c7;
+    }
+
+    body.dark-mode .feature-item {
+      background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+      border-color: #3498db;
+      color: #ecf0f1;
+    }
+
+    body.dark-mode .feature-item:hover {
+      border-color: #3498db;
+      box-shadow: 0 10px 30px rgba(52, 152, 219, 0.2);
+    }
+
+    body.dark-mode .feature-title {
+      color: #ecf0f1;
+    }
+
+    body.dark-mode .feature-desc {
+      color: #bdc3c7;
+    }
+
+    body.dark-mode .home-btn {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+    }
+
+    body.dark-mode .home-btn:hover {
+      box-shadow: 0 12px 35px rgba(52, 152, 219, 0.5);
+    }
+
+    body.dark-mode .btn-secondary {
+      background: #2c3e50;
+      color: #3498db;
+      border: 2px solid #3498db;
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+    }
+
+    body.dark-mode .btn-secondary:hover {
+      background: #3498db;
+      color: white;
+    }
+
+    body.dark-mode .footer {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    body.dark-mode .footer a {
+      color: #3498db;
+    }
+
+    body.dark-mode .footer a:hover {
+      color: #66ccff;
+    }
+
+    body.dark-mode .stat-number {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    body.dark-mode .stat-label {
+      color: #bdc3c7;
+    }
+
+    .dark-mode-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: white;
+      transition: background 0.3s ease;
+      z-index: 10;
+    }
+
+    .dark-mode-toggle:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    body.dark-mode .dark-mode-toggle {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    body.dark-mode .dark-mode-toggle:hover {
+      background: rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
+  <!-- Animated Background -->
+  <div class="bg-animation">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="home-container">
+    <div class="content-box">
+      <div class="logo-container">
+        <div class="logo"></div>
+      </div>
+
+      <h1 class="home-title">QuickOrder</h1>
+      <p class="home-subtitle">Restaurant Management Made Simple</p>
+      
+      <p class="home-desc">
+        Streamline your restaurant's order and inventory management with QuickOrder. 
+        Fast, simple, and efficient solution designed for modern restaurants.
+      </p>
+
+      <div class="features">
+        <div class="feature-item">
+          <div class="feature-icon">📋</div>
+          <div class="feature-title">Order Management</div>
+          <div class="feature-desc">Track and manage orders in real-time</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">📦</div>
+          <div class="feature-title">Inventory Control</div>
+          <div class="feature-desc">Monitor stock levels effortlessly</div>
+        </div>
+      </div>
+
+      <div class="features" style="margin-top: 1.5rem; max-width: 300px; margin-left: auto; margin-right: auto;">
+        <div class="feature-item">
+          <div class="feature-icon">📊</div>
+          <div class="feature-title">Analytics</div>
+          <div class="feature-desc">Insights to grow your business</div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <a href="Login.html" class="home-btn">
+          🚀 Get Started
+        </a>
+        <a href="#about" class="home-btn btn-secondary">
+          📖 Learn More
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    © 2025 QuickOrder. All rights reserved. | <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms of Service</a>
+  </div>
+
+  <script>
+    // Add smooth scroll for learn more button
+    document.querySelector('.btn-secondary').addEventListener('click', function(e) {
+      if (this.getAttribute('href') === '#about') {
+        e.preventDefault();
+        alert('Welcome to QuickOrder!\n\nA comprehensive restaurant management system featuring:\n\n• Real-time order tracking\n• Inventory management\n• Sales analytics\n• Multi-user access\n\nLogin to explore all features!');
+      }
+    });
+
+    // Add parallax effect to circles
+    document.addEventListener('mousemove', function(e) {
+      const circles = document.querySelectorAll('.circle');
+      const mouseX = e.clientX / window.innerWidth;
+      const mouseY = e.clientY / window.innerHeight;
+
+      circles.forEach((circle, index) => {
+        const speed = (index + 1) * 50;
+        const x = (mouseX * speed) - (speed / 2);
+        const y = (mouseY * speed) - (speed / 2);
+        
+        circle.style.transform = `translate(${x}px, ${y}px)`;
+      });
+    });
+
+    // Add loading animation
+    window.addEventListener('load', function() {
+      document.body.style.opacity = '0';
+      setTimeout(() => {
+        document.body.style.transition = 'opacity 0.5s';
+        document.body.style.opacity = '1';
+      }, 100);
+    });
+
+    // Dark Mode Toggle Logic
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+
+    // Check for saved dark mode preference
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark-mode');
+      darkModeToggle.textContent = '☀️'; // Sun icon for light mode
+    } else {
+      darkModeToggle.textContent = '🌙'; // Moon icon for dark mode
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+      if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', 'disabled');
+        darkModeToggle.textContent = '🌙';
+      } else {
+        body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', 'enabled');
+        darkModeToggle.textContent = '☀️';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/receipt.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="js/dark-mode.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            Quick Order
+        </div>
+        <div class="nav-links">
+            <a href="#" id="aboutLink">About</a>
+            <a href="#" id="contactsLink">Contact</a>
+            <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
+        </div>
+    </nav>
+    <div class="receipt-container">
+        <div class="success-icon"></div>
+        
+        <div class="receipt-header">
+            <h2>Thank You! 🎉</h2>
+            <p>Your order has been successfully placed</p>
+        </div>
+
+        <div class="order-info">
+            <div class="order-number" id="orderNumber">#QO123456</div>
+            <div class="info-item">
+                <strong>Status:</strong> Order Received
+            </div>
+            <div class="info-item">
+                <strong>Payment:</strong> Pending Verification
+            </div>
+        </div>
+
+        <div class="thank-you-message">
+            <strong>🚀 What's Next?</strong><br>
+            Your order is being processed and you will receive updates via SMS at the contact number you provided. Our team will verify your payment and prepare your order shortly.
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="contact-info">
+            <strong>📧 Need Help?</strong><br>
+            We value your feedback! For any questions or concerns, please email us at:<br>
+            <a href="mailto:quickorder@example.com">quickorder@example.com</a>
+        </div>
+
+        <a href="QuickOrder.html" class="home-button">← Back to Home</a>
+
+        <script src="js/receipt.js"></script>
+    </div>
+
+    <!-- Modals -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>About Quick Order</h2>
+                <button class="close-btn" onclick="closeModal('aboutModal')" title="Close about section">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                Welcome to Quick Order! We offer a variety of delicious burgers, pizzas, snacks, and drinks at affordable prices. Our mission is to provide fast, convenient, and quality food ordering for everyone. Enjoy browsing our menu and place your order with ease!
+            </div>
+        </div>
+    </div>
+
+    <div id="contactsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Contact Us</h2>
+                <button class="close-btn" onclick="closeModal('contactsModal')" title="Close contact info">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                For inquiries, feedback, or support, contact us at:<br><br>
+                <strong>Email:</strong> quickorder@example.com<br>
+                <strong>Phone:</strong> 0917-123-4567<br>
+                <strong>Facebook:</strong> <a href="https://facebook.com/quickorder" target="_blank" rel="noopener" class="social-link">facebook.com/quickorder</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const aboutLink = document.getElementById('aboutLink');
+            const contactsLink = document.getElementById('contactsLink');
+            const aboutModal = document.getElementById('aboutModal');
+            const contactsModal = document.getElementById('contactsModal');
+
+            if (aboutLink) {
+                aboutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    aboutModal.style.display = 'flex';
+                });
+            }
+
+            if (contactsLink) {
+                contactsLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    contactsModal.style.display = 'flex';
+                });
+            }
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === aboutModal) aboutModal.style.display = 'none';
+                if (e.target === contactsModal) contactsModal.style.display = 'none';
+            });
+        });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === aboutModal) aboutModal.style.display = 'none';
+                if (e.target === contactsModal) contactsModal.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

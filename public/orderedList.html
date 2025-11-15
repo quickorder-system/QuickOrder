@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordered List</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/orderedList.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="js/orderedList.js" defer></script>
+    <script src="js/dark-mode.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            Quick Order
+        </div>
+        <div class="nav-links">
+            <a href="#" id="aboutLink">About</a>
+            <a href="#" id="contactsLink">Contact</a>
+            <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <button id="backBtn" class="back-btn" title="Go back">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>📋 Your Order</h2>
+        </div>
+        
+        <div class="order-list">
+            <div id="orderItems">
+                <p id="list1" class="order-item"></p>
+                <p id="list2" class="order-item"></p>
+                <p id="list3" class="order-item"></p>
+                <p id="list4" class="order-item"></p>
+                <p id="list5" class="order-item"></p>
+                <p id="list6" class="order-item"></p>
+                <p id="list7" class="order-item"></p>
+                <p id="list8" class="order-item"></p>
+                <p id="list9" class="order-item"></p>
+                <p id="list10" class="order-item"></p>
+                <p id="list11" class="order-item"></p>
+                <p id="list12" class="order-item"></p>
+                <p id="list13" class="order-item"></p>  
+                <p id="list14" class="order-item"></p> 
+                <p id="list15" class="order-item"></p> 
+                <p id="list16" class="order-item"></p>
+            </div>
+            
+            <div class="total-section">
+                <span>TOTAL</span>
+                <span class="total-price" id="totalAmount">₱0</span>
+            </div>
+
+            <div class="alert-box">
+                <strong>⚠️ Note:</strong>
+                Please double check your orders before proceeding to the next page.
+            </div>
+
+            <div class="button-container">
+                <form action="customerDetails.html">
+                    <input type="submit" value="Next →" class="next-button">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>About Quick Order</h2>
+                <button class="close-btn" onclick="closeModal('aboutModal')" title="Close about section">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                Welcome to Quick Order! We offer a variety of delicious burgers, pizzas, snacks, and drinks at affordable prices. Our mission is to provide fast, convenient, and quality food ordering for everyone. Enjoy browsing our menu and place your order with ease!
+            </div>
+        </div>
+    </div>
+
+    <div id="contactsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Contact Us</h2>
+                <button class="close-btn" onclick="closeModal('contactsModal')" title="Close contact info">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                For inquiries, feedback, or support, contact us at:<br><br>
+                <strong>Email:</strong> quickorder@example.com<br>
+                <strong>Phone:</strong> 0917-123-4567<br>
+                <strong>Facebook:</strong> <a href="https://facebook.com/quickorder" target="_blank" rel="noopener" class="social-link">facebook.com/quickorder</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const aboutLink = document.getElementById('aboutLink');
+            const contactsLink = document.getElementById('contactsLink');
+            const aboutModal = document.getElementById('aboutModal');
+            const contactsModal = document.getElementById('contactsModal');
+
+            if (aboutLink) {
+                aboutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    aboutModal.style.display = 'flex';
+                });
+            }
+
+            if (contactsLink) {
+                contactsLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    contactsModal.style.display = 'flex';
+                });
+            }
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === aboutModal) aboutModal.style.display = 'none';
+                if (e.target === contactsModal) contactsModal.style.display = 'none';
+            });
+        });
+    </script>
+
+    <script src="js/orderedList.js" type="module"></script>
+</body>
+</html>

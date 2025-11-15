@@ -1,0 +1,180 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Payment Methods</title>
+        <link rel="icon" href="data:,">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="css/paymentMethods.css">
+        <link rel="stylesheet" href="css/payment-methods.css">
+        <link rel="stylesheet" href="css/dark-mode.css">
+        <script src="js/paymentMethods.js" defer></script>
+        <script src="js/dark-mode.js"></script>
+    </head>
+    <body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            Quick Order
+        </div>
+        <div class="nav-links">
+            <a href="#" id="aboutLink">About</a>
+            <a href="#" id="contactsLink">Contact</a>
+            <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
+        </div>
+    </nav>        <div class="container">
+            <div class="header">
+                <button id="backBtn" class="back-btn" title="Go back">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>💳 Review & Pay</h2>
+            </div>
+
+            <div class="main-content">
+                <div class="order-review-section">
+                    <h3>Order Summary</h3>
+                    <div id="orderItems"></div>
+                    <div class="total-section">
+                        <span>TOTAL</span>
+                        <span class="total-price" id="totalAmount">₱0</span>
+                    </div>
+                </div>
+
+                <div class="order-review-section">
+                    <h3>Delivery Details</h3>
+                    <div id="customerDetails"></div>
+                </div>
+
+                <div class="payment-container">
+                    <form id="paymentForm">
+                        <div class="section">
+                            <div class="section-title">📸 Upload Proof of Payment</div>
+                            <div class="upload-area" id="uploadAreaClick">
+                                <div class="upload-icon">📤</div>
+                                <label for="paymentScreenshot" class="upload-label">
+                                    <strong>Click to upload</strong> or drag and drop<br>
+                                    <small>PNG or JPG (MAX. 5MB)</small>
+                                </label>
+                                <input type="file" id="paymentScreenshot" name="paymentScreenshot" accept="image/*">
+                                <div id="screenshotError"></div>
+                            </div>
+                            <img id="screenshotPreview" src="" alt="Screenshot Preview" />
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">💰 Select Payment Method</div>
+                            <div class="payment-options">
+                                <div class="payment-option selected payment-option-clickable">
+                                    <input type="radio" checked="checked" value="GCash" name="payMethod" id="gcash">
+                                    <label for="gcash">GCash</label>
+                                    <img src="image/gcash.png" class="payment-logo" alt="GCash">
+                                </div>
+
+                                <div class="payment-option payment-option-clickable">
+                                    <input type="radio" value="Maya" name="payMethod" id="maya">
+                                    <label for="maya">Maya</label>
+                                    <img src="image/Paymaya.png" class="payment-logo" alt="Maya">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-box">
+                            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#ffc107" viewBox="0 0 16 16">
+                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.964 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.707c.89 0 1.438-.99.982-1.767L8.982 1.566zm-1.196.868a.13.13 0 0 1 .228 0l6.853 11.667a.13.13 0 0 1-.114.199H1.147a.13.13 0 0 1-.114-.199L7.886 2.434zM8 5c-.535 0-.954.462-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 5zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                            </svg>
+                            <div>
+                                <strong>Note:</strong> Please double check your payment screenshot before submitting to ensure it is clear and correct.
+                            </div>
+                        </div>
+
+                        <div id="progressContainer" class="progress-container">
+                            <div id="progressBar" class="progress-bar"></div>
+                            <div id="progressText" class="progress-text">Uploading... 0%</div>
+                        </div>
+
+                        <button type="submit" id="submitButton" class="submit-button">Confirm & Place Order →</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast notification -->
+        <div id="toast" class="toast"></div>
+
+        <!-- Modals -->
+        <div id="aboutModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>About Quick Order</h2>
+                    <button class="close-btn" onclick="closeModal('aboutModal')" title="Close about section">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Welcome to Quick Order! We offer a variety of delicious burgers, pizzas, snacks, and drinks at affordable prices. Our mission is to provide fast, convenient, and quality food ordering for everyone. Enjoy browsing our menu and place your order with ease!
+                </div>
+            </div>
+        </div>
+
+        <div id="contactsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Contact Us</h2>
+                    <button class="close-btn" onclick="closeModal('contactsModal')" title="Close contact info">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    For inquiries, feedback, or support, contact us at:<br><br>
+                    <strong>Email:</strong> quickorder@example.com<br>
+                    <strong>Phone:</strong> 0917-123-4567<br>
+                    <strong>Facebook:</strong> <a href="https://facebook.com/quickorder" target="_blank" rel="noopener" class="social-link">facebook.com/quickorder</a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function closeModal(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const aboutLink = document.getElementById('aboutLink');
+                const contactsLink = document.getElementById('contactsLink');
+                const aboutModal = document.getElementById('aboutModal');
+                const contactsModal = document.getElementById('contactsModal');
+
+                if (aboutLink) {
+                    aboutLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        aboutModal.style.display = 'flex';
+                    });
+                }
+
+                if (contactsLink) {
+                    contactsLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        contactsModal.style.display = 'flex';
+                    });
+                }
+
+                // Close modal when clicking outside
+                window.addEventListener('click', function(e) {
+                    if (e.target === aboutModal) aboutModal.style.display = 'none';
+                    if (e.target === contactsModal) contactsModal.style.display = 'none';
+                });
+            });
+
+                // Close modal when clicking outside
+                window.addEventListener('click', function(e) {
+                    if (e.target === aboutModal) aboutModal.style.display = 'none';
+                    if (e.target === contactsModal) contactsModal.style.display = 'none';
+                });
+            });
+        </script>
+
+        <script src="js/paymentMethods.js" type="module"></script>
+    </body>
+    </html>

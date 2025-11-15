@@ -1,0 +1,579 @@
+/* Dark Mode Toggle Button Styles */
+.dark-mode-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: white;
+  transition: background 0.3s ease;
+  z-index: 10;
+  margin-top: -2px;
+}
+
+.dark-mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+body.dark-mode .dark-mode-toggle {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .dark-mode-toggle:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* General Dark Mode Styles */
+body.dark-mode {
+  background-color: #1a202c;
+  color: #e2e8f0;
+}
+
+body.dark-mode .content-box {
+  background: rgba(44, 62, 80, 0.95);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .home-title {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.dark-mode .home-subtitle,
+body.dark-mode .home-desc {
+  color: #bdc3c7;
+}
+
+body.dark-mode .feature-item {
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+  border-color: #3498db;
+  color: #ecf0f1;
+}
+
+body.dark-mode .feature-item:hover {
+  transform: translateY(-5px);
+  border-color: #3498db;
+  box-shadow: 0 10px 30px rgba(52, 152, 219, 0.2);
+}
+
+body.dark-mode .feature-title {
+  color: #ecf0f1;
+}
+
+body.dark-mode .feature-desc {
+  color: #bdc3c7;
+}
+
+body.dark-mode .home-btn {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+}
+
+body.dark-mode .home-btn:hover {
+  box-shadow: 0 12px 35px rgba(52, 152, 219, 0.5);
+}
+
+body.dark-mode .btn-primary {
+  background-color: #4299e1;
+  color: white;
+}
+
+body.dark-mode .btn-secondary {
+  background-color: #4a5568;
+  color: #e2e8f0;
+  border: 2px solid #4a5568;
+}
+
+body.dark-mode .btn-secondary:hover {
+  background-color: #636e72;
+  color: white;
+}
+
+body.dark-mode .footer {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+body.dark-mode .footer a {
+  color: #3498db;
+}
+
+body.dark-mode .footer a:hover {
+  color: #66ccff;
+}
+
+body.dark-mode .stat-number {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.dark-mode .stat-label {
+  color: #bdc3c7;
+}
+
+/* Admin/Owner Specific Dark Mode Styles */
+body.dark-mode .header {
+  background-color: #2d3748;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .logo-text h1,
+body.dark-mode .logo-text p {
+  color: #e2e8f0;
+}
+
+body.dark-mode .user-name,
+body.dark-mode .user-role {
+  color: #e2e8f0;
+}
+
+body.dark-mode .logout-btn {
+  background-color: #e53e3e;
+  color: white;
+}
+
+body.dark-mode .nav-tabs {
+  background-color: #2d3748;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .tab-btn {
+  color: #cbd5e0;
+}
+
+body.dark-mode .tab-btn.active {
+  background-color: #4a5568;
+  color: #4299e1;
+}
+
+body.dark-mode .main-content {
+  background-color: #1a202c;
+}
+
+body.dark-mode .section-header h2,
+body.dark-mode .section-title {
+  color: #e2e8f0;
+}
+
+body.dark-mode .controls .search-box input,
+body.dark-mode .filter-select,
+body.dark-mode .date-input,
+body.dark-mode .form-group input,
+body.dark-mode .form-group select,
+body.dark-mode .form-group textarea {
+  background-color: #4a5568;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .controls .search-box input::placeholder,
+body.dark-mode .form-group input::placeholder,
+body.dark-mode .form-group textarea::placeholder {
+  color: #cbd5e0;
+}
+
+/* Reports Tab Specific Styles */
+body.dark-mode .report-controls .date-input,
+body.dark-mode .report-select {
+  background-color: #4a5568;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .metric-card {
+  background-color: #2d3748;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+  color: #e2e8f0;
+}
+
+body.dark-mode .metric-title,
+body.dark-mode .metric-value,
+body.dark-mode .metric-change {
+  color: #e2e8f0;
+}
+
+body.dark-mode .chart-container {
+  background-color: #2d3748;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .chart-header h3,
+body.dark-mode .chart-legend span {
+  color: #e2e8f0;
+}
+
+/* QuickOrder.html Specific Dark Mode Styles */
+body.dark-mode {
+  background-color: #1a202c;
+  color: #e2e8f0;
+}
+
+body.dark-mode .navbar {
+  background-color: #2d3748;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .navbar .logo,
+body.dark-mode .navbar .nav-links a {
+  color: #e2e8f0;
+}
+
+body.dark-mode .hero {
+  background-color: #1a202c;
+}
+
+body.dark-mode .hero-content h1,
+body.dark-mode .hero-content p {
+  color: #e2e8f0;
+}
+
+body.dark-mode .btn-cta.btn-primary {
+  background-color: #4299e1;
+  color: white;
+}
+
+body.dark-mode .btn-cta.btn-primary:hover {
+  background-color: #3182ce;
+}
+
+body.dark-mode .tos-checkbox label {
+  color: #e2e8f0;
+}
+
+body.dark-mode .tos-checkbox a {
+  color: #4299e1;
+}
+
+body.dark-mode .wave .shape-fill {
+  fill: #2d3748;
+}
+
+body.dark-mode .features {
+  background-color: #2d3748;
+}
+
+body.dark-mode .section-title,
+body.dark-mode .section-subtitle {
+  color: #e2e8f0;
+}
+
+body.dark-mode .feature-card {
+  background-color: #4a5568;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  color: #e2e8f0;
+}
+
+body.dark-mode .feature-card h3 {
+  color: #e2e8f0;
+}
+
+body.dark-mode .stats {
+  background-color: #1a202c;
+}
+
+body.dark-mode .stat-item {
+  color: #e2e8f0;
+}
+
+body.dark-mode .stat-number {
+  color: #4299e1;
+}
+
+body.dark-mode .stat-label {
+  color: #cbd5e0;
+}
+
+body.dark-mode .cta-section {
+  background-color: #2d3748;
+}
+
+body.dark-mode .cta-section h2,
+body.dark-mode .cta-section p {
+  color: #e2e8f0;
+}
+
+body.dark-mode .footer {
+  background-color: #2d3748;
+  color: #cbd5e0;
+}
+
+body.dark-mode .modal-content {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+body.dark-mode .modal-header h2,
+body.dark-mode .modal-body {
+  color: #e2e8f0;
+}
+
+body.dark-mode .modal-body strong,
+body.dark-mode .modal-body a {
+  color: #4299e1;
+}
+
+body.dark-mode .close-btn {
+  color: #e2e8f0;
+}
+
+/* menu.html Specific Dark Mode Styles */
+body.dark-mode .header {
+  background-color: #2d3748;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .header .logo {
+  color: #e2e8f0;
+}
+
+body.dark-mode .hero-banner {
+  background-color: #2d3748;
+}
+
+body.dark-mode .hero-content h1,
+body.dark-mode .hero-content p {
+  color: #e2e8f0;
+}
+
+body.dark-mode .search-filter {
+  background-color: #2d3748;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .search-box input,
+body.dark-mode .category-select {
+  background-color: #4a5568;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .search-box input::placeholder {
+  color: #cbd5e0;
+}
+
+body.dark-mode .section-header {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+body.dark-mode .section-header h2 {
+  color: #e2e8f0;
+}
+
+body.dark-mode .food-card {
+  background-color: #4a5568;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  color: #e2e8f0;
+}
+
+body.dark-mode .food-name,
+body.dark-mode .food-price,
+body.dark-mode .food-description,
+body.dark-mode .meta-item span,
+body.dark-mode .qty-label {
+  color: #e2e8f0;
+}
+
+body.dark-mode .qty-input {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .custom-checkbox {
+  border-color: #e2e8f0;
+}
+
+body.dark-mode .order-section {
+  background-color: #2d3748;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .order-btn {
+  background-color: #4299e1;
+  color: white;
+}
+
+body.dark-mode .order-btn:hover {
+  background-color: #3182ce;
+}
+
+/* Menu Page Dark Mode Styles */
+body.dark-mode {
+  background: linear-gradient(135deg, #2d3e50 0%, #3d4d5c 100%);
+}
+
+body.dark-mode .navbar {
+  background: rgba(45, 62, 80, 0.98);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .navbar .logo {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.dark-mode .nav-links a {
+  color: #e2e8f0;
+}
+
+body.dark-mode .nav-links a::after {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+}
+
+body.dark-mode .container {
+  background: #1a202c;
+}
+
+body.dark-mode .hero-banner {
+  background: linear-gradient(135deg, #2d3e50 0%, #3d4d5c 100%);
+}
+
+body.dark-mode .hero-content h1,
+body.dark-mode .hero-content p {
+  color: #e2e8f0;
+}
+
+body.dark-mode .search-filter {
+  background: rgba(45, 62, 80, 0.7);
+}
+
+body.dark-mode .search-box {
+  background: rgba(74, 85, 104, 0.8);
+}
+
+body.dark-mode .search-box input {
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .search-box input::placeholder {
+  color: #cbd5e0;
+}
+
+body.dark-mode .search-box i {
+  color: #cbd5e0;
+}
+
+body.dark-mode .category-select {
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .section-header {
+  background: linear-gradient(135deg, #2d3e50 0%, #3d4d5c 100%);
+}
+
+body.dark-mode .section-header h2,
+body.dark-mode .section-icon {
+  color: #e2e8f0;
+}
+
+body.dark-mode .menu-grid {
+  background: transparent;
+}
+
+body.dark-mode .food-card {
+  background: linear-gradient(135deg, #3d4d5c 0%, #4a5568 100%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  border-color: #4a5568;
+}
+
+body.dark-mode .food-card:hover {
+  background: linear-gradient(135deg, #4a5568 0%, #5a6b7d 100%);
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .difficulty-badge {
+  color: #e2e8f0;
+  background: rgba(66, 153, 225, 0.8);
+}
+
+body.dark-mode .food-details {
+  background: linear-gradient(135deg, #3d4d5c 0%, #4a5568 100%);
+}
+
+body.dark-mode .food-name {
+  color: #e2e8f0;
+}
+
+body.dark-mode .food-price {
+  color: #4299e1;
+}
+
+body.dark-mode .food-description {
+  color: #cbd5e0;
+}
+
+body.dark-mode .food-meta {
+  background: rgba(45, 62, 80, 0.5);
+}
+
+body.dark-mode .meta-item {
+  color: #cbd5e0;
+}
+
+body.dark-mode .qty-label {
+  color: #cbd5e0;
+}
+
+body.dark-mode .qty-input {
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .custom-checkbox {
+  border-color: #4a5568;
+}
+
+body.dark-mode .custom-checkbox:checked {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  border-color: #4299e1;
+}
+
+body.dark-mode .order-section {
+  background: linear-gradient(135deg, #2d3e50 0%, #3d4d5c 100%);
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .order-count {
+  color: #e2e8f0;
+}
+
+body.dark-mode .order-btn {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .order-btn:hover {
+  background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+  box-shadow: 0 12px 28px rgba(66, 153, 225, 0.4);
+}
+
+body.dark-mode .back-button-section {
+  background: transparent;
+}
+
+body.dark-mode .back-button {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .back-button:hover {
+  box-shadow: 0 6px 16px rgba(66, 153, 225, 0.4);
+}

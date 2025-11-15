@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add New Item</title>
+  <link rel="stylesheet" href="css/addItem.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f7f9;
+    }
+    .form-container {
+      max-width: 600px;
+      margin: 48px auto;
+      background: white;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(16,24,40,0.08);
+      border: 1px solid rgba(99,102,241,0.06);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 12px 16px;
+      background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      border: none;
+      color: white;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(102,126,234,0.18);
+      font-size: 15px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .image-preview {
+      margin-top: 10px;
+      width: 100%;
+      height: auto;
+      max-height: 200px;
+      object-fit: cover;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>Add New Item</h2>
+  <form action="#" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="itemName">Item Name</label>
+      <input type="text" id="itemName" name="itemName" required>
+    </div>
+
+    <div class="form-group">
+      <label for="category">Category</label>
+      <select id="category" name="category" required>
+        <option value="">Select Category</option>
+        <option value="Ingredients">Ingredients</option>
+        <option value="Beverages">Beverages</option>
+        <option value="Packaging">Packaging</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="unit">Unit (e.g., kg, cans)</label>
+      <input type="text" id="unit" name="unit" required>
+    </div>
+
+    <div class="form-group">
+      <label for="quantity">Initial Quantity</label>
+      <input type="number" id="quantity" name="quantity" required>
+    </div>
+
+    <div class="form-group">
+      <label for="alertLevel">Alert Level</label>
+      <input type="number" id="alertLevel" name="alertLevel" required>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description (Optional)</label>
+      <textarea id="description" name="description" rows="3"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="itemPhoto">Upload Item Photo</label>
+      <input type="file" id="itemPhoto" name="itemPhoto" accept="image/*">
+      <img id="preview" class="image-preview" alt="Image preview">
+      <input type="hidden" id="itemImageData">
+    </div>
+
+    <button type="submit" class="btn-primary">Add Item</button>
+  </form>
+</div>
+
+<script>
+  function previewImage(event) {
+    const preview = document.getElementById('preview');
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      preview.src = ev.target.result;
+      preview.style.display = 'block';
+      document.getElementById('itemImageData').value = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  document.getElementById('itemPhoto')?.addEventListener('change', previewImage);
+
+  // Redirect to Admin.html or Owner.html after form submission
+  document.querySelector('.form-container form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Save item to localStorage
+    const item = {
+      itemName: document.getElementById('itemName').value,
+      category: document.getElementById('category').value,
+      unit: document.getElementById('unit').value,
+      quantity: parseFloat(document.getElementById('quantity').value),
+      alertLevel: parseFloat(document.getElementById('alertLevel').value),
+      description: document.getElementById('description').value,
+      image: document.getElementById('itemImageData')?.value || ''
+    };
+    let items = JSON.parse(localStorage.getItem('inventoryItems') || '[]');
+    items.push(item);
+    localStorage.setItem('inventoryItems', JSON.stringify(items));
+    // Check last user type
+    const lastUser = localStorage.getItem('lastUserType') || 'admin';
+    if (lastUser === 'owner') {
+      window.location.href = 'Owner.html';
+    } else {
+      window.location.href = 'Admin.html';
+    }
+  });
+
+  // Set lastUserType when coming from Admin or Owner
+  if (document.referrer.includes('Owner.html')) {
+    localStorage.setItem('lastUserType', 'owner');
+  } else if (document.referrer.includes('Admin.html')) {
+    localStorage.setItem('lastUserType', 'admin');
+  }
+</script>
+
+</body>
+</html>

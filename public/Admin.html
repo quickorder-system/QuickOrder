@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Quick Order</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="css/admin.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <i class="fas fa-utensils"></i>
+      </div>
+      <div class="logo-text">
+        <h1>Quick Order</h1>
+        <p>Admin Panel</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="user-profile">
+        <div class="user-avatar">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <div class="user-info">
+          <div class="user-name">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" data-tab="ordersTab">
+      <i class="fas fa-clipboard-list"></i>
+      Orders
+      <span class="badge">5</span>
+    </button>
+    <button class="tab-btn" data-tab="inventoryTab">
+      <i class="fas fa-boxes"></i>
+      Inventory
+    </button>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Orders Tab -->
+    <div id="ordersTab" class="tab-content active">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-clipboard-list"></i>
+          Active Orders
+        </h2>
+      </div>
+
+      <div class="controls">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search orders by ID, customer name..." id="orderSearch">
+        </div>
+        <label for="statusFilter" class="visually-hidden">Filter by Status</label>
+        <select class="filter-select" id="statusFilter" title="Filter orders by status">
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="preparing">Preparing</option>
+          <option value="ready">Ready</option>
+          <option value="complete">Complete</option>
+        </select>
+        <label for="orderDate" class="visually-hidden">Filter by Date</label>
+        <input type="date" class="date-input" id="orderDate" title="Filter orders by date" placeholder="Select date">
+      </div>
+      
+      <h2>Customer Orders</h2>
+      <div class="orders-grid" id="ordersContainer">
+        <p>Loading orders...</p>
+      </div>
+
+      <div class="orders-grid orders-example hidden">
+        <!-- Order Card 1 -->
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-id">
+              <h3>#ORD-001</h3>
+              <span class="status-badge pending">Pending</span>
+            </div>
+            <div class="order-time">
+              <i class="far fa-clock"></i>
+              10 mins ago
+            </div>
+          </div>
+
+          <div class="customer-info">
+            <div class="info-item">
+              <i class="fas fa-user"></i>
+              <span>Juan Dela Cruz</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-phone"></i>
+              <span>09123456789</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Manila, Philippines</span>
+            </div>
+          </div>
+
+          <div class="order-items">
+            <div class="item-row">
+              <span>Beef Burger x 2</span>
+              <span>₱178</span>
+            </div>
+            <div class="item-row">
+              <span>Spicy Pizza x 1</span>
+              <span>₱199</span>
+            </div>
+            <div class="item-row">
+              <span>Coke / Pepsi x 2</span>
+              <span>₱70</span>
+            </div>
+          </div>
+
+          <div class="order-total">
+            <span>Total:</span>
+            <span>₱447</span>
+          </div>
+
+          <div class="order-actions">
+            <button class="action-btn preparing">
+              <i class="fas fa-check"></i>
+              Accept & Prepare
+            </button>
+            <button class="action-btn complete">
+              <i class="fas fa-times"></i>
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Card 2 -->
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-id">
+              <h3>#ORD-002</h3>
+              <span class="status-badge preparing">Preparing</span>
+            </div>
+            <div class="order-time">
+              <i class="far fa-clock"></i>
+              25 mins ago
+            </div>
+          </div>
+
+          <div class="customer-info">
+            <div class="info-item">
+              <i class="fas fa-user"></i>
+              <span>Maria Santos</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-phone"></i>
+              <span>09187654321</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Quezon City, Philippines</span>
+            </div>
+          </div>
+
+          <div class="order-items">
+            <div class="item-row">
+              <span>Chicken Burger x 1</span>
+              <span>₱79</span>
+            </div>
+            <div class="item-row">
+              <span>Italian Pizza x 1</span>
+              <span>₱219</span>
+            </div>
+            <div class="item-row">
+              <span>French Fries x 2</span>
+              <span>₱118</span>
+            </div>
+            <div class="item-row">
+              <span>Milk Shake x 1</span>
+              <span>₱65</span>
+            </div>
+          </div>
+
+          <div class="order-total">
+            <span>Total:</span>
+            <span>₱481</span>
+          </div>
+
+          <div class="order-actions">
+            <button class="action-btn ready">
+              <i class="fas fa-check-double"></i>
+              Mark as Ready
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Card 3 -->
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-id">
+              <h3>#ORD-003</h3>
+              <span class="status-badge ready">Ready</span>
+            </div>
+            <div class="order-time">
+              <i class="far fa-clock"></i>
+              45 mins ago
+            </div>
+          </div>
+
+          <div class="customer-info">
+            <div class="info-item">
+              <i class="fas fa-user"></i>
+              <span>Pedro Reyes</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-phone"></i>
+              <span>09156781234</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Makati City, Philippines</span>
+            </div>
+          </div>
+
+          <div class="order-items">
+            <div class="item-row">
+              <span>Shrimp Burger x 2</span>
+              <span>₱218</span>
+            </div>
+            <div class="item-row">
+              <span>Fried Chicken x 1</span>
+              <span>₱99</span>
+            </div>
+            <div class="item-row">
+              <span>Fruit Juice x 2</span>
+              <span>₱90</span>
+            </div>
+          </div>
+
+          <div class="order-total">
+            <span>Total:</span>
+            <span>₱407</span>
+          </div>
+
+          <div class="order-actions">
+            <button class="action-btn complete">
+              <i class="fas fa-box"></i>
+              Complete Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Tab -->
+    <div id="inventoryTab" class="tab-content">
+      <div class="section-header">
+        <h2 class="section-title">Inventory Management</h2>
+        <button class="btn-primary" id="addNewItemBtn">
+          <i class="fas fa-plus"></i>
+          Add New Item
+        </button>
+      </div>
+
+      <div class="controls">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input id="inventorySearch" type="text" placeholder="Search inventory...">
+        </div>
+        <label for="stockFilter" class="visually-hidden">Filter by Stock Status</label>
+        <select class="filter-select" id="stockFilter" title="Filter items by stock status">
+          <option value="all">All Stock</option>
+          <option value="in-stock">In Stock</option>
+          <option value="low-stock">Low Stock</option>
+          <option value="out-stock">Out of Stock</option>
+        </select>
+      </div>
+
+      <div class="inventory-container">
+        <div class="table-header">
+          <div>Item Name</div>
+          <div>Category</div>
+          <div>Current Stock</div>
+          <div>Alert Level</div>
+          <div>Status</div>
+          <div>Actions</div>
+        </div>
+        <div id="inventoryRows"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add/Edit Item Modal -->
+  <div class="modal" id="itemModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-plus-circle"></i> Add / Edit Item</h3>
+        <button class="close-modal" id="modalCloseBtn" title="Close modal" aria-label="Close modal">
+          <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+      <form id="addItemForm">
+        <div class="form-group">
+          <label for="itemName">Item Name</label>
+          <input type="text" id="itemName" placeholder="Enter item name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="itemCategory">Category</label>
+          <select id="itemCategory" required>
+            <option value="">Select category</option>
+            <option value="burger">Burger</option>
+            <option value="pizza">Pizza</option>
+            <option value="others">Others</option>
+            <option value="drinks">Drinks</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="itemPrice">Price (₱)</label>
+          <input type="number" id="itemPrice" placeholder="0.00">
+        </div>
+
+        <div class="form-group">
+          <label for="itemUnit">Unit</label>
+          <input type="text" id="itemUnit" placeholder="pcs" value="pcs">
+        </div>
+
+        <div class="form-group">
+          <label for="itemAlertLevel">Alert Level</label>
+          <input type="number" id="itemAlertLevel" placeholder="0" value="0">
+        </div>
+
+        <div class="form-group">
+          <label for="itemStock">Stock Quantity</label>
+          <input type="number" id="itemStock" placeholder="0" required>
+        </div>
+
+        <div class="form-group">
+          <label for="itemDescription">Description (Optional)</label>
+          <textarea id="itemDescription" rows="3" placeholder="Enter item description"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="itemImage">Item Photo (optional)</label>
+          <input type="file" id="itemImage" accept="image/*">
+          <img id="itemPreview" alt="Preview" class="item-preview hidden" />
+          <input type="hidden" id="itemImageData">
+          <input type="hidden" id="itemEditIndex">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="modalCancelBtn">Cancel</button>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-save"></i>
+            Save Item
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Screenshot Modal -->
+  <div id="screenshot-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <img id="screenshot-image" src="" alt="Payment Screenshot" style="width: 100%; height: auto;">
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/services/api.service.js"></script>
+  <script src="js/services/order.service.js"></script>
+  <script src="js/components/order-card.component.js"></script>
+  <script src="js/components/order-management.js"></script>
+  <script src="js/orders.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

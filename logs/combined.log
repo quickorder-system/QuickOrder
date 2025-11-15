@@ -1,0 +1,12 @@
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-10-27T13:58:27.054Z"}
+{"level":"info","message":"Server listening on port 5000","timestamp":"2025-10-27T13:58:27.060Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-10-27T14:00:31.894Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-10-27T14:06:12.546Z"}
+{"level":"info","message":"Server listening on port 5000","timestamp":"2025-10-27T14:06:12.552Z"}
+{"level":"info","message":"Shutting down gracefully...","timestamp":"2025-10-27T20:18:36.150Z"}
+{"level":"info","message":"Server closed","timestamp":"2025-10-27T20:18:36.158Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-10-27T20:21:01.412Z"}
+{"level":"info","message":"Server listening on port 5000","timestamp":"2025-10-27T20:21:01.418Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-10-27T20:29:55.575Z"}
+{"level":"info","message":"Shutting down gracefully...","timestamp":"2025-10-27T20:54:47.276Z"}
+{"level":"info","message":"Server closed","timestamp":"2025-10-27T20:54:47.278Z"}

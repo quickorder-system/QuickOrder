@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Order - Delicious Food Delivered</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/QuickOrder.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            Quick Order
+        </div>
+        <div class="nav-links">
+            <a href="#" id="aboutLink">About</a>
+            <a href="#" id="contactsLink">Contact</a>
+            <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
+        </div>
+    </nav>
+
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="floating-emoji emoji-1">🍔</div>
+        <div class="floating-emoji emoji-2">🍕</div>
+        <div class="floating-emoji emoji-3">🍗</div>
+        <div class="floating-emoji emoji-4">🥤</div>
+        <div class="floating-emoji emoji-5">🍟</div>
+        <div class="floating-emoji emoji-6">🌮</div>
+        <div class="floating-emoji emoji-7">🍰</div>
+        <div class="floating-emoji emoji-8">🥗</div>
+        <div class="floating-emoji emoji-9">🍜</div>
+        <div class="floating-emoji emoji-10">🧃</div>
+
+        <div class="hero-content">
+            <h1 class="animate__animated animate__fadeInDown">Welcome to Quick Order!</h1>
+            <p class="animate__animated animate__fadeInUp">Enjoy the best food in town. Browse our menu, order online, and experience fast delivery straight to your door!</p>
+            
+            <div class="cta-group">
+                <a href="#" class="btn-cta btn-primary" id="getStartedBtn">
+                    <i class="fas fa-rocket"></i>
+                    Get Started
+                </a>
+                
+                <div class="tos-checkbox">
+                    <input type="checkbox" id="tosCheckbox">
+                    <label for="tosCheckbox">
+                        I agree to the <a href="#" id="tosLink">Terms of Service</a>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="wave">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Why Order With Us?</h2>
+            <p class="section-subtitle">Experience the best food ordering service in town</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt" aria-hidden="true"></i>
+                    </div>
+                    <h3>Fast & Efficient</h3>
+                    <p>Your order is prepared as soon as you place it and ready for pickup or delivery in no time.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                    </div>
+                    <h3>Top Quality</h3>
+                    <p>We hand-pick the finest ingredients to ensure the highest quality for every meal we serve.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-tag" aria-hidden="true"></i>
+                    </div>
+                    <h3>Great Deals</h3>
+                    <p>Enjoy competitive prices and regular promotions that make delicious food affordable for everyone.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">5000+</div>
+                    <div class="stat-label">Happy Customers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Menu Items</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4.9★</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Service Available</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Order?</h2>
+            <p>Start your delicious journey with Quick Order today!</p>
+            <a href="#" class="btn-cta btn-primary" id="getStartedBtn2">
+                <i class="fas fa-utensils"></i>
+                Browse Menu
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Quick Order. All rights reserved.</p>
+    </footer>
+
+    <!-- Modals -->
+    <div id="tosModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Terms of Service</h2>
+                <button class="close-btn" onclick="closeModal('tosModal')" title="Close terms of service" aria-label="Close terms of service modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                Welcome to <strong>QuickOrder</strong>. By placing an order through our platform, you agree to the following Terms of Service. Please read them carefully before proceeding.<br><br>
+
+                <strong>1. Acceptance of Terms</strong><br>
+                By using QuickOrder, you acknowledge that you have read, understood, and agreed to these Terms of Service. A checkbox will appear before finalizing your order, serving as a disclaimer that you consent to these terms and our privacy practices.<br><br>
+
+                <strong>2. Ordering Terms</strong><br>
+                a. <em>Service Availability</em> – Our services are available during designated operating hours, which may vary depending on your location and the merchant’s schedule.<br>
+                b. <em>Item Pricing</em> – All prices displayed on the platform are subject to change without prior notice. Prices include applicable taxes unless stated otherwise.<br>
+                c. <em>Order Confirmation</em> – Once an order has been confirmed and payment has been processed, the details will be sent to the customer via email or on-screen confirmation.<br><br>
+
+                <strong>3. Cancellation Terms</strong><br>
+                a. <em>Cancellation Window</em> – Customers may cancel their orders within <strong>10 minutes</strong> after placing the order.<br>
+                b. <em>Cancellation Restrictions</em> – Once preparation or processing has begun, cancellations will no longer be accepted.<br>
+                c. <em>Merchant’s Right to Cancel</em> – The merchant reserves the right to cancel orders in cases such as unavailability of items, invalid customer details, or system errors.<br><br>
+
+                <strong>4. No Refund Terms</strong><br>
+                a. <em>No Refund Policy</em> – All confirmed orders are final. Refunds will not be issued once an order has been confirmed and payment has been processed.<br>
+                b. <em>Exceptional Cases</em> – Refunds may only be considered under specific circumstances, such as duplicate transactions or system errors, subject to administrative approval.<br><br>
+
+                <strong>5. Customer Information Terms</strong><br>
+                a. <em>Information Collection</em> – We collect necessary information such as your name, contact details, and order information to process and deliver your order.<br>
+                b. <em>Data Usage</em> – Your information will be used solely for order processing, customer support, and service improvement.<br>
+                c. <em>Data Protection</em> – All personal information will be handled in accordance with our Privacy Policy and applicable data protection laws. We ensure that your data is securely stored and will not be shared with unauthorized parties.<br><br>
+                <p>To learn more about how we handle your data, please see our <a href="PrivacyPolicy.html" target="_blank">Privacy Policy</a>.</p>
+
+                <strong>6. Amendments to Terms</strong><br>
+                We reserve the right to modify these Terms of Service at any time. Updates will be posted on our website or platform, and continued use of the service indicates acceptance of the revised terms.<br><br>
+
+                <strong>7. Contact Information</strong><br>
+                For questions or concerns about these Terms of Service, please contact us at:<br>
+                <strong>Email:</strong> support@quickorder.com<br>
+                <strong>Phone:</strong> +63 912 345 6789<br><br>
+
+                Please read these terms carefully before proceeding. If you do not agree, do not use this service.
+            </div>
+
+        </div>
+    </div>
+
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>About Quick Order</h2>
+                <button class="close-btn" onclick="closeModal('aboutModal')" title="Close about section" aria-label="Close about modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                Welcome to Quick Order! We offer a variety of delicious burgers, pizzas, snacks, and drinks at affordable prices. Our mission is to provide fast, convenient, and quality food ordering for everyone. Enjoy browsing our menu and place your order with ease!
+            </div>
+        </div>
+    </div>
+
+    <div id="contactsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Contact Us</h2>
+                <button class="close-btn" onclick="closeModal('contactsModal')" title="Close contact info" aria-label="Close contacts modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                For inquiries, feedback, or support, contact us at:<br><br>
+                <strong>Email:</strong> quickorder@example.com<br>
+                <strong>Phone:</strong> 0917-123-4567<br>
+                <strong>Facebook:</strong> <a href="https://facebook.com/quickorder" target="_blank" rel="noopener" class="social-link">facebook.com/quickorder</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal
+    <div id="alertModal" class="alert-modal">
+        <div class="alert-modal-content">
+            <div class="alert-icon">
+                <i class="fas fa-exclamation" style="color: white;"></i>
+            </div>
+            <h3>Terms of Service Required</h3>
+            <p>Please agree to our Terms of Service before proceeding to the menu.</p>
+            <button class="alert-btn" onclick="closeAlertModal()">I Understand</button>
+        </div>
+    </div>-->
+
+    <script src="js/QuickOrder.js"></script>
+    <script src="js/dark-mode.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const tosCheckbox = document.getElementById('tosCheckbox');
+        const getStartedBtn = document.getElementById('getStartedBtn');
+        const getStartedBtn2 = document.getElementById('getStartedBtn2');
+        const tosLink = document.getElementById('tosLink');
+        const aboutLink = document.getElementById('aboutLink');
+        const contactsLink = document.getElementById('contactsLink');
+        const tosModal = document.getElementById('tosModal');
+        const aboutModal = document.getElementById('aboutModal');
+        const contactsModal = document.getElementById('contactsModal');
+
+        function openModal(modalId) {
+          document.getElementById(modalId).style.display = 'flex';
+        }
+
+        window.closeModal = function(modalId) {
+          document.getElementById(modalId).style.display = 'none';
+        };
+
+        tosLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          openModal('tosModal');
+        });
+
+        aboutLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          openModal('aboutModal');
+        });
+
+        contactsLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          openModal('contactsModal');
+        });
+
+        getStartedBtn.addEventListener('click', (e) => {
+          if (!tosCheckbox.checked) {
+            e.preventDefault();
+            alert('Please agree to the Terms of Service before proceeding.');
+          } else {
+            window.location.href = 'menu.html';
+          }
+        });
+
+        getStartedBtn2.addEventListener('click', (e) => {
+          if (!tosCheckbox.checked) {
+            e.preventDefault();
+            alert('Please agree to the Terms of Service before proceeding.');
+          } else {
+            window.location.href = 'menu.html';
+          }
+        });
+      });
+    </script>
+</body>
+</html>
