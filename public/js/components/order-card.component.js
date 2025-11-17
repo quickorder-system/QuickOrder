@@ -102,6 +102,7 @@ function addOrderActions(container, order) {
     container.innerHTML = ''; // Clear existing content
 
     const { status, paymentScreenshot } = order;
+    let currentStatus = status; // Use a mutable variable to track status changes
 
     // Define the possible statuses (must match backend Order model)
     const statuses = ['Pending', 'Preparing', 'Ready', 'Complete', 'Cancelled'];
@@ -128,7 +129,7 @@ function addOrderActions(container, order) {
     // Add change event listener for status updates
     statusSelect.addEventListener('change', async (e) => {
         const newStatus = e.target.value;
-        const oldStatus = status;
+        const oldStatus = currentStatus;
         
         let hasError = false;
         try {
@@ -157,8 +158,8 @@ function addOrderActions(container, order) {
                 }
             }
             
-            // Update the status variable so next change starts from correct state
-            status = newStatus;
+            // Update the currentStatus variable so next change starts from correct state
+            currentStatus = newStatus;
             
             // Update select styling
             updateStatusSelectClass(statusSelect, newStatus);
