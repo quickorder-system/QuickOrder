@@ -102,7 +102,6 @@ function addOrderActions(container, order) {
     container.innerHTML = ''; // Clear existing content
 
     const { status, paymentScreenshot } = order;
-    let currentStatus = status; // Use a mutable variable to track status changes
 
     // Define the possible statuses (must match backend Order model)
     const statuses = ['Pending', 'Preparing', 'Ready', 'Complete', 'Cancelled'];
@@ -126,61 +125,8 @@ function addOrderActions(container, order) {
     // Update status class based on current selection
     updateStatusSelectClass(statusSelect, status);
 
-    // Add change event listener for status updates
-    statusSelect.addEventListener('change', async (e) => {
-        const newStatus = e.target.value;
-        const oldStatus = currentStatus;
-        
-        let hasError = false;
-        try {
-            // Show loading state
-            statusSelect.disabled = true;
-            statusSelect.style.opacity = '0.6';
-            
-            console.log(`[OrderCard] Updating status from ${oldStatus} to ${newStatus}`);
-            
-            // Call API to update status using OrderService with proper auth
-            const updatedOrder = await OrderService.updateOrderStatus(order._id, newStatus);
-            
-            console.log(`[OrderCard] Status updated successfully:`, updatedOrder);
-
-            // Update the order card with new status
-            const orderCard = statusSelect.closest('.order-card');
-            if (orderCard) {
-                const statusBadge = orderCard.querySelector('.status-badge');
-                if (statusBadge) {
-                    // Remove old status classes
-                    statusBadge.classList.remove('pending', 'preparing', 'ready', 'complete', 'cancelled');
-                    // Add new status class
-                    statusBadge.classList.add(newStatus);
-                    // Update text
-                    statusBadge.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-                }
-            }
-            
-            // Update the currentStatus variable so next change starts from correct state
-            currentStatus = newStatus;
-            
-            // Update select styling
-            updateStatusSelectClass(statusSelect, newStatus);
-            
-            // Show success feedback
-            showStatusUpdateFeedback(statusSelect, true, oldStatus, newStatus);
-        } catch (error) {
-            hasError = true;
-            console.error('[OrderCard] Error updating status:', error);
-            // Revert on error
-            statusSelect.value = oldStatus;
-            showStatusUpdateFeedback(statusSelect, false);
-        } finally {
-            // Ensure the select is always re-enabled
-            setTimeout(() => {
-                statusSelect.disabled = false;
-                statusSelect.style.opacity = '1';
-                console.log(`[OrderCard] Select re-enabled. Error occurred: ${hasError}`);
-            }, 100);
-        }
-    });
+    // NOTE: Event listener is handled by delegated listener in orders.js
+    // This prevents duplicate event handling and ensures proper UI refresh
 
     container.appendChild(statusSelect);
 
