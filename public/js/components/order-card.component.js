@@ -157,6 +157,9 @@ function addOrderActions(container, order) {
                 }
             }
             
+            // Update the status variable so next change starts from correct state
+            status = newStatus;
+            
             // Update select styling
             updateStatusSelectClass(statusSelect, newStatus);
             
@@ -393,7 +396,7 @@ function openEnhancedPaymentModal(order) {
                     <div class="payment-screenshot-section">
                         <h3>Payment Proof</h3>
                         <div class="screenshot-container">
-                            <img src="${order.paymentScreenshot.startsWith('http') ? order.paymentScreenshot : window.location.origin + order.paymentScreenshot}" alt="Payment Screenshot" id="payment-screenshot" style="cursor: pointer; transition: transform 0.2s ease; border-radius: 8px;" title="Click to view full size">
+                            <img src="${order.paymentScreenshot.startsWith('http') ? order.paymentScreenshot : order.paymentScreenshot.startsWith('/') ? window.location.origin + order.paymentScreenshot : window.location.origin + '/uploads/' + order.paymentScreenshot}" alt="Payment Screenshot" id="payment-screenshot" style="cursor: pointer; transition: transform 0.2s ease; border-radius: 8px;" title="Click to view full size">
                         </div>
                     </div>
                 ` : '<div class="no-screenshot">No payment screenshot uploaded</div>'}
