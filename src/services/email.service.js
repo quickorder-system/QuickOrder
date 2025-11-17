@@ -4,37 +4,56 @@ const logger = require('../utils/logger');
 /**
  * Email Service
  * Handles all email notifications for order status updates
+ * Uses SendGrid Web API for better reliability than SMTP
  */
 
-// Initialize transporter with support for SendGrid, custom SMTP, and Gmail
+// Initialize transporter with support for SendGrid API, custom SMTP, and Gmail
 let transporter;
 
 if (process.env.SENDGRID_API_KEY) {
-    // SendGrid configuration - use apikey@sendgrid.net with the API key as password
-    transporter = nodemailer.createTransport({
-        host: 'smtp.sendgrid.net',
-        port: 587,
-        secure: false, // TLS
-        auth: {
-            user: 'apikey', // Required by SendGrid - do not change
-            pass: process.env.SENDGRID_API_KEY
-        },
-        connectionUrl: null,
-        tls: {
-            rejectUnauthorized: false // Allow self-signed certificates
-        }
-    });
-    console.log('[EmailService] Configured for SendGrid SMTP');
+    // SendGrid configuration using Web API (more reliable than SMTP)
+    // Use SendGrid API via nodemailer-sendgrid
+    try {
+        const sgTransport = require('nodemailer-sendgrid-transport');
+        transporter = nodemailer.createTransport(
+            sgTransport({
+                auth: {
+                    api_key: process.env.SENDGRID_API_KEY
+                }
+            })
+        );
+        console.log('[EmailService] Configured for SendGrid Web API (most reliable)');
+    } catch (err) {
+        // Fallback to SMTP if nodemailer-sendgrid-transport is not available
+        console.log('[EmailService] nodemailer-sendgrid-transport not available, using SMTP');
+        transporter = nodemailer.createTransport({
+            host: 'smtp.sendgrid.net',
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'apikey',
+                pass: process.env.SENDGRID_API_KEY
+            },
+            connectionTimeout: 60000, // 60 seconds
+            socketTimeout: 60000,
+            tls: {
+                rejectUnauthorized: false
+            }
+        });
+        console.log('[EmailService] Configured for SendGrid SMTP (with extended timeout)');
+    }
 } else if (process.env.SMTP_HOST) {
     // Custom SMTP configuration (Mailtrap, etc.)
     transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || 587),
-        secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+        secure: process.env.SMTP_SECURE === 'true',
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD
-        }
+        },
+        connectionTimeout: 60000,
+        socketTimeout: 60000
     });
     console.log('[EmailService] Configured for custom SMTP');
 } else {
@@ -44,7 +63,9 @@ if (process.env.SENDGRID_API_KEY) {
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD
-        }
+        },
+        connectionTimeout: 60000,
+        socketTimeout: 60000
     });
     console.log('[EmailService] Configured for ' + (process.env.EMAIL_SERVICE || 'Gmail'));
 }
@@ -136,20 +157,20 @@ async function sendEmail(to, subject, htmlContent) {
             html: htmlContent
         };
 
-        // Set timeout for sending email (30 seconds)
+        // Set timeout for sending email (60 seconds for API, more generous than SMTP)
         const timeoutPromise = new Promise((resolve, reject) => {
-            setTimeout(() => reject(new Error('Email send timeout (30s)')), 30000);
+            setTimeout(() => reject(new Error('Email send timeout (60s)')), 60000);
         });
 
         const sendPromise = transporter.sendMail(mailOptions);
         const info = await Promise.race([sendPromise, timeoutPromise]);
 
         logger.info(`Email sent successfully to ${to}`);
-        console.log(`[EmailService] Email sent to ${to}: ${info.response || info.messageId}`);
+        console.log(`[EmailService] ✅ Email sent to ${to}: ${info.response || info.messageId}`);
         return true;
     } catch (error) {
         logger.error(`Failed to send email to ${to}:`, error.message);
-        console.error(`[EmailService] Error sending email to ${to}:`, error.message);
+        console.error(`[EmailService] ❌ Error sending email to ${to}:`, error.message);
         
         // Log more details for debugging
         if (error.code) console.error(`[EmailService] Error code: ${error.code}`);

@@ -20,7 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.8.7",
     "multer": "^2.0.2",
-    "nodemailer": "^7.0.10"
+    "nodemailer": "^7.0.10",
+    "nodemailer-sendgrid-transport": "^1.2.1"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
