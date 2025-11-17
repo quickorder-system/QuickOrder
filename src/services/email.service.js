@@ -47,9 +47,18 @@ if (process.env.SENDGRID_API_KEY) {
  */
 async function verifyEmailConfig() {
     try {
-        await transporter.verify();
-        logger.info('✓ Email service verified and ready to send');
-        return true;
+        // Skip verification in production to avoid timeout issues
+        // Just check if we have the minimum required configuration
+        if (process.env.SENDGRID_API_KEY) {
+            logger.info('✓ SendGrid API key configured');
+            return true;
+        } else if (process.env.EMAIL_SERVICE && process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+            logger.info('✓ Email service configured');
+            return true;
+        } else {
+            logger.warn('⚠️  Email service not fully configured');
+            return false;
+        }
     } catch (error) {
         logger.error('Email service verification failed:', error.message);
         console.warn('⚠️  Email notifications disabled - missing or invalid email configuration');

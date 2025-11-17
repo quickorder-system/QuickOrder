@@ -130,13 +130,18 @@ function addOrderActions(container, order) {
         const newStatus = e.target.value;
         const oldStatus = status;
         
+        let hasError = false;
         try {
             // Show loading state
             statusSelect.disabled = true;
             statusSelect.style.opacity = '0.6';
             
+            console.log(`[OrderCard] Updating status from ${oldStatus} to ${newStatus}`);
+            
             // Call API to update status using OrderService with proper auth
             const updatedOrder = await OrderService.updateOrderStatus(order._id, newStatus);
+            
+            console.log(`[OrderCard] Status updated successfully:`, updatedOrder);
 
             // Update the order card with new status
             const orderCard = statusSelect.closest('.order-card');
@@ -158,14 +163,18 @@ function addOrderActions(container, order) {
             // Show success feedback
             showStatusUpdateFeedback(statusSelect, true, oldStatus, newStatus);
         } catch (error) {
-            console.error('Error updating status:', error);
+            hasError = true;
+            console.error('[OrderCard] Error updating status:', error);
             // Revert on error
             statusSelect.value = oldStatus;
             showStatusUpdateFeedback(statusSelect, false);
         } finally {
-            // Remove loading state
-            statusSelect.disabled = false;
-            statusSelect.style.opacity = '1';
+            // Ensure the select is always re-enabled
+            setTimeout(() => {
+                statusSelect.disabled = false;
+                statusSelect.style.opacity = '1';
+                console.log(`[OrderCard] Select re-enabled. Error occurred: ${hasError}`);
+            }, 100);
         }
     });
 
@@ -384,7 +393,7 @@ function openEnhancedPaymentModal(order) {
                     <div class="payment-screenshot-section">
                         <h3>Payment Proof</h3>
                         <div class="screenshot-container">
-                            <img src="${order.paymentScreenshot}" alt="Payment Screenshot" id="payment-screenshot" style="cursor: pointer; transition: transform 0.2s ease; border-radius: 8px;" title="Click to view full size">
+                            <img src="${order.paymentScreenshot.startsWith('http') ? order.paymentScreenshot : window.location.origin + order.paymentScreenshot}" alt="Payment Screenshot" id="payment-screenshot" style="cursor: pointer; transition: transform 0.2s ease; border-radius: 8px;" title="Click to view full size">
                         </div>
                     </div>
                 ` : '<div class="no-screenshot">No payment screenshot uploaded</div>'}
