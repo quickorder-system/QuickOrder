@@ -10,16 +10,21 @@ const logger = require('../utils/logger');
 let transporter;
 
 if (process.env.SENDGRID_API_KEY) {
-    // SendGrid configuration
+    // SendGrid configuration - use apikey@sendgrid.net with the API key as password
     transporter = nodemailer.createTransport({
         host: 'smtp.sendgrid.net',
         port: 587,
-        secure: false,
+        secure: false, // TLS
         auth: {
-            user: 'apikey',
+            user: 'apikey', // Required by SendGrid - do not change
             pass: process.env.SENDGRID_API_KEY
+        },
+        connectionUrl: null,
+        tls: {
+            rejectUnauthorized: false // Allow self-signed certificates
         }
     });
+    console.log('[EmailService] Configured for SendGrid SMTP');
 } else if (process.env.SMTP_HOST) {
     // Custom SMTP configuration (Mailtrap, etc.)
     transporter = nodemailer.createTransport({
@@ -31,6 +36,7 @@ if (process.env.SENDGRID_API_KEY) {
             pass: process.env.EMAIL_PASSWORD
         }
     });
+    console.log('[EmailService] Configured for custom SMTP');
 } else {
     // Gmail or other service
     transporter = nodemailer.createTransport({
@@ -40,6 +46,7 @@ if (process.env.SENDGRID_API_KEY) {
             pass: process.env.EMAIL_PASSWORD
         }
     });
+    console.log('[EmailService] Configured for ' + (process.env.EMAIL_SERVICE || 'Gmail'));
 }
 
 /**
@@ -47,21 +54,52 @@ if (process.env.SENDGRID_API_KEY) {
  */
 async function verifyEmailConfig() {
     try {
-        // Skip verification in production to avoid timeout issues
-        // Just check if we have the minimum required configuration
         if (process.env.SENDGRID_API_KEY) {
+            console.log('[EmailService] ✓ SendGrid API key configured');
             logger.info('✓ SendGrid API key configured');
-            return true;
+            
+            // Try to verify the connection (with timeout)
+            const timeoutPromise = new Promise((resolve, reject) => {
+                setTimeout(() => reject(new Error('Connection verification timeout')), 10000);
+            });
+            
+            try {
+                const verifyPromise = transporter.verify();
+                await Promise.race([verifyPromise, timeoutPromise]);
+                console.log('[EmailService] ✓ SendGrid connection verified');
+                logger.info('✓ SendGrid connection verified');
+                return true;
+            } catch (verifyError) {
+                console.warn('[EmailService] ⚠️ SendGrid connection verification failed:', verifyError.message);
+                console.warn('[EmailService] This may be a network issue - emails may still work');
+                logger.warn('⚠️ SendGrid connection could not be verified: ' + verifyError.message);
+                // Don't fail - network might be slow
+                return true;
+            }
         } else if (process.env.EMAIL_SERVICE && process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+            console.log('[EmailService] ✓ Email service configured');
             logger.info('✓ Email service configured');
-            return true;
+            
+            try {
+                const timeoutPromise = new Promise((resolve, reject) => {
+                    setTimeout(() => reject(new Error('Connection verification timeout')), 10000);
+                });
+                const verifyPromise = transporter.verify();
+                await Promise.race([verifyPromise, timeoutPromise]);
+                console.log('[EmailService] ✓ Email connection verified');
+                return true;
+            } catch (verifyError) {
+                console.warn('[EmailService] ⚠️ Email connection verification failed:', verifyError.message);
+                return true;
+            }
         } else {
-            logger.warn('⚠️  Email service not fully configured');
+            console.warn('[EmailService] ⚠️ Email service not fully configured');
+            logger.warn('⚠️ Email service not fully configured');
             return false;
         }
     } catch (error) {
         logger.error('Email service verification failed:', error.message);
-        console.warn('⚠️  Email notifications disabled - missing or invalid email configuration');
+        console.warn('[EmailService] ⚠️ Email notifications may be disabled - ' + error.message);
         return false;
     }
 }
@@ -77,21 +115,36 @@ async function sendEmail(to, subject, htmlContent) {
     try {
         if (!process.env.SENDGRID_API_KEY && (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD)) {
             logger.warn('Email service not configured - skipping email send');
+            console.warn('[EmailService] Email not sent - service not configured');
             return false;
         }
 
         const mailOptions = {
-            from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+            from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@quickorder.com',
             to: to,
             subject: subject,
             html: htmlContent
         };
 
-        const info = await transporter.sendMail(mailOptions);
-        logger.info(`Email sent successfully to ${to}: ${info.response}`);
+        // Set timeout for sending email (30 seconds)
+        const timeoutPromise = new Promise((resolve, reject) => {
+            setTimeout(() => reject(new Error('Email send timeout (30s)')), 30000);
+        });
+
+        const sendPromise = transporter.sendMail(mailOptions);
+        const info = await Promise.race([sendPromise, timeoutPromise]);
+
+        logger.info(`Email sent successfully to ${to}`);
+        console.log(`[EmailService] Email sent to ${to}: ${info.response || info.messageId}`);
         return true;
     } catch (error) {
         logger.error(`Failed to send email to ${to}:`, error.message);
+        console.error(`[EmailService] Error sending email to ${to}:`, error.message);
+        
+        // Log more details for debugging
+        if (error.code) console.error(`[EmailService] Error code: ${error.code}`);
+        if (error.response) console.error(`[EmailService] SMTP response: ${error.response}`);
+        
         return false;
     }
 }
