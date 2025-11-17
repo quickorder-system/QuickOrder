@@ -1,5 +1,5 @@
 export class ApiService {
-    static baseUrl = 'http://localhost:5001';
+    static baseUrl = window.location.origin;
 
     static async request(endpoint, method = 'GET', body = null) {
         const options = {
