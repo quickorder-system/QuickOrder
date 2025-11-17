@@ -1,33 +1,20 @@
 const nodemailer = require('nodemailer');
+const https = require('https');
 const logger = require('../utils/logger');
 
 /**
  * Email Service
  * Handles all email notifications for order status updates
- * Uses SendGrid Web API for better reliability than SMTP
+ * Uses SendGrid Web API (HTTP) for maximum reliability in cloud environments
  */
 
-// Initialize transporter
 let transporter;
+let useSendGridAPI = false;
 
 if (process.env.SENDGRID_API_KEY) {
-    // SendGrid SMTP with extended timeout settings
-    transporter = nodemailer.createTransport({
-        host: 'smtp.sendgrid.net',
-        port: 587,
-        secure: false, // Use TLS
-        auth: {
-            user: 'apikey', // Required by SendGrid
-            pass: process.env.SENDGRID_API_KEY
-        },
-        connectionTimeout: 90000, // 90 seconds
-        socketTimeout: 90000, // 90 seconds
-        greetingTimeout: 30000,
-        tls: {
-            rejectUnauthorized: false
-        }
-    });
-    console.log('[EmailService] Configured for SendGrid SMTP (with extended 90s timeouts)');
+    // Use SendGrid HTTP API (most reliable for cloud environments)
+    useSendGridAPI = true;
+    console.log('[EmailService] Configured for SendGrid HTTP Web API');
 } else if (process.env.SMTP_HOST) {
     // Custom SMTP configuration
     transporter = nodemailer.createTransport({
@@ -43,7 +30,7 @@ if (process.env.SENDGRID_API_KEY) {
     });
     console.log('[EmailService] Configured for custom SMTP');
 } else {
-    // Gmail or other service
+    // Gmail fallback
     transporter = nodemailer.createTransport({
         service: process.env.EMAIL_SERVICE || 'gmail',
         auth: {
@@ -54,6 +41,75 @@ if (process.env.SENDGRID_API_KEY) {
         socketTimeout: 90000
     });
     console.log('[EmailService] Configured for ' + (process.env.EMAIL_SERVICE || 'Gmail'));
+}
+
+/**
+ * Send email via SendGrid HTTP API
+ */
+function sendViaAPI(to, subject, htmlContent) {
+    return new Promise((resolve, reject) => {
+        const fromEmail = process.env.EMAIL_FROM || 'noreply@quickorder.com';
+        
+        const payload = JSON.stringify({
+            personalizations: [
+                {
+                    to: [{ email: to }]
+                }
+            ],
+            from: { email: fromEmail },
+            subject: subject,
+            content: [
+                {
+                    type: 'text/html',
+                    value: htmlContent
+                }
+            ]
+        });
+
+        const options = {
+            hostname: 'api.sendgrid.com',
+            port: 443,
+            path: '/v3/mail/send',
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(payload)
+            }
+        };
+
+        const req = https.request(options, (res) => {
+            let data = '';
+
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            res.on('end', () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    console.log(`[EmailService] ✅ Email sent via API to ${to}`);
+                    resolve(true);
+                } else {
+                    console.error(`[EmailService] API Error (${res.statusCode}):`, data);
+                    reject(new Error(`SendGrid API returned ${res.statusCode}: ${data}`));
+                }
+            });
+        });
+
+        req.on('error', (error) => {
+            console.error('[EmailService] ❌ API Request error:', error.message);
+            reject(error);
+        });
+
+        // 30 second timeout for HTTP request
+        req.setTimeout(30000, () => {
+            req.destroy();
+            reject(new Error('SendGrid API request timeout'));
+        });
+
+        req.write(payload);
+        req.end();
+    });
 }
 
 /**
@@ -120,6 +176,14 @@ async function verifyEmailConfig() {
  */
 async function sendEmail(to, subject, htmlContent) {
     try {
+        if (useSendGridAPI && process.env.SENDGRID_API_KEY) {
+            // Use SendGrid HTTP API (most reliable)
+            console.log(`[EmailService] Sending via SendGrid API to ${to}`);
+            await sendViaAPI(to, subject, htmlContent);
+            logger.info(`Email sent successfully to ${to} via API`);
+            return true;
+        }
+
         // Check if transporter is initialized
         if (!transporter) {
             console.error('[EmailService] Transporter not initialized - missing configuration');
@@ -127,7 +191,7 @@ async function sendEmail(to, subject, htmlContent) {
             return false;
         }
 
-        if (!process.env.SENDGRID_API_KEY && (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD)) {
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
             console.warn('[EmailService] Email service not configured - skipping email send');
             logger.warn('Email service not configured - skipping email send');
             return false;
@@ -143,7 +207,7 @@ async function sendEmail(to, subject, htmlContent) {
             html: htmlContent
         };
 
-        // Set timeout for sending email (90 seconds to account for slow connections)
+        // Set timeout for SMTP sending (90 seconds)
         const timeoutPromise = new Promise((resolve, reject) => {
             setTimeout(() => reject(new Error('Email send timeout (90s)')), 90000);
         });
