@@ -39,7 +39,16 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
     try {
-        let order = await Order.findById(req.params.id);
+        const { id } = req.params;
+        
+        // First, try to find by MongoDB _id
+        let order = await Order.findById(id);
+        
+        // If not found by _id, try to find by orderId (formatted ID like QO000002)
+        if (!order) {
+            order = await Order.findOne({ orderId: id });
+        }
+        
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
