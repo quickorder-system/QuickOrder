@@ -8,6 +8,8 @@ services:
       - PORT=5001
     depends_on:
       - mongo
+    volumes:
+      - uploads-data:/app/uploads
 
   mongo:
     image: mongo:latest
@@ -18,3 +20,4 @@ services:
 
 volumes:
   mongo-data:
+  uploads-data:

@@ -13,6 +13,9 @@ RUN npm install
 # Copy the rest of the application source code to the working directory
 COPY . .
 
+# Create uploads directory for persistent storage
+RUN mkdir -p /app/uploads
+
 # Expose the port the app runs on
 EXPOSE 5001
 
