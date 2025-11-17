@@ -40,9 +40,18 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        const mongoose = require('mongoose');
+        let order = null;
         
-        // First, try to find by MongoDB _id
-        let order = await Order.findById(id);
+        // Check if the id is a valid MongoDB ObjectId
+        if (mongoose.Types.ObjectId.isValid(id) && id.length === 24) {
+            try {
+                order = await Order.findById(id);
+            } catch (err) {
+                // If findById fails (e.g., cast error), continue to next search
+                console.log(`[Orders GET] findById failed for ${id}, trying orderId search`);
+            }
+        }
         
         // If not found by _id, try to find by orderId (formatted ID like QO000002)
         if (!order) {
@@ -96,6 +105,7 @@ router.put('/:id/status', auth, async (req, res) => { // Temporarily commented o
     try {
         const { id } = req.params;
         const { status } = req.body;
+        const mongoose = require('mongoose');
         
         console.log(`[Orders] Updating order ${id} status to ${status}`);
         
@@ -103,8 +113,21 @@ router.put('/:id/status', auth, async (req, res) => { // Temporarily commented o
             return res.status(400).json({ message: 'Invalid status' });
         }
 
-        // Get the current order first
-        let order = await Order.findById(id);
+        // Get the current order - check if valid ObjectId first
+        let order = null;
+        if (mongoose.Types.ObjectId.isValid(id) && id.length === 24) {
+            try {
+                order = await Order.findById(id);
+            } catch (err) {
+                console.log(`[Orders PUT] findById failed for ${id}, trying orderId search`);
+            }
+        }
+        
+        // If not found by _id, try to find by orderId
+        if (!order) {
+            order = await Order.findOne({ orderId: id });
+        }
+        
         if (!order) {
             console.log(`[Orders] Order not found: ${id}`);
             return res.status(404).json({ message: 'Order not found' });
@@ -194,6 +217,7 @@ router.patch('/:id/payment-status', auth, async (req, res) => {
     try {
         const { id } = req.params;
         const { paymentStatus } = req.body;
+        const mongoose = require('mongoose');
 
         console.log(`[Orders] Updating order ${id} payment status to ${paymentStatus}`);
 
@@ -202,8 +226,21 @@ router.patch('/:id/payment-status', auth, async (req, res) => {
             return res.status(400).json({ message: 'Invalid payment status' });
         }
 
-        // Get the current order
-        let order = await Order.findById(id);
+        // Get the current order - check if valid ObjectId first
+        let order = null;
+        if (mongoose.Types.ObjectId.isValid(id) && id.length === 24) {
+            try {
+                order = await Order.findById(id);
+            } catch (err) {
+                console.log(`[Orders PATCH] findById failed for ${id}, trying orderId search`);
+            }
+        }
+        
+        // If not found by _id, try to find by orderId
+        if (!order) {
+            order = await Order.findOne({ orderId: id });
+        }
+        
         if (!order) {
             console.log(`[Orders] Order not found: ${id}`);
             return res.status(404).json({ message: 'Order not found' });

@@ -4,7 +4,8 @@ const { generateOrderId } = require('../utils/order');
 const orderSchema = new mongoose.Schema({
     orderId: {
         type: String,
-        unique: true
+        unique: true,
+        index: true
     },
     customerName: {
         type: String,
