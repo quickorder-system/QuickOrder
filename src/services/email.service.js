@@ -7,43 +7,29 @@ const logger = require('../utils/logger');
  * Uses SendGrid Web API for better reliability than SMTP
  */
 
-// Initialize transporter with support for SendGrid API, custom SMTP, and Gmail
+// Initialize transporter
 let transporter;
 
 if (process.env.SENDGRID_API_KEY) {
-    // SendGrid configuration using Web API (more reliable than SMTP)
-    // Use SendGrid API via nodemailer-sendgrid
-    try {
-        const sgTransport = require('nodemailer-sendgrid-transport');
-        transporter = nodemailer.createTransport(
-            sgTransport({
-                auth: {
-                    api_key: process.env.SENDGRID_API_KEY
-                }
-            })
-        );
-        console.log('[EmailService] Configured for SendGrid Web API (most reliable)');
-    } catch (err) {
-        // Fallback to SMTP if nodemailer-sendgrid-transport is not available
-        console.log('[EmailService] nodemailer-sendgrid-transport not available, using SMTP');
-        transporter = nodemailer.createTransport({
-            host: 'smtp.sendgrid.net',
-            port: 587,
-            secure: false,
-            auth: {
-                user: 'apikey',
-                pass: process.env.SENDGRID_API_KEY
-            },
-            connectionTimeout: 60000, // 60 seconds
-            socketTimeout: 60000,
-            tls: {
-                rejectUnauthorized: false
-            }
-        });
-        console.log('[EmailService] Configured for SendGrid SMTP (with extended timeout)');
-    }
+    // SendGrid SMTP with extended timeout settings
+    transporter = nodemailer.createTransport({
+        host: 'smtp.sendgrid.net',
+        port: 587,
+        secure: false, // Use TLS
+        auth: {
+            user: 'apikey', // Required by SendGrid
+            pass: process.env.SENDGRID_API_KEY
+        },
+        connectionTimeout: 90000, // 90 seconds
+        socketTimeout: 90000, // 90 seconds
+        greetingTimeout: 30000,
+        tls: {
+            rejectUnauthorized: false
+        }
+    });
+    console.log('[EmailService] Configured for SendGrid SMTP (with extended 90s timeouts)');
 } else if (process.env.SMTP_HOST) {
-    // Custom SMTP configuration (Mailtrap, etc.)
+    // Custom SMTP configuration
     transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || 587),
@@ -52,8 +38,8 @@ if (process.env.SENDGRID_API_KEY) {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD
         },
-        connectionTimeout: 60000,
-        socketTimeout: 60000
+        connectionTimeout: 90000,
+        socketTimeout: 90000
     });
     console.log('[EmailService] Configured for custom SMTP');
 } else {
@@ -64,8 +50,8 @@ if (process.env.SENDGRID_API_KEY) {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD
         },
-        connectionTimeout: 60000,
-        socketTimeout: 60000
+        connectionTimeout: 90000,
+        socketTimeout: 90000
     });
     console.log('[EmailService] Configured for ' + (process.env.EMAIL_SERVICE || 'Gmail'));
 }
@@ -157,9 +143,9 @@ async function sendEmail(to, subject, htmlContent) {
             html: htmlContent
         };
 
-        // Set timeout for sending email (60 seconds for API, more generous than SMTP)
+        // Set timeout for sending email (90 seconds to account for slow connections)
         const timeoutPromise = new Promise((resolve, reject) => {
-            setTimeout(() => reject(new Error('Email send timeout (60s)')), 60000);
+            setTimeout(() => reject(new Error('Email send timeout (90s)')), 90000);
         });
 
         const sendPromise = transporter.sendMail(mailOptions);
