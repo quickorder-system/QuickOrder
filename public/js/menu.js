@@ -147,7 +147,7 @@ import { stateService } from './services/state.service.js';
                 itemsByCategory[category].forEach(item => {
                     itemCounter++;
                     const itemId = item._id || `item-${itemCounter}`;
-                    const image = item.image || '/image/placeholder.jpg';
+                    const image = item.image || '';
                     const price = item.price || 0;
                     const description = item.description || 'No description available';
                     const name = item.itemName || 'Unknown Item';
@@ -163,7 +163,7 @@ import { stateService } from './services/state.service.js';
                     menuHTML += `
                         <div class="food-card ${unavailableClass}" data-item-id="${itemId}" data-item-name="${name}" data-item-price="${price}" data-available="${isAvailable}">
                             ${availabilityBadge}
-                            <img src="${image}" alt="${name}" class="food-image" onerror="this.src='/image/placeholder.jpg'">
+                            ${image ? `<img src="${image}" alt="${name}" class="food-image">` : ''}
                             <div class="food-details">
                                 <div class="food-header">
                                     <div class="food-name">${name}</div>
