@@ -8,7 +8,16 @@ const emailService = require('../services/email.service');
  * @access Public
  */
 router.get('/', (req, res) => {
-    res.status(200).json({ status: 'ok' });
+    const health = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        environment: {
+            sendgridConfigured: !!process.env.SENDGRID_API_KEY,
+            emailFromConfigured: !!process.env.EMAIL_FROM,
+            emailServiceConfigured: !!process.env.EMAIL_SERVICE
+        }
+    };
+    res.status(200).json(health);
 });
 
 /**

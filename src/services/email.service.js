@@ -113,14 +113,24 @@ async function verifyEmailConfig() {
  */
 async function sendEmail(to, subject, htmlContent) {
     try {
-        if (!process.env.SENDGRID_API_KEY && (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD)) {
-            logger.warn('Email service not configured - skipping email send');
-            console.warn('[EmailService] Email not sent - service not configured');
+        // Check if transporter is initialized
+        if (!transporter) {
+            console.error('[EmailService] Transporter not initialized - missing configuration');
+            logger.error('Email service transporter not initialized');
             return false;
         }
 
+        if (!process.env.SENDGRID_API_KEY && (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD)) {
+            console.warn('[EmailService] Email service not configured - skipping email send');
+            logger.warn('Email service not configured - skipping email send');
+            return false;
+        }
+
+        const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@quickorder.com';
+        console.log(`[EmailService] Preparing to send email from: ${fromEmail} to: ${to}`);
+
         const mailOptions = {
-            from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@quickorder.com',
+            from: fromEmail,
             to: to,
             subject: subject,
             html: htmlContent
@@ -144,6 +154,7 @@ async function sendEmail(to, subject, htmlContent) {
         // Log more details for debugging
         if (error.code) console.error(`[EmailService] Error code: ${error.code}`);
         if (error.response) console.error(`[EmailService] SMTP response: ${error.response}`);
+        if (error.command) console.error(`[EmailService] SMTP command: ${error.command}`);
         
         return false;
     }

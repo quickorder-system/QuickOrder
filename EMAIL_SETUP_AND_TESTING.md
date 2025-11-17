@@ -3,6 +3,19 @@
 ## Status
 ✅ **Email service has been improved** with better error handling, timeout management, and debug logging.
 
+## 🚀 Railway Configuration (Your Setup)
+
+**Add these variables to Railway:**
+
+```
+SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+EMAIL_FROM=QuickOrder System <system.quickorder@gmail.com>
+```
+
+**Replace `SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` with your actual SendGrid API key.**
+
+⚠️ **IMPORTANT:** After adding these variables to Railway, you MUST restart the app for changes to take effect.
+
 ## Quick Diagnosis
 
 ### Testing Email Configuration
@@ -54,8 +67,10 @@ Make sure you have these variables set:
 
 ```
 SENDGRID_API_KEY=SG.xxxxxx...
-EMAIL_FROM=QuickOrder <noreply@quickorder.com>
+EMAIL_FROM=QuickOrder System <system.quickorder@gmail.com>
 ```
+
+⚠️ **Important:** The email address in `EMAIL_FROM` MUST be a verified sender address in SendGrid. Use the email you verified (system.quickorder@gmail.com).
 
 ### Step 3: Check Railway Logs
 
@@ -156,8 +171,9 @@ When you place an order:
 
 - [ ] SendGrid account created (sendgrid.com)
 - [ ] API key generated with "Mail Send" permission
+- [ ] Email sender verified in SendGrid (system.quickorder@gmail.com)
 - [ ] `SENDGRID_API_KEY` variable set in Railway (format: SG.xxx...)
-- [ ] `EMAIL_FROM` variable set (format: name <email@domain>)
+- [ ] `EMAIL_FROM` variable set in Railway to verified sender email (format: Name <system.quickorder@gmail.com>)
 - [ ] Railway app restarted after adding variables
 - [ ] Test email endpoint returns success
 - [ ] Order status update triggers email send
