@@ -66,6 +66,38 @@ router.post('/register', validateRegistration, async (req, res, next) => {
 });
 
 /**
+ * @route POST /api/auth/check-username
+ * @description Check if username exists (for forgot password flow)
+ * @access Public
+ */
+router.post('/check-username', async (req, res, next) => {
+    try {
+        const { username } = req.body;
+        
+        if (!username) {
+            throw new BadRequestError('Username is required');
+        }
+
+        const user = await User.findOne({ username });
+        
+        if (!user) {
+            return res.status(404).json({ 
+                exists: false,
+                message: 'User not found'
+            });
+        }
+
+        res.json({ 
+            exists: true,
+            role: user.role,
+            message: 'User found'
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
  * @route POST /api/auth/reset-test-users
  * @description Reset test users (FOR DEVELOPMENT ONLY)
  * @access Public
@@ -96,6 +128,46 @@ router.post('/reset-test-users', async (req, res, next) => {
                 { username: 'admin', password: 'admin123', role: 'admin' },
                 { username: 'owner', password: 'owner123', role: 'owner' }
             ]
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route POST /api/auth/reset-password
+ * @description Reset password for admin/owner users
+ * @access Public
+ */
+router.post('/reset-password', async (req, res, next) => {
+    try {
+        const { username, newPassword } = req.body;
+
+        if (!username || !newPassword) {
+            throw new BadRequestError('Username and new password are required');
+        }
+
+        if (newPassword.length < 6) {
+            throw new BadRequestError('Password must be at least 6 characters long');
+        }
+
+        const user = await User.findOne({ username });
+        
+        if (!user) {
+            throw new UnauthorizedError('User not found');
+        }
+
+        // Only allow password reset for admin/owner users
+        if (!['admin', 'owner'].includes(user.role)) {
+            throw new UnauthorizedError('Password reset only available for admin and owner accounts');
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ 
+            message: 'Password reset successfully',
+            success: true
         });
     } catch (error) {
         next(error);

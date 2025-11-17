@@ -298,6 +298,7 @@
           <div>Category</div>
           <div>Price</div>
           <div>Stock</div>
+          <div>Alert Level</div>
           <div>Status</div>
           <div>Actions</div>
         </div>
@@ -329,14 +330,11 @@
           <i class="fas fa-sync" aria-hidden="true"></i>
           Generate Report
         </button>
-        
-        <label for="reportType" class="visually-hidden">Report type</label>
-        <select class="report-select" id="reportType" title="Select report type">
-          <option value="daily">Daily Report</option>
-          <option value="weekly">Weekly Report</option>
-          <option value="monthly">Monthly Report</option>
-          <option value="yearly">Yearly Report</option>
-        </select>
+
+        <button class="btn-primary" onclick="exportReportToExcel()" title="Export current report to Excel">
+          <i class="fas fa-file-excel" aria-hidden="true"></i>
+          Export to Excel
+        </button>
       </div>
 
       <div class="quick-report-buttons">
@@ -434,13 +432,21 @@
 
         <div class="form-group">
           <label for="itemCategory">Category</label>
-          <select id="itemCategory" required>
-            <option value="">Select category</option>
-            <option value="burger">Burger</option>
-            <option value="pizza">Pizza</option>
-            <option value="others">Others</option>
-            <option value="drinks">Drinks</option>
-          </select>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <select id="itemCategory" required style="flex: 1;">
+              <option value="">Select category</option>
+              <option value="burger">Burger</option>
+              <option value="pizza">Pizza</option>
+              <option value="others">Snacks</option>
+              <option value="drinks">Drinks</option>
+              <option value="rice">Rice Meals</option>
+              <option value="pasta">Pasta</option>
+              <option value="coffee">Coffee</option>
+              <option value="bundle">Bundle Meals</option>
+              <option value="custom">+ Create New Category</option>
+            </select>
+          </div>
+          <input type="text" id="customCategory" placeholder="Enter custom category name" style="display: none; margin-top: 8px; width: 100%;">
         </div>
 
         <div class="form-group">

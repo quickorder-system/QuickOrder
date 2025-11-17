@@ -171,7 +171,6 @@
                 a. <em>Information Collection</em> – We collect necessary information such as your name, contact details, and order information to process and deliver your order.<br>
                 b. <em>Data Usage</em> – Your information will be used solely for order processing, customer support, and service improvement.<br>
                 c. <em>Data Protection</em> – All personal information will be handled in accordance with our Privacy Policy and applicable data protection laws. We ensure that your data is securely stored and will not be shared with unauthorized parties.<br><br>
-                <p>To learn more about how we handle your data, please see our <a href="PrivacyPolicy.html" target="_blank">Privacy Policy</a>.</p>
 
                 <strong>6. Amendments to Terms</strong><br>
                 We reserve the right to modify these Terms of Service at any time. Updates will be posted on our website or platform, and continued use of the service indicates acceptance of the revised terms.<br><br>
@@ -251,6 +250,25 @@
         window.closeModal = function(modalId) {
           document.getElementById(modalId).style.display = 'none';
         };
+
+        // Close modal when clicking outside the modal-content
+        tosModal.addEventListener('click', (e) => {
+          if (e.target === tosModal) {
+            window.closeModal('tosModal');
+          }
+        });
+
+        aboutModal.addEventListener('click', (e) => {
+          if (e.target === aboutModal) {
+            window.closeModal('aboutModal');
+          }
+        });
+
+        contactsModal.addEventListener('click', (e) => {
+          if (e.target === contactsModal) {
+            window.closeModal('contactsModal');
+          }
+        });
 
         tosLink.addEventListener('click', (e) => {
           e.preventDefault();

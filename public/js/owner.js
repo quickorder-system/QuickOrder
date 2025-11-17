@@ -46,25 +46,52 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('reportStartDate')?.setAttribute('value', today);
   document.getElementById('reportEndDate')?.setAttribute('value', today);
 
-  // Set up report date input listeners for auto-generation
-  const reportStartDate = document.getElementById('reportStartDate');
-  const reportEndDate = document.getElementById('reportEndDate');
-  
-  if (reportStartDate) {
-    reportStartDate.addEventListener('change', () => {
-      if (!isDisplayingQuickReport && document.getElementById('reportsTab')?.classList.contains('active')) {
-        fetchAndRenderSalesReport();
-      }
+  // Set up order search and filter listeners
+  document.getElementById('orderSearch')?.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    document.querySelectorAll('.order-card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(searchTerm) ? '' : 'none';
     });
-  }
+  });
 
-  if (reportEndDate) {
-    reportEndDate.addEventListener('change', () => {
-      if (!isDisplayingQuickReport && document.getElementById('reportsTab')?.classList.contains('active')) {
-        fetchAndRenderSalesReport();
+  document.getElementById('statusFilter')?.addEventListener('change', function(e) {
+    const status = e.target.value;
+    document.querySelectorAll('.order-card').forEach(card => {
+      if (status === 'all') {
+        card.style.display = '';
+        return;
+      }
+      const badge = card.querySelector('.status-badge');
+      card.style.display = badge && badge.classList.contains(status) ? '' : 'none';
+    });
+  });
+
+  // Orders date filter
+  document.getElementById('orderDate')?.addEventListener('change', function(e) {
+    const selectedDate = e.target.value;
+    if (!selectedDate) {
+      // If no date selected, show all cards
+      document.querySelectorAll('.order-card').forEach(card => {
+        card.style.display = '';
+      });
+      return;
+    }
+
+    const filterDate = new Date(selectedDate).toDateString();
+    
+    document.querySelectorAll('.order-card').forEach(card => {
+      const orderTimeElement = card.querySelector('.order-time');
+      if (orderTimeElement) {
+        const orderDateText = orderTimeElement.textContent.trim();
+        // Parse the order date from the displayed date/time string
+        const orderDate = new Date(orderDateText).toDateString();
+        card.style.display = orderDate === filterDate ? '' : 'none';
+      } else {
+        card.style.display = '';
       }
     });
-  }
+  });
 
   // Set up quick report buttons
   document.querySelectorAll('.quick-report-btn').forEach(button => {
@@ -191,6 +218,83 @@ function initializeReports() {
  */
 function generateReport() {
   fetchAndRenderSalesReport();
+}
+
+/**
+ * Export current report data to Excel
+ */
+function exportReportToExcel() {
+  try {
+    if (!reportChartData) {
+      alert('Please generate a report first before exporting.');
+      return;
+    }
+
+    // Prepare data for export
+    const data = reportChartData;
+    const summary = data.summary;
+    
+    // Create CSV content
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    
+    // Add title
+    csvContent += 'Sales Report\n\n';
+    
+    // Add summary section
+    csvContent += 'Summary Metrics\n';
+    csvContent += `Total Revenue,₱${summary.totalRevenue.toFixed(2)}\n`;
+    csvContent += `Total Orders,${summary.totalOrdersCompleted}\n`;
+    csvContent += `Average Order Value,₱${(summary.totalRevenue / summary.totalOrdersCompleted).toFixed(2)}\n`;
+    csvContent += `Average Daily Sales,₱${summary.averageDailySales.toFixed(2)}\n`;
+    csvContent += `Max Daily Sales,₱${summary.maxDailySales.toFixed(2)}\n`;
+    csvContent += `Min Daily Sales,₱${summary.minDailySales.toFixed(2)}\n`;
+    csvContent += `Days with Sales,${summary.daysWithSales}\n`;
+    csvContent += `Total Days in Range,${summary.totalDaysInRange}\n\n`;
+    
+    // Add daily breakdown
+    csvContent += 'Daily Sales Breakdown\n';
+    csvContent += 'Date,Sales Amount (₱)\n';
+    
+    if (data.labels && data.datasets && data.datasets[0] && data.datasets[0].data) {
+      data.labels.forEach((label, index) => {
+        const amount = data.datasets[0].data[index];
+        csvContent += `${label},${amount.toFixed(2)}\n`;
+      });
+    }
+    
+    // Create downloadable link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    
+    // Generate filename with date
+    const today = new Date();
+    const filename = `Sales_Report_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.csv`;
+    link.setAttribute('download', filename);
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log('[Export] Report exported successfully:', filename);
+    
+    // Show success message
+    const exportBtn = document.querySelector('button[onclick="exportReportToExcel()"]');
+    if (exportBtn) {
+      const originalHTML = exportBtn.innerHTML;
+      exportBtn.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Downloaded!';
+      exportBtn.disabled = true;
+      
+      setTimeout(() => {
+        exportBtn.innerHTML = originalHTML;
+        exportBtn.disabled = false;
+      }, 2000);
+    }
+  } catch (error) {
+    console.error('Error exporting report:', error);
+    alert('Failed to export report. Please try again.');
+  }
 }
 
 /**
@@ -462,6 +566,34 @@ async function loadQuickReport(reportType) {
     setReportLoading(true);
     clearReportError();
 
+    // Update date range inputs based on report type
+    const today = new Date();
+    const startDateInput = document.getElementById('reportStartDate');
+    const endDateInput = document.getElementById('reportEndDate');
+
+    if (reportType === 'daily') {
+      // Today only
+      const todayStr = today.toISOString().split('T')[0];
+      if (startDateInput) startDateInput.value = todayStr;
+      if (endDateInput) endDateInput.value = todayStr;
+    } else if (reportType === 'weekly') {
+      // This week (Monday to today)
+      const firstDay = new Date(today);
+      firstDay.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // Monday
+      if (startDateInput) startDateInput.value = firstDay.toISOString().split('T')[0];
+      if (endDateInput) endDateInput.value = today.toISOString().split('T')[0];
+    } else if (reportType === 'monthly') {
+      // This month (1st to today)
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      if (startDateInput) startDateInput.value = firstDay.toISOString().split('T')[0];
+      if (endDateInput) endDateInput.value = today.toISOString().split('T')[0];
+    } else if (reportType === 'yearly') {
+      // This year (1st Jan to today)
+      const firstDay = new Date(today.getFullYear(), 0, 1);
+      if (startDateInput) startDateInput.value = firstDay.toISOString().split('T')[0];
+      if (endDateInput) endDateInput.value = today.toISOString().split('T')[0];
+    }
+
     // Show reports tab
     const reportsTab = document.getElementById('reportsTab');
     const tabButtons = document.querySelectorAll('.tab-btn');
@@ -477,36 +609,28 @@ async function loadQuickReport(reportType) {
     console.log(`Response status: ${response.status}`);
     
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || `Failed to load ${reportType} report`);
+      const errorData = await response.json();
+      throw new Error(errorData.message || `Failed to load ${reportType} report`);
     }
 
     const reportData = await response.json();
     console.log(`Report data received:`, reportData);
 
-    // Handle daily report (single day, no chart needed)
-    if (reportType === 'daily') {
-      console.log('Updating daily metrics...');
-      updateDailyMetrics(reportData);
-      // Hide chart for daily view, show metric cards only
-      const chartContainer = document.querySelector('.chart-container');
-      if (chartContainer) {
-        chartContainer.style.display = 'none';
-      }
-    } else {
-      // For weekly, monthly, yearly - show chart
-      const chartContainer = document.querySelector('.chart-container');
-      if (chartContainer) {
-        chartContainer.style.display = 'block';
-      }
-      
-      // Render chart with report data
-      console.log('Rendering quick report chart...');
-      renderQuickReportChart(reportData, reportType);
-      
-      // Update metrics with quick report data format
-      updateQuickReportMetrics(reportData, reportType);
+    // Store the data for export
+    reportChartData = reportData;
+
+    // All reports now have consistent format with labels and data
+    const chartContainer = document.querySelector('.chart-container');
+    if (chartContainer) {
+      chartContainer.style.display = 'block';
     }
+    
+    // Render chart with report data
+    console.log(`Rendering ${reportType} report chart...`);
+    renderQuickReportChart(reportData, reportType);
+    
+    // Update metrics with quick report data
+    updateQuickReportMetrics(reportData, reportType);
 
     console.log(`${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report:`, reportData);
     setReportLoading(false);
@@ -542,7 +666,7 @@ function updateDailyMetrics(data) {
 }
 
 /**
- * Update metrics for quick reports (weekly, monthly, yearly)
+ * Update metrics for quick reports (daily, weekly, monthly, yearly)
  */
 function updateQuickReportMetrics(data, reportType) {
   const totalSalesElement = document.querySelector('[data-metric="total-sales"] .metric-value');
@@ -552,22 +676,22 @@ function updateQuickReportMetrics(data, reportType) {
 
   const totalOrdersElement = document.querySelector('[data-metric="total-orders"] .metric-value');
   if (totalOrdersElement) {
-    totalOrdersElement.textContent = data.totalOrders;
+    totalOrdersElement.textContent = data.totalOrders || 0;
   }
 
   const averageOrderElement = document.querySelector('[data-metric="average-order"] .metric-value');
   if (averageOrderElement) {
-    // For yearly reports, use averageMonthlySales; for others use averageDailySales
-    const avgValue = reportType === 'yearly' 
-      ? (data.totalRevenue / data.totalOrders).toFixed(2)
-      : (data.totalRevenue / data.totalOrders).toFixed(2);
+    let avgValue = 0;
+    if (data.totalOrders > 0) {
+      avgValue = (data.totalRevenue / data.totalOrders).toFixed(2);
+    }
     averageOrderElement.textContent = `₱${avgValue}`;
   }
 
   console.log(`${reportType.toUpperCase()} Report Metrics:`, {
     'Total Revenue': `₱${data.totalRevenue.toFixed(2)}`,
-    'Total Orders': data.totalOrders,
-    'Average per Order': `₱${(data.totalRevenue / data.totalOrders).toFixed(2)}`
+    'Total Orders': data.totalOrders || 0,
+    'Average per Order': `₱${(data.totalOrders > 0 ? data.totalRevenue / data.totalOrders : 0).toFixed(2)}`
   });
 }
 
@@ -581,11 +705,12 @@ function renderQuickReportChart(data, reportType) {
     return;
   }
 
-  // Determine chart title and X-axis label
+  // Determine chart title based on report type
   const titles = {
-    weekly: 'Weekly Sales',
-    monthly: 'Monthly Sales',
-    yearly: 'Yearly Sales'
+    daily: 'Daily Sales Report',
+    weekly: 'Weekly Sales Report',
+    monthly: 'Monthly Sales Report',
+    yearly: 'Yearly Sales Report'
   };
 
   const chartTitle = titles[reportType] || 'Sales Report';
@@ -603,42 +728,80 @@ function renderQuickReportChart(data, reportType) {
       datasets: [{
         label: 'Sales (₱)',
         data: data.data,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 2,
+        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+        borderColor: 'rgba(102, 126, 234, 1)',
+        borderWidth: 3,
         fill: true,
         tension: 0.4,
-        pointRadius: 5,
-        pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
         pointBorderColor: '#fff',
         pointBorderWidth: 2
       }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
       plugins: {
         legend: {
           display: true,
-          position: 'top'
+          position: 'top',
+          labels: {
+            usePointStyle: true,
+            padding: 20,
+            font: {
+              size: 13,
+              weight: 'bold'
+            },
+            color: '#374151'
+          }
         },
-        title: {
-          display: true,
-          text: chartTitle,
-          font: {
-            size: 16,
+        tooltip: {
+          enabled: true,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: 12,
+          titleFont: {
+            size: 14,
             weight: 'bold'
           },
-          padding: {
-            bottom: 30
+          bodyFont: {
+            size: 13
+          },
+          callbacks: {
+            label: function(context) {
+              return `₱${context.parsed.y.toFixed(2)}`;
+            }
           }
         }
       },
       scales: {
         y: {
           beginAtZero: true,
-          title: {
-            display: true,
-            text: 'Sales (₱)'
+          grid: {
+            color: 'rgba(200, 200, 200, 0.2)',
+            drawBorder: false
+          },
+          ticks: {
+            callback: function(value) {
+              return '₱' + value.toFixed(0);
+            },
+            font: {
+              size: 12
+            },
+            color: '#6B7280'
+          }
+        },
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            font: {
+              size: 12
+            },
+            color: '#6B7280'
           }
         }
       }
@@ -719,28 +882,80 @@ async function handleDeleteItem(itemId) {
 
   try {
     const token = localStorage.getItem('token');
-    const headers = {};
-    if (token) {
-      headers['x-auth-token'] = token;
+    console.log('[Owner Delete] Token from localStorage:', token ? 'Present' : 'Missing');
+    
+    if (!token) {
+      alert('Authentication token not found. Please log in again.');
+      window.location.href = 'Login.html';
+      return;
     }
 
+    const headers = {
+      'x-auth-token': token,
+      'Content-Type': 'application/json'
+    };
+
+    console.log('[Owner Delete] Sending DELETE request to /api/inventory/' + itemId);
     const response = await fetch(`/api/inventory/${itemId}`, {
       method: 'DELETE',
       headers: headers
     });
 
+    console.log('[Owner Delete] Response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.text();
+      console.error('[Owner Delete] Error response:', errorData);
+      throw new Error(`HTTP error! status: ${response.status}. ${errorData}`);
     }
 
     const result = await response.json();
     console.log('[Owner] Item deleted successfully:', result);
 
     // Re-render inventory after successful deletion
-    renderInventoryShared('inventoryRows');
+    await renderInventoryOwner('inventoryRows');
     alert('Item deleted successfully.');
   } catch (error) {
     console.error('Error deleting item:', error);
-    alert('Failed to delete item. Please try again.');
+    alert(`Failed to delete item: ${error.message}`);
+  }
+}
+
+/**
+ * Handle toggle item availability for Owner
+ * Calls PATCH /api/inventory/:id with { isAvailable: !currentStatus }
+ */
+async function handleToggleAvailability(itemId, currentStatus) {
+  try {
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['x-auth-token'] = token;
+    }
+
+    const response = await fetch(`/api/inventory/${itemId}`, {
+      method: 'PATCH',
+      headers: headers,
+      body: JSON.stringify({ isAvailable: !currentStatus })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const updatedItem = await response.json();
+    console.log('[Owner] Availability toggled for item:', itemId, 'New status:', updatedItem.isAvailable);
+    
+    // Re-render inventory to show updated status
+    renderInventoryOwner();
+    
+    // Optional: Show success toast/notification
+    const statusText = updatedItem.isAvailable ? 'Available' : 'Unavailable';
+    console.log(`Item marked as ${statusText}`);
+  } catch (error) {
+    console.error('Error toggling item availability:', error);
+    alert('Failed to update item availability. Please try again.');
   }
 }

@@ -33,20 +33,39 @@ const upload = multer({
   }
 });
 
-// Handle file uploads
-router.post('/', upload.single('paymentScreenshot'), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+// Handle file uploads (for payment screenshots and inventory item images)
+router.post('/', (req, res) => {
+  upload.single('paymentScreenshot')(req, res, (err) => {
+    // Handle multer errors
+    if (err) {
+      console.error('Multer error:', err);
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'File size exceeds 5MB limit' });
+      }
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ error: err.message });
+      }
+      return res.status(400).json({ error: err.message || 'Upload failed' });
     }
-    res.json({ 
-      message: 'File uploaded successfully',
-      fileUrl: `/uploads/${req.file.filename}`
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: error.message });
-  }
+
+    // Check if file was uploaded
+    if (!req.file) {
+      console.log('No file in request:', { body: req.body, file: req.file });
+      return res.status(400).json({ error: 'No file provided' });
+    }
+
+    try {
+      const fileUrl = `/uploads/${req.file.filename}`;
+      console.log('File uploaded successfully:', fileUrl);
+      res.json({ 
+        message: 'File uploaded successfully',
+        fileUrl: fileUrl
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      res.status(500).json({ error: 'Failed to upload file: ' + error.message });
+    }
+  });
 });
 
 module.exports = router;

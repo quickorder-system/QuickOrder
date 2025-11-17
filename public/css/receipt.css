@@ -95,6 +95,17 @@ body {
 
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
 .success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; display:flex; align-items:center; justify-content:center; margin:0 auto 25px; animation:scaleIn 0.5s ease-out 0.2s both; }
 @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
 .success-icon::before { content: "✓"; color: white; font-size: 48px; font-weight: bold; }
@@ -104,6 +115,9 @@ body {
 .order-number { font-size: 24px; font-weight: 700; color: #667eea; margin-bottom: 15px; }
 .info-item { color: #475569; font-size: 15px; line-height: 1.8; margin: 8px 0; }
 .info-item strong { color: #1e293b; }
+.info-item.payment-pending { color: #b45309; }
+.info-item.payment-verified { color: #047857; }
+.info-item.payment-rejected { color: #dc2626; }
 .thank-you-message { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 20px; border-radius: 12px; margin: 20px 0; color: #065f46; font-size: 15px; line-height: 1.7; }
 .contact-info { background: #fffbeb; padding: 20px; border-radius: 12px; margin: 20px 0; font-size: 14px; color: #78350f; }
 .contact-info a { color: #667eea; text-decoration: none; font-weight: 600; }

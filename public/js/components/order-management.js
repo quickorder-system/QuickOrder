@@ -80,24 +80,19 @@ class OrderManagement {
         }
 
         const orderId = card.dataset.orderId;
-        if (!orderId) return;
+        if (!orderId) {
+            console.error('Could not find order ID on card:', card);
+            return;
+        }
 
         // Disable all action buttons while processing
         const actionButtons = card.querySelectorAll('.action-btn');
         actionButtons.forEach(btn => btn.disabled = true);
 
-        fetch(`/api/orders/${orderId}/status`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ status })
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to update order status');
-            return response.json();
-        })
-        .then(updatedOrder => {
+        try {
+            const updatedOrder = await OrderService.updateOrderStatus(orderId, status);
+            
+            // Update the UI with the new status
             badge.textContent = status;
             badge.className = `status-badge ${status}`;
             
@@ -112,15 +107,13 @@ class OrderManagement {
             if (typeof updateStatistics === 'function') {
                 updateStatistics();
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error updating order status:', error);
             alert('Failed to update order status. Please try again.');
-        })
-        .finally(() => {
+        } finally {
             // Re-enable buttons
             actionButtons.forEach(btn => btn.disabled = false);
-        });
+        }
     }
 
     cancelOrder(btn) {
@@ -130,50 +123,45 @@ class OrderManagement {
         if (!card) return;
 
         const orderId = card.dataset.orderId;
-        if (!orderId) return;
+        if (!orderId) {
+            console.error('Could not find order ID on card:', card);
+            return;
+        }
 
         // Disable all action buttons while processing
         const actionButtons = card.querySelectorAll('.action-btn');
         actionButtons.forEach(btn => btn.disabled = true);
 
-        fetch(`/api/orders/${orderId}/cancel`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to cancel order');
-            return response.json();
-        })
-        .then(cancelledOrder => {
-            const badge = card.querySelector('.status-badge');
-            if (badge) {
-                badge.textContent = 'Cancelled';
-                badge.className = 'status-badge cancelled';
-            }
-            // Hide all action buttons for cancelled order
-            card.querySelectorAll('.action-btn').forEach(btn => btn.style.display = 'none');
-            
-            // Update statistics if needed
-            if (typeof updateStatistics === 'function') {
-                updateStatistics();
-            }
+        (async () => {
+            try {
+                const cancelledOrder = await OrderService.updateOrderStatus(orderId, 'cancelled');
+                
+                const badge = card.querySelector('.status-badge');
+                if (badge) {
+                    badge.textContent = 'Cancelled';
+                    badge.className = 'status-badge cancelled';
+                }
+                // Hide all action buttons for cancelled order
+                card.querySelectorAll('.action-btn').forEach(btn => btn.style.display = 'none');
+                
+                // Update statistics if needed
+                if (typeof updateStatistics === 'function') {
+                    updateStatistics();
+                }
 
-            // Fade out and remove card after animation
-            card.style.opacity = '0';
-            setTimeout(() => card.remove(), 300);
-        })
-        .catch(error => {
-            console.error('Error cancelling order:', error);
-            alert('Failed to cancel order. Please try again.');
-            // Reset opacity if error occurs
-            card.style.opacity = '1';
-        })
-        .finally(() => {
-            // Re-enable buttons
-            actionButtons.forEach(btn => btn.disabled = false);
-        });
+                // Fade out and remove card after animation
+                card.style.opacity = '0';
+                setTimeout(() => card.remove(), 300);
+            } catch (error) {
+                console.error('Error cancelling order:', error);
+                alert('Failed to cancel order. Please try again.');
+                // Reset opacity if error occurs
+                card.style.opacity = '1';
+            } finally {
+                // Re-enable buttons
+                actionButtons.forEach(btn => btn.disabled = false);
+            }
+        })();
     }
 
     updateActionButtons(card, status) {
@@ -236,7 +224,7 @@ class OrderManagement {
         orders.forEach(order => {
             const orderCard = document.createElement('div');
             orderCard.className = 'order-card';
-            orderCard.dataset.orderId = order._id; // Assuming order has an _id
+            orderCard.setAttribute('data-order-id', order._id); // Set data attribute before innerHTML
 
             let itemsHtml = '';
             order.items.forEach(item => {
@@ -266,6 +254,9 @@ class OrderManagement {
                     <!-- Buttons will be dynamically updated by updateActionButtons -->
                 </div>
             `;
+            
+            // Re-apply data attribute after innerHTML to ensure it persists
+            orderCard.setAttribute('data-order-id', order._id);
             ordersContainer.appendChild(orderCard);
             this.updateActionButtons(orderCard, order.status); // Set initial buttons
         });
@@ -274,11 +265,3 @@ class OrderManagement {
 
 // Initialize
 window.orderManagement = new OrderManagement();
-document.addEventListener('DOMContentLoaded', () => {
-  // Add error handling for order cards that don't have orderId
-  document.querySelectorAll('.order-card').forEach(card => {
-    if (!card.dataset.orderId) {
-      console.error('Order card missing orderId:', card);
-    }
-  });
-});

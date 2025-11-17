@@ -9,7 +9,6 @@
         <link rel="stylesheet" href="css/paymentMethods.css">
         <link rel="stylesheet" href="css/payment-methods.css">
         <link rel="stylesheet" href="css/dark-mode.css">
-        <script src="js/paymentMethods.js" defer></script>
         <script src="js/dark-mode.js"></script>
     </head>
     <body>
@@ -24,18 +23,21 @@
             <a href="#" id="contactsLink">Contact</a>
             <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
         </div>
-    </nav>        <div class="container">
-            <div class="header">
-                <button id="backBtn" class="back-btn" title="Go back">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <h2>💳 Review & Pay</h2>
-            </div>
+    </nav>
 
-            <div class="main-content">
+    <div class="container">
+        <div class="header">
+            <button id="backBtn" class="back-btn" title="Go back">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>💳 Review & Pay</h2>
+        </div>
+
+        <div class="main-content">
+            <div class="left-section">
                 <div class="order-review-section">
-                    <h3>Order Summary</h3>
-                    <div id="orderItems"></div>
+                    <h3>📋 Order Summary</h3>
+                    <div id="orderItems" class="items-list"></div>
                     <div class="total-section">
                         <span>TOTAL</span>
                         <span class="total-price" id="totalAmount">₱0</span>
@@ -43,10 +45,12 @@
                 </div>
 
                 <div class="order-review-section">
-                    <h3>Delivery Details</h3>
-                    <div id="customerDetails"></div>
+                    <h3>👤 Customer Details</h3>
+                    <div id="customerDetails" class="details-list"></div>
                 </div>
+            </div>
 
+            <div class="right-section">
                 <div class="payment-container">
                     <form id="paymentForm">
                         <div class="section">
@@ -99,6 +103,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
         <!-- Toast notification -->
         <div id="toast" class="toast"></div>
@@ -159,13 +164,6 @@
                         contactsModal.style.display = 'flex';
                     });
                 }
-
-                // Close modal when clicking outside
-                window.addEventListener('click', function(e) {
-                    if (e.target === aboutModal) aboutModal.style.display = 'none';
-                    if (e.target === contactsModal) contactsModal.style.display = 'none';
-                });
-            });
 
                 // Close modal when clicking outside
                 window.addEventListener('click', function(e) {

@@ -4,11 +4,11 @@ import { stateService } from './services/state.service.js';
 function checkItem() {
     const cart = stateService.cart;
     console.log('Cart on orderedList.html load:', cart);
-    console.log('stateService.cart content:', stateService.cart); // Added console.log
+    console.log('stateService.cart content:', stateService.cart);
     var total = 0;
     var orderItemsContainer = document.getElementById('orderItems');
 
-    if (cart.length === 0) {
+    if (!cart || cart.length === 0) {
         orderItemsContainer.innerHTML = '<div class="empty-message">No items in your order. Please go back and select items.</div>';
         document.getElementById('totalAmount').textContent = '₱0';
         return;
@@ -25,13 +25,15 @@ function checkItem() {
     document.getElementById('totalAmount').textContent = '₱' + total;
 }
 
-window.addEventListener('load', checkItem);
-
-// Back button listener
+// Initialize on DOMContentLoaded, not load (prevents duplicate execution)
 document.addEventListener('DOMContentLoaded', function() {
+    checkItem();
+    
     const backBtn = document.getElementById('backBtn');
     if (backBtn) {
         backBtn.addEventListener('click', function() {
+            // Clear cart before navigating back to prevent duplicate items
+            stateService.clearCart();
             window.location.href = 'menu.html';
         });
     }

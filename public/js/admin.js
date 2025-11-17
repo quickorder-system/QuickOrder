@@ -1,5 +1,5 @@
 // Tab Navigation
-function showTab(tabId) {
+async function showTab(tabId) {
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.classList.remove('active');
   });
@@ -11,7 +11,7 @@ function showTab(tabId) {
   event.target.closest('.tab-btn').classList.add('active');
   
   if (tabId === 'inventoryTab') {
-    renderInventory();
+    await renderInventory();
   }
 }
 
@@ -31,8 +31,8 @@ function handleAddNewItem() {
 }
 
 // Inventory Management (use shared inventory.js helpers)
-function renderInventory() {
-  renderInventoryAdmin('inventoryRows');
+async function renderInventory() {
+  await renderInventoryAdmin('inventoryRows');
 }
 
 /**
@@ -74,16 +74,6 @@ async function handleToggleAvailability(itemId, currentStatus) {
   }
 }
 
-function deleteInventoryItem(idx) {
-  if (!confirm('Are you sure you want to delete this item?')) return;
-  const items = getInventory();
-  if (idx >= 0 && idx < items.length) {
-    items.splice(idx, 1);
-    saveInventory(items);
-    renderInventory();
-  }
-}
-
 // modal / add-edit flow
 let currentEditIdx = null;
 
@@ -118,38 +108,8 @@ function closeModal() {
   if (idxField) idxField.value = '';
 }
 
-// populate modal for editing
-function editInventoryItem(idx) {
-  const inv = getInventory();
-  if (idx >= 0 && idx < inv.length) {
-    const item = inv[idx];
-    document.getElementById('itemName').value = item.itemName || item.name || '';
-    document.getElementById('itemCategory').value = item.category || '';
-    document.getElementById('itemPrice').value = item.price !== undefined ? item.price : '';
-    document.getElementById('itemUnit').value = item.unit || 'pcs';
-    document.getElementById('itemStock').value = item.quantity !== undefined ? item.quantity : (item.stock !== undefined ? item.stock : 0);
-    document.getElementById('itemAlertLevel').value = item.alertLevel !== undefined ? item.alertLevel : 0;
-    document.getElementById('itemDescription').value = item.description || '';
-    if (item.image) {
-      const prev = document.getElementById('itemPreview'); 
-      prev.src = item.image; 
-      prev.style.display = '';
-      document.getElementById('itemImageData').value = item.image;
-    } else {
-      const prev = document.getElementById('itemPreview'); 
-      prev.style.display = 'none'; 
-      document.getElementById('itemImageData').value = '';
-    }
-    // set hidden edit index
-    const idxField = document.getElementById('itemEditIndex'); 
-    if (idxField) idxField.value = String(idx);
-    console.log('[Admin] editInventoryItem open idx=', idx, 'item=', item);
-    currentEditIdx = idx;
-    openAddItemModal();
-  } else {
-    openAddItemModal();
-  }
-}
+// Note: editInventoryItem is now defined in inventory.js and handles both new and edit operations by ID
+// This function has been removed to prevent conflicts
 
 // image file -> dataURL
 document.getElementById('itemImage')?.addEventListener('change', function(e) {
@@ -258,6 +218,32 @@ document.getElementById('statusFilter')?.addEventListener('change', function(e) 
     }
     const badge = card.querySelector('.status-badge');
     card.style.display = badge && badge.classList.contains(status) ? '' : 'none';
+  });
+});
+
+// Orders date filter
+document.getElementById('orderDate')?.addEventListener('change', function(e) {
+  const selectedDate = e.target.value;
+  if (!selectedDate) {
+    // If no date selected, show all cards
+    document.querySelectorAll('.order-card').forEach(card => {
+      card.style.display = '';
+    });
+    return;
+  }
+
+  const filterDate = new Date(selectedDate).toDateString();
+  
+  document.querySelectorAll('.order-card').forEach(card => {
+    const orderTimeElement = card.querySelector('.order-time');
+    if (orderTimeElement) {
+      const orderDateText = orderTimeElement.textContent.trim();
+      // Parse the order date from the displayed date/time string
+      const orderDate = new Date(orderDateText).toDateString();
+      card.style.display = orderDate === filterDate ? '' : 'none';
+    } else {
+      card.style.display = '';
+    }
   });
 });
 

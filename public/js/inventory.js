@@ -127,18 +127,25 @@
       const alert = Number(item.alertLevel !== undefined ? item.alertLevel : 0) || 0;
       const unit = item.unit || 'pcs';
       const price = item.price || 0;
+      const isAvailable = item.isAvailable !== false; // Default to true if not set
       let status = 'In Stock', statusClass = 'in-stock';
       if (quantity <= 0) { status = 'Out of Stock'; statusClass = 'out-stock'; }
       else if (quantity <= alert) { status = 'Low Stock'; statusClass = 'low-stock'; }
 
+      const availabilityBtnClass = isAvailable ? 'available' : 'unavailable';
+      const availabilityIcon = isAvailable ? 'fa-check-circle' : 'fa-ban';
+      const availabilityTitle = isAvailable ? 'Click to mark unavailable' : 'Click to mark available';
+
       inventoryRows.innerHTML += `
-        <div class="table-row" data-id="${item._id}">
+        <div class="table-row" data-id="${item._id}" style="${!isAvailable ? 'opacity: 0.6;' : ''}">
           <div>${escapeHtml(item.itemName || item.name || '')}${item.description ? `<div style="font-size:0.85rem;color:#64748b;">${escapeHtml(item.description)}</div>` : ''}</div>
           <div>${escapeHtml(item.category || '')}</div>
           <div>₱${price.toFixed(2)}</div>
           <div>${quantity} ${escapeHtml(unit)}</div>
+          <div>${alert} ${escapeHtml(unit)}</div>
           <div><span class="stock-status ${statusClass}">${status}</span></div>
           <div class="action-icons">
+            <button class="icon-btn ${availabilityBtnClass}" onclick="handleToggleAvailability('${item._id}', ${isAvailable})" title="${availabilityTitle}"><i class="fas ${availabilityIcon}"></i></button>
             <button class="icon-btn" onclick="handleEditItem('${item._id}')" title="Edit item"><i class="fas fa-edit"></i></button>
             <button class="icon-btn delete" onclick="handleDeleteItem('${item._id}')" title="Delete item"><i class="fas fa-trash"></i></button>
           </div>
@@ -181,6 +188,7 @@
       const quantity = Number(item.quantity !== undefined ? item.quantity : (item.stock !== undefined ? item.stock : 0)) || 0;
       const alert = Number(item.alertLevel !== undefined ? item.alertLevel : 0) || 0;
       const unit = item.unit || 'pcs';
+      const price = item.price || 0;
       const isAvailable = item.isAvailable !== false; // Default to true if not set
       let status = 'In Stock', statusClass = 'in-stock';
       if (quantity <= 0) { status = 'Out of Stock'; statusClass = 'out-stock'; }
@@ -194,6 +202,7 @@
         <div class="table-row" data-id="${item._id}" style="${!isAvailable ? 'opacity: 0.6;' : ''}">
           <div>${escapeHtml(item.itemName || item.name || '')}${item.description ? `<div style="font-size:0.85rem;color:#64748b;">${escapeHtml(item.description)}</div>` : ''}</div>
           <div>${escapeHtml(item.category || '')}</div>
+          <div>₱${price.toFixed(2)}</div>
           <div>${quantity} ${escapeHtml(unit)}</div>
           <div>${alert} ${escapeHtml(unit)}</div>
           <div><span class="stock-status ${statusClass}">${status}</span></div>
@@ -234,6 +243,8 @@
     if (prev) { prev.style.display = 'none'; prev.src = ''; }
     const hid = document.getElementById('itemImageData'); 
     if (hid) hid.value = '';
+    const customCat = document.getElementById('customCategory'); 
+    if (customCat) { customCat.style.display = 'none'; customCat.value = ''; }
     if (document.getElementById('itemModal')) {
       document.getElementById('itemModal').classList.add('show');
     }
@@ -252,18 +263,57 @@
     const prev = document.getElementById('itemPreview'); if (prev) { prev.style.display = 'none'; prev.src = ''; }
     const hid = document.getElementById('itemImageData'); if (hid) hid.value = '';
     const idxField = document.getElementById('itemEditIndex'); if (idxField) idxField.value = '';
+    const customCat = document.getElementById('customCategory'); if (customCat) { customCat.style.display = 'none'; customCat.value = ''; }
   }
 
   async function editInventoryItem(id) {
     try {
-      const response = await fetch(`/api/inventory/${id}`);
+      const token = localStorage.getItem('token');
+      console.log('[Edit] Token from localStorage:', token ? 'Present' : 'Missing');
+      
+      if (!token) {
+        alert('Authentication token not found. Please log in again.');
+        window.location.href = 'Login.html';
+        return;
+      }
+
+      const headers = {
+        'x-auth-token': token,
+        'Content-Type': 'application/json'
+      };
+
+      console.log('[Edit] Fetching item:', id);
+      const response = await fetch(`/api/inventory/${id}`, {
+        headers: headers
+      });
+      
+      console.log('[Edit] Response status:', response.status);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const item = await response.json();
+      console.log('[Edit] Item loaded successfully:', item);
 
       document.getElementById('itemName').value = item.itemName || '';
-      document.getElementById('itemCategory').value = item.category || '';
+      
+      // Handle category display
+      const categorySelect = document.getElementById('itemCategory');
+      const customInput = document.getElementById('customCategory');
+      const predefinedCategories = ['burger', 'pizza', 'others', 'drinks', 'rice', 'pasta', 'coffee', 'bundle'];
+      
+      if (predefinedCategories.includes(item.category)) {
+        categorySelect.value = item.category;
+        if (customInput) { customInput.style.display = 'none'; customInput.value = ''; }
+      } else if (item.category) {
+        // Custom category
+        categorySelect.value = 'custom';
+        if (customInput) { customInput.style.display = 'block'; customInput.value = item.category; }
+      } else {
+        categorySelect.value = '';
+        if (customInput) { customInput.style.display = 'none'; customInput.value = ''; }
+      }
+      
       const priceEl = document.getElementById('itemPrice'); if (priceEl) priceEl.value = item.price !== undefined ? item.price : '';
       const unitEl = document.getElementById('itemUnit'); if (unitEl) unitEl.value = item.unit || 'pcs';
       document.getElementById('itemStock').value = item.quantity !== undefined ? item.quantity : 0;
@@ -288,25 +338,42 @@
     if (!confirm('Are you sure you want to delete this item?')) return;
     try {
       const token = localStorage.getItem('token');
-      const headers = {};
-      if (token) {
-        headers['x-auth-token'] = token;
+      console.log('[Delete] Token from localStorage:', token ? 'Present' : 'Missing');
+      
+      if (!token) {
+        alert('Authentication token not found. Please log in again.');
+        window.location.href = 'Login.html';
+        return;
       }
 
+      const headers = {
+        'x-auth-token': token,
+        'Content-Type': 'application/json'
+      };
+
+      console.log('[Delete] Sending DELETE request to /api/inventory/' + id);
       const response = await fetch(`/api/inventory/${id}`, {
         method: 'DELETE',
         headers: headers,
       });
 
+      console.log('[Delete] Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.text();
+        console.error('[Delete] Error response:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}. ${errorData}`);
       }
       
+      const result = await response.json();
+      console.log('[Delete] Item deleted successfully:', result);
+      
       // Re-render inventory after successful deletion
-      renderInventoryShared('inventoryRows');
+      await renderInventoryShared('inventoryRows');
+      alert('Item deleted successfully.');
     } catch (error) {
       console.error('Error deleting inventory item:', error);
-      alert('Failed to delete inventory item. Please try again later.');
+      alert(`Failed to delete inventory item: ${error.message}`);
     }
   }
 
@@ -314,6 +381,23 @@
   document.addEventListener('change', function(e) {
     const target = e.target;
     if (!target) return;
+    
+    // Handle category dropdown change
+    if (target.id === 'itemCategory') {
+      const customInput = document.getElementById('customCategory');
+      if (customInput) {
+        if (target.value === 'custom') {
+          customInput.style.display = 'block';
+          customInput.focus();
+          customInput.value = '';
+        } else {
+          customInput.style.display = 'none';
+          customInput.value = '';
+        }
+      }
+      return;
+    }
+    
     if (target.id === 'itemImage') {
       const file = target.files && target.files[0];
       if (!file) return;
@@ -334,7 +418,19 @@
     e.preventDefault();
 
     const name = document.getElementById('itemName').value.trim();
-    const category = document.getElementById('itemCategory').value;
+    let category = document.getElementById('itemCategory').value;
+    
+    // Handle custom category
+    if (category === 'custom') {
+      const customCat = document.getElementById('customCategory').value.trim();
+      if (!customCat) {
+        alert('Please enter a custom category name');
+        document.getElementById('customCategory').focus();
+        return;
+      }
+      category = customCat.toLowerCase().replace(/\s+/g, '-'); // Convert to lowercase and replace spaces with hyphens
+    }
+    
     const price = parseFloat(document.getElementById('itemPrice').value) || 0;
     const unit = document.getElementById('itemUnit')?.value || 'pcs';
     const stock = parseInt(document.getElementById('itemStock').value) || 0;
@@ -353,30 +449,43 @@
     // If imageData is a base64 string, it means a new image was selected or an existing one was re-selected
     if (imageData && imageData.startsWith('data:image')) {
       try {
+        // Convert base64 to Blob
+        const parts = imageData.split(',');
+        const mimeMatch = parts[0].match(/:(.*?);/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        const binaryString = atob(parts[1]);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: mimeType });
+
+        // Create FormData and append the blob
+        const formData = new FormData();
+        formData.append('paymentScreenshot', blob, 'item-image.jpg');
+
         const token = localStorage.getItem('token');
-        const headers = {
-          'Content-Type': 'application/json',
-        };
+        const headers = {};
         if (token) {
           headers['x-auth-token'] = token;
         }
 
-        const response = await fetch('/api/upload', {
+        const uploadResponse = await fetch('/api/upload', {
           method: 'POST',
           headers: headers,
-          body: JSON.stringify({ image: imageData, filename: `${name}-${Date.now()}.png` }),
+          body: formData,
         });
-        const result = await response.json();
-        if (response.ok) {
+        const result = await uploadResponse.json();
+        if (uploadResponse.ok) {
           imageUrl = result.fileUrl;
         } else {
           console.error('Image upload failed:', result.error);
-          alert('Failed to upload image.');
+          alert('Failed to upload image: ' + (result.error || 'Unknown error'));
           return;
         }
       } catch (error) {
         console.error('Error during image upload:', error);
-        alert('Error uploading image.');
+        alert('Error uploading image: ' + error.message);
         return;
       }
     }
@@ -420,8 +529,12 @@
 
       const result = await response.json();
       if (response.ok) {
+        console.log('[Inventory] Item saved successfully:', result);
+        // Clear edit index for next operation
+        const idxField = document.getElementById('itemEditIndex');
+        if (idxField) idxField.value = '';
         // Re-render inventory after successful operation
-        renderInventoryShared('inventoryRows');
+        await renderInventoryShared('inventoryRows');
         closeModal();
       } else {
         console.error('Inventory operation failed:', result.error);

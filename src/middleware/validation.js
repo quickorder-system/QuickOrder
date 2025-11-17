@@ -15,7 +15,14 @@ const validateOrder = [
 ];
 
 const validateRegistration = [
-  body('username').notEmpty().withMessage('Username is required'),
+  body('username')
+    .notEmpty().withMessage('Username is required')
+    .custom((value) => {
+      if (['admin', 'owner'].includes(value.toLowerCase())) {
+        throw new Error('This username is reserved and cannot be used');
+      }
+      return true;
+    }),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
   (req, res, next) => {
     const errors = validationResult(req);

@@ -26,6 +26,7 @@ async function fetchOrderDetails() {
         }
 
         const order = await response.json();
+        console.log('Order details fetched:', order);
         
         // Display formatted order ID
         const orderNumberElem = document.getElementById('orderNumber');
@@ -33,19 +34,168 @@ async function fetchOrderDetails() {
             orderNumberElem.textContent = '#' + order.orderId;
         }
 
-        // Update status based on order data
-        const statusElem = document.querySelector('.info-item strong');
-        if (statusElem && order.status) {
-            statusElem.nextSibling.textContent = ` ${order.status}`;
+        // Update order status
+        const orderStatusElem = document.getElementById('orderStatus');
+        if (orderStatusElem && order.status) {
+            orderStatusElem.textContent = order.status.charAt(0).toUpperCase() + order.status.slice(1);
         }
+
+        // Update payment status
+        updatePaymentStatusDisplay(order);
 
     } catch (error) {
         console.error('Error fetching order details:', error);
     }
 }
 
+// Helper function to update payment status display
+function updatePaymentStatusDisplay(order) {
+    const paymentStatusElem = document.getElementById('paymentStatus');
+    const paymentInfoElem = document.getElementById('paymentInfo');
+    const debugPaymentStatus = document.getElementById('debugPaymentStatus');
+    
+    if (paymentStatusElem && paymentInfoElem) {
+        let paymentStatusText = 'Pending Verification';
+        let paymentStatusClass = 'payment-pending';
+        
+        // Use paymentStatus from order, default to 'pending' if not set
+        const currentPaymentStatus = order.paymentStatus || 'pending';
+        console.log('Current paymentStatus from order:', order.paymentStatus, 'Resolved to:', currentPaymentStatus);
+        
+        // Update debug info
+        if (debugPaymentStatus) {
+            debugPaymentStatus.textContent = `paymentStatus="${order.paymentStatus || 'undefined'}" → "${currentPaymentStatus}"`;
+        }
+        
+        if (currentPaymentStatus === 'verified') {
+            paymentStatusText = 'Verified ✓';
+            paymentStatusClass = 'payment-verified';
+        } else if (currentPaymentStatus === 'rejected') {
+            paymentStatusText = 'Rejected ✗';
+            paymentStatusClass = 'payment-rejected';
+        }
+        
+        paymentStatusElem.textContent = paymentStatusText;
+        
+        // Update the class for styling
+        paymentInfoElem.className = `info-item ${paymentStatusClass}`;
+        
+        console.log('Payment status updated to:', paymentStatusText);
+    }
+}
+
+// Function to refresh payment status without full page reload
+async function refreshPaymentStatus(orderId) {
+    try {
+        const response = await fetch(`http://localhost:5001/api/orders/${orderId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch order details');
+        }
+
+        const order = await response.json();
+        console.log('Refreshed order data:', order);
+        console.log('Full order object:', JSON.stringify(order, null, 2));
+        
+        // Update order status
+        if (order.status) {
+            const orderStatusElem = document.getElementById('orderStatus');
+            const newStatusText = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+            if (orderStatusElem && orderStatusElem.textContent !== newStatusText) {
+                orderStatusElem.textContent = newStatusText;
+                console.log('Order status refreshed to:', newStatusText);
+            }
+        }
+        
+        // Update payment status if it has changed
+        const paymentStatusElem = document.getElementById('paymentStatus');
+        const paymentInfoElem = document.getElementById('paymentInfo');
+        
+        if (paymentStatusElem && paymentInfoElem) {
+            let paymentStatusText = 'Pending Verification';
+            let paymentStatusClass = 'payment-pending';
+            
+            // Use paymentStatus from order, default to 'pending' if not set
+            const currentPaymentStatus = order.paymentStatus || 'pending';
+            console.log('Refresh - Current paymentStatus:', order.paymentStatus, 'Resolved to:', currentPaymentStatus);
+            
+            if (currentPaymentStatus === 'verified') {
+                paymentStatusText = 'Verified ✓';
+                paymentStatusClass = 'payment-verified';
+            } else if (currentPaymentStatus === 'rejected') {
+                paymentStatusText = 'Rejected ✗';
+                paymentStatusClass = 'payment-rejected';
+            }
+            
+            // Update if status has changed
+            if (paymentStatusElem.textContent !== paymentStatusText) {
+                console.log('Payment status changed from', paymentStatusElem.textContent, 'to', paymentStatusText);
+                paymentStatusElem.textContent = paymentStatusText;
+                paymentInfoElem.className = `info-item ${paymentStatusClass}`;
+                
+                // Add visual indicator that it was updated
+                paymentInfoElem.style.animation = 'none';
+                setTimeout(() => {
+                    paymentInfoElem.style.animation = 'pulse 0.5s ease-out';
+                }, 10);
+            }
+            
+            // Stop polling once payment status is verified or rejected
+            if (currentPaymentStatus === 'verified' || currentPaymentStatus === 'rejected') {
+                console.log('Payment status is final, stopping auto-refresh');
+                stopAutoRefresh();
+            }
+        }
+    } catch (error) {
+        console.error('Error refreshing payment status:', error);
+    }
+}
+
 // Call the function when the page loads
 fetchOrderDetails();
+
+// Also set up more aggressive polling - check immediately and then every 1 second
+let refreshInterval = null;
+const MAX_REFRESH_TIME = 5 * 60 * 1000; // Stop polling after 5 minutes
+let refreshStartTime = null;
+
+function startAutoRefresh(orderId) {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshStartTime = Date.now();
+    refreshInterval = setInterval(() => {
+        const elapsedTime = Date.now() - refreshStartTime;
+        
+        // Stop polling after 5 minutes
+        if (elapsedTime > MAX_REFRESH_TIME) {
+            console.log('Auto-refresh stopped after 5 minutes');
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+            return;
+        }
+        
+        refreshPaymentStatus(orderId);
+    }, 1000);
+}
+
+function stopAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+        console.log('Auto-refresh stopped');
+    }
+}
+
+// Extract orderId from URL for later use
+const urlParams = new URLSearchParams(window.location.search);
+const orderId = urlParams.get('orderId');
+if (orderId) {
+    startAutoRefresh(orderId);
+}
 
 setTimeout(() => {
     createConfetti();

@@ -14,9 +14,18 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    email: {
+        type: String,
+        required: true
+    },
     address: {
         type: String,
         required: true
+    },
+    deliveryType: {
+        type: String,
+        enum: ['pickup', 'delivery'],
+        default: 'pickup'
     },
     paymentMethod: {
         type: String,
@@ -31,7 +40,7 @@ const orderSchema = new mongoose.Schema({
     },
     items: [{
         itemId: {
-            type: Number,
+            type: String,
             required: true
         },
         name: {
@@ -61,6 +70,11 @@ const orderSchema = new mongoose.Schema({
         enum: ['pending', 'preparing', 'ready', 'complete', 'cancelled'],
         default: 'pending'
     },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'verified', 'rejected'],
+        default: 'pending'
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -68,6 +82,16 @@ const orderSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    }
+}, {
+    toJSON: {
+        transform: function(doc, ret) {
+            // Ensure paymentStatus is always included, default to 'pending' if missing
+            if (!ret.paymentStatus) {
+                ret.paymentStatus = 'pending';
+            }
+            return ret;
+        }
     }
 });
 

@@ -33,16 +33,16 @@
         <div class="order-info">
             <div class="order-number" id="orderNumber">#QO123456</div>
             <div class="info-item">
-                <strong>Status:</strong> Order Received
+                <strong>Status:</strong> <span id="orderStatus">Order Received</span>
             </div>
-            <div class="info-item">
-                <strong>Payment:</strong> Pending Verification
+            <div class="info-item payment-pending" id="paymentInfo">
+                <strong>Payment:</strong> <span id="paymentStatus">Pending Verification</span>
             </div>
         </div>
 
         <div class="thank-you-message">
             <strong>🚀 What's Next?</strong><br>
-            Your order is being processed and you will receive updates via SMS at the contact number you provided. Our team will verify your payment and prepare your order shortly.
+            Your order is being processed and you will receive updates via SMS/Email address you provided or you can refresh this page to check the order status. Our team will verify your payment and prepare your order shortly.
         </div>
 
         <div class="divider"></div>
@@ -114,13 +114,6 @@
                     contactsModal.style.display = 'flex';
                 });
             }
-
-            // Close modal when clicking outside
-            window.addEventListener('click', function(e) {
-                if (e.target === aboutModal) aboutModal.style.display = 'none';
-                if (e.target === contactsModal) contactsModal.style.display = 'none';
-            });
-        });
 
             // Close modal when clicking outside
             window.addEventListener('click', function(e) {

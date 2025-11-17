@@ -108,13 +108,7 @@ async function handleOrderSubmit(event) {
             }
         }, 200);
 
-        const uploadResponse = await ApiService.uploadImage(screenshotFile, (event) => {
-            if (event.lengthComputable) {
-                const percent = Math.round((event.loaded / event.total) * 100);
-                progressBar.style.width = `${percent}%`;
-                progressText.textContent = `Uploading... ${percent}%`;
-            }
-        });
+        const uploadResponse = await ApiService.uploadImage(screenshotFile);
         clearInterval(uploadProgress); // Ensure interval is cleared on successful upload
 
         if (!uploadResponse || !uploadResponse.fileUrl) {
@@ -176,6 +170,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     screenshotInput.addEventListener('change', previewScreenshot);
+
+    // Drag and drop functionality
+    uploadAreaClick.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadAreaClick.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
+        uploadAreaClick.style.borderColor = '#667eea';
+    });
+
+    uploadAreaClick.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadAreaClick.style.backgroundColor = '';
+        uploadAreaClick.style.borderColor = '';
+    });
+
+    uploadAreaClick.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadAreaClick.style.backgroundColor = '';
+        uploadAreaClick.style.borderColor = '';
+        
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            screenshotInput.files = files;
+            previewScreenshot();
+        }
+    });
 
     // Back button listener
     const backBtn = document.getElementById('backBtn');

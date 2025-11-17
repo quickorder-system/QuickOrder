@@ -213,6 +213,8 @@ router.get('/daily', async (req, res) => {
 
         res.json({
             date,
+            labels: [date],
+            data: [parseFloat(data.totalSales.toFixed(2))],
             totalRevenue: parseFloat(data.totalSales.toFixed(2)),
             totalOrders: data.orderCount,
             averageOrderValue: parseFloat(data.averageOrderValue.toFixed(2))

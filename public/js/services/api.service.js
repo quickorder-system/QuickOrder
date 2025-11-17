@@ -40,9 +40,12 @@ export class ApiService {
                 method: 'POST',
                 body: formData,
             });
+            
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
+            
             return await response.json();
         } catch (error) {
             console.error('ApiService uploadImage request failed:', error);
