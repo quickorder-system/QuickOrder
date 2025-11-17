@@ -210,14 +210,29 @@ router.get('/daily', async (req, res) => {
 
         const data = salesData[0] || { totalSales: 0, orderCount: 0, averageOrderValue: 0 };
         const date = formatDate(today);
+        const totalSales = parseFloat(data.totalSales.toFixed(2));
 
         res.json({
-            date,
             labels: [date],
-            data: [parseFloat(data.totalSales.toFixed(2))],
-            totalRevenue: parseFloat(data.totalSales.toFixed(2)),
-            totalOrders: data.orderCount,
-            averageOrderValue: parseFloat(data.averageOrderValue.toFixed(2))
+            datasets: [
+                {
+                    label: 'Daily Sales (₱)',
+                    data: [totalSales],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2
+                }
+            ],
+            summary: {
+                totalRevenue: totalSales,
+                totalOrdersCompleted: data.orderCount,
+                averageOrderValue: parseFloat(data.averageOrderValue.toFixed(2)),
+                averageDailySales: totalSales,
+                maxDailySales: totalSales,
+                minDailySales: totalSales,
+                daysWithSales: data.orderCount > 0 ? 1 : 0,
+                totalDaysInRange: 1
+            }
         });
     } catch (error) {
         logger.error('Error generating daily report:', error);
@@ -284,13 +299,33 @@ router.get('/weekly', async (req, res) => {
 
         const labels = allDates.map(date => formatDate(date));
         const data = allDates.map(date => salesMap[formatDate(date)] || 0);
+        const averageDailySales = parseFloat((totalRevenue / allDates.length).toFixed(2));
+        const maxDailySales = Math.max(...data, 0);
+        const minDailySales = Math.min(...data.filter(val => val > 0), 0);
 
         res.json({
             labels,
-            data,
-            totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-            totalOrders,
-            averageDailySales: parseFloat((totalRevenue / allDates.length).toFixed(2))
+            datasets: [
+                {
+                    label: 'Weekly Sales (₱)',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }
+            ],
+            summary: {
+                totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+                totalOrdersCompleted: totalOrders,
+                averageOrderValue: totalOrders > 0 ? parseFloat((totalRevenue / totalOrders).toFixed(2)) : 0,
+                averageDailySales: averageDailySales,
+                maxDailySales: maxDailySales,
+                minDailySales: minDailySales || 0,
+                daysWithSales: salesData.length,
+                totalDaysInRange: allDates.length
+            }
         });
     } catch (error) {
         logger.error('Error generating weekly report:', error);
@@ -352,13 +387,33 @@ router.get('/monthly', async (req, res) => {
 
         const labels = allDates.map(date => formatDate(date));
         const data = allDates.map(date => salesMap[formatDate(date)] || 0);
+        const averageDailySales = parseFloat((totalRevenue / allDates.length).toFixed(2));
+        const maxDailySales = Math.max(...data, 0);
+        const minDailySales = Math.min(...data.filter(val => val > 0), 0);
 
         res.json({
             labels,
-            data,
-            totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-            totalOrders,
-            averageDailySales: parseFloat((totalRevenue / allDates.length).toFixed(2))
+            datasets: [
+                {
+                    label: 'Monthly Sales (₱)',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }
+            ],
+            summary: {
+                totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+                totalOrdersCompleted: totalOrders,
+                averageOrderValue: totalOrders > 0 ? parseFloat((totalRevenue / totalOrders).toFixed(2)) : 0,
+                averageDailySales: averageDailySales,
+                maxDailySales: maxDailySales,
+                minDailySales: minDailySales || 0,
+                daysWithSales: salesData.length,
+                totalDaysInRange: allDates.length
+            }
         });
     } catch (error) {
         logger.error('Error generating monthly report:', error);
@@ -427,13 +482,33 @@ router.get('/yearly', async (req, res) => {
 
         const labels = allMonths.map(m => m.monthStr);
         const data = allMonths.map(m => salesMap[m.monthStr] || 0);
+        const averageMonthlySales = parseFloat((totalRevenue / 12).toFixed(2));
+        const maxDailySales = Math.max(...data, 0);
+        const minDailySales = Math.min(...data.filter(val => val > 0), 0);
 
         res.json({
             labels,
-            data,
-            totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-            totalOrders,
-            averageMonthlySales: parseFloat((totalRevenue / 12).toFixed(2))
+            datasets: [
+                {
+                    label: 'Yearly Sales (₱)',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }
+            ],
+            summary: {
+                totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+                totalOrdersCompleted: totalOrders,
+                averageOrderValue: totalOrders > 0 ? parseFloat((totalRevenue / totalOrders).toFixed(2)) : 0,
+                averageDailySales: averageMonthlySales,
+                maxDailySales: maxDailySales,
+                minDailySales: minDailySales || 0,
+                daysWithSales: salesData.length,
+                totalDaysInRange: 12
+            }
         });
     } catch (error) {
         logger.error('Error generating yearly report:', error);

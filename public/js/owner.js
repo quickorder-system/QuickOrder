@@ -234,6 +234,11 @@ function exportReportToExcel() {
     const data = reportChartData;
     const summary = data.summary;
     
+    if (!summary) {
+      alert('Report data is incomplete. Please generate a report first.');
+      return;
+    }
+    
     // Create CSV content
     let csvContent = 'data:text/csv;charset=utf-8,';
     
@@ -244,7 +249,7 @@ function exportReportToExcel() {
     csvContent += 'Summary Metrics\n';
     csvContent += `Total Revenue,₱${summary.totalRevenue.toFixed(2)}\n`;
     csvContent += `Total Orders,${summary.totalOrdersCompleted}\n`;
-    csvContent += `Average Order Value,₱${(summary.totalRevenue / summary.totalOrdersCompleted).toFixed(2)}\n`;
+    csvContent += `Average Order Value,₱${(summary.totalRevenue / (summary.totalOrdersCompleted || 1)).toFixed(2)}\n`;
     csvContent += `Average Daily Sales,₱${summary.averageDailySales.toFixed(2)}\n`;
     csvContent += `Max Daily Sales,₱${summary.maxDailySales.toFixed(2)}\n`;
     csvContent += `Min Daily Sales,₱${summary.minDailySales.toFixed(2)}\n`;
@@ -255,9 +260,20 @@ function exportReportToExcel() {
     csvContent += 'Daily Sales Breakdown\n';
     csvContent += 'Date,Sales Amount (₱)\n';
     
-    if (data.labels && data.datasets && data.datasets[0] && data.datasets[0].data) {
-      data.labels.forEach((label, index) => {
-        const amount = data.datasets[0].data[index];
+    // Handle both old and new data formats
+    let chartData = data;
+    
+    // If using new datasets format, extract the first dataset
+    if (data.datasets && data.datasets[0]) {
+      chartData = {
+        labels: data.labels,
+        data: data.datasets[0].data
+      };
+    }
+    
+    if (chartData.labels && chartData.data) {
+      chartData.labels.forEach((label, index) => {
+        const amount = chartData.data[index];
         csvContent += `${label},${amount.toFixed(2)}\n`;
       });
     }
@@ -265,7 +281,7 @@ function exportReportToExcel() {
     // Create downloadable link
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
     
     // Generate filename with date
     const today = new Date();
