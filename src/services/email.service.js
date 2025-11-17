@@ -117,29 +117,13 @@ function sendViaAPI(to, subject, htmlContent) {
  */
 async function verifyEmailConfig() {
     try {
-        if (process.env.SENDGRID_API_KEY) {
+        if (useSendGridAPI && process.env.SENDGRID_API_KEY) {
             console.log('[EmailService] ✓ SendGrid API key configured');
             logger.info('✓ SendGrid API key configured');
-            
-            // Try to verify the connection (with timeout)
-            const timeoutPromise = new Promise((resolve, reject) => {
-                setTimeout(() => reject(new Error('Connection verification timeout')), 10000);
-            });
-            
-            try {
-                const verifyPromise = transporter.verify();
-                await Promise.race([verifyPromise, timeoutPromise]);
-                console.log('[EmailService] ✓ SendGrid connection verified');
-                logger.info('✓ SendGrid connection verified');
-                return true;
-            } catch (verifyError) {
-                console.warn('[EmailService] ⚠️ SendGrid connection verification failed:', verifyError.message);
-                console.warn('[EmailService] This may be a network issue - emails may still work');
-                logger.warn('⚠️ SendGrid connection could not be verified: ' + verifyError.message);
-                // Don't fail - network might be slow
-                return true;
-            }
-        } else if (process.env.EMAIL_SERVICE && process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+            // SendGrid HTTP API doesn't require connection verification
+            // Configuration check is sufficient
+            return true;
+        } else if (transporter && process.env.EMAIL_SERVICE && process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
             console.log('[EmailService] ✓ Email service configured');
             logger.info('✓ Email service configured');
             
