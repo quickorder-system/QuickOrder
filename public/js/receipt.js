@@ -14,7 +14,7 @@ async function fetchOrderDetails() {
         }
 
         // Fetch order details from the server
-        const response = await fetch(`http://localhost:5001/api/orders/${orderId}`, {
+        const response = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -87,7 +87,7 @@ function updatePaymentStatusDisplay(order) {
 // Function to refresh payment status without full page reload
 async function refreshPaymentStatus(orderId) {
     try {
-        const response = await fetch(`http://localhost:5001/api/orders/${orderId}`, {
+        const response = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'

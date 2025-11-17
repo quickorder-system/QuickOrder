@@ -133,13 +133,13 @@ router.put('/:id/status', auth, async (req, res) => { // Temporarily commented o
             
             try {
                 if (status === 'preparing') {
-                    emailService.sendPreparingEmail(order);
+                    await emailService.sendPreparingEmail(order);
                 } else if (status === 'ready') {
-                    emailService.sendReadyEmail(order);
+                    await emailService.sendReadyEmail(order);
                 } else if (status === 'complete') {
-                    emailService.sendCompletedEmail(order);
+                    await emailService.sendCompletedEmail(order);
                 } else if (status === 'cancelled') {
-                    emailService.sendCancelledEmail(order);
+                    await emailService.sendCancelledEmail(order);
                 }
             } catch (emailError) {
                 logger.error('Email notification error:', emailError.message);
@@ -223,7 +223,7 @@ router.patch('/:id/payment-status', auth, async (req, res) => {
             
             try {
                 if (previousPaymentStatus !== paymentStatus) {
-                    emailService.sendPaymentStatusEmail(order, paymentStatus);
+                    await emailService.sendPaymentStatusEmail(order, paymentStatus);
                 }
             } catch (emailError) {
                 logger.error('Email notification error:', emailError.message);

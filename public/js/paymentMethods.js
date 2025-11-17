@@ -137,7 +137,7 @@ async function handleOrderSubmit(event) {
         stateService.setCurrentOrder(null);
         showToast('Order placed successfully!', 'success');
         setTimeout(() => {
-            window.location.href = `/receipt.html?orderId=${newOrder._id}`;
+            window.location.href = `/receipt.html?orderId=${newOrder.orderId}`;
         }, 2000);
 
     } catch (error) {
