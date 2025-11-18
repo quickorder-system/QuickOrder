@@ -31,6 +31,16 @@ function setupDeliveryTypeToggle() {
 function submitCustomerDetails(event) {
     event.preventDefault();
 
+    // Validate phone number
+    const phoneNumber = document.getElementById('customerPhone').value;
+    const phoneRegex = /^09\d{9}$/;
+    
+    if (!phoneRegex.test(phoneNumber)) {
+        alert('⚠️ Warning!\nPhone number must be 11 digits and start with 09\n(e.g., 09123456789)');
+        document.getElementById('customerPhone').focus();
+        return;
+    }
+
     const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
     const address = deliveryType === 'delivery' ? document.getElementById('address').value : 'Pick Up';
 

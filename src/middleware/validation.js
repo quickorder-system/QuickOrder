@@ -2,7 +2,9 @@ const { body, validationResult } = require('express-validator');
 
 const validateOrder = [
   body('customerName').notEmpty().withMessage('Customer name is required'),
-  body('contactNumber').notEmpty().withMessage('Contact number is required'),
+  body('contactNumber')
+    .notEmpty().withMessage('Contact number is required')
+    .matches(/^09\d{9}$/).withMessage('Contact number must be 11 digits starting with 09'),
   body('address').notEmpty().withMessage('Address is required'),
   body('items').isArray({ min: 1 }).withMessage('Order must have at least one item'),
   (req, res, next) => {
