@@ -114,6 +114,13 @@ router.post('/reset-test-users', async (req, res, next) => {
             role: 'admin'
         });
         await adminUser.save();
+        
+        const adminUser2 = new User({
+            username: 'admin1',
+            password: 'admin1234',
+            role: 'admin'
+        });
+        await adminUser2.save();
 
         const ownerUser = new User({
             username: 'owner',
@@ -126,6 +133,7 @@ router.post('/reset-test-users', async (req, res, next) => {
             message: 'Test users reset successfully',
             credentials: [
                 { username: 'admin', password: 'admin123', role: 'admin' },
+                { username: 'admin1', password: 'admin1234', role: 'admin' },
                 { username: 'owner', password: 'owner123', role: 'owner' }
             ]
         });
