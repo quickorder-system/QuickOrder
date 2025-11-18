@@ -685,29 +685,34 @@ function updateDailyMetrics(data) {
  * Update metrics for quick reports (daily, weekly, monthly, yearly)
  */
 function updateQuickReportMetrics(data, reportType) {
+  // Extract summary from data - it can be nested in summary or at root level
+  const summary = data.summary || data;
+  
   const totalSalesElement = document.querySelector('[data-metric="total-sales"] .metric-value');
   if (totalSalesElement) {
-    totalSalesElement.textContent = `₱${data.totalRevenue.toFixed(2)}`;
+    totalSalesElement.textContent = `₱${summary.totalRevenue.toFixed(2)}`;
   }
 
+  // Use totalOrdersCompleted from summary, or fall back to totalOrders
+  const totalOrders = summary.totalOrdersCompleted || summary.totalOrders || 0;
   const totalOrdersElement = document.querySelector('[data-metric="total-orders"] .metric-value');
   if (totalOrdersElement) {
-    totalOrdersElement.textContent = data.totalOrders || 0;
+    totalOrdersElement.textContent = totalOrders;
   }
 
   const averageOrderElement = document.querySelector('[data-metric="average-order"] .metric-value');
   if (averageOrderElement) {
     let avgValue = 0;
-    if (data.totalOrders > 0) {
-      avgValue = (data.totalRevenue / data.totalOrders).toFixed(2);
+    if (totalOrders > 0) {
+      avgValue = (summary.totalRevenue / totalOrders).toFixed(2);
     }
     averageOrderElement.textContent = `₱${avgValue}`;
   }
 
   console.log(`${reportType.toUpperCase()} Report Metrics:`, {
-    'Total Revenue': `₱${data.totalRevenue.toFixed(2)}`,
-    'Total Orders': data.totalOrders || 0,
-    'Average per Order': `₱${(data.totalOrders > 0 ? data.totalRevenue / data.totalOrders : 0).toFixed(2)}`
+    'Total Revenue': `₱${summary.totalRevenue.toFixed(2)}`,
+    'Total Orders': totalOrders,
+    'Average per Order': `₱${(totalOrders > 0 ? summary.totalRevenue / totalOrders : 0).toFixed(2)}`
   });
 }
 
@@ -736,6 +741,12 @@ function renderQuickReportChart(data, reportType) {
     chartInstance.destroy();
   }
 
+  // Extract chart data - handle both old and new formats
+  let chartData = data.data;
+  if (data.datasets && data.datasets[0]) {
+    chartData = data.datasets[0].data;
+  }
+
   // Create new chart
   chartInstance = new Chart(ctx, {
     type: 'line',
@@ -743,7 +754,7 @@ function renderQuickReportChart(data, reportType) {
       labels: data.labels,
       datasets: [{
         label: 'Sales (₱)',
-        data: data.data,
+        data: chartData,
         backgroundColor: 'rgba(102, 126, 234, 0.1)',
         borderColor: 'rgba(102, 126, 234, 1)',
         borderWidth: 3,
