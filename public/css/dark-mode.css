@@ -577,3 +577,676 @@ body.dark-mode .back-button {
 body.dark-mode .back-button:hover {
   box-shadow: 0 6px 16px rgba(66, 153, 225, 0.4);
 }
+
+/* ===== LOGIN PAGE DARK MODE STYLES ===== */
+body.dark-mode .login-box {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .login-title {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.dark-mode .login-subtitle {
+  color: #cbd5e0;
+}
+
+body.dark-mode .login-error {
+  background: rgba(245, 101, 101, 0.15);
+  color: #fc8181;
+  border-left-color: #f56565;
+}
+
+body.dark-mode .form-label {
+  color: #cbd5e0;
+}
+
+body.dark-mode .login-input {
+  background: #4a5568;
+  color: #e2e8f0;
+  border-color: #5a6b7d;
+}
+
+body.dark-mode .login-input:focus {
+  border-color: #4299e1;
+  background: #5a6b7d;
+  box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.2);
+}
+
+body.dark-mode .login-input::placeholder {
+  color: #a0aec0;
+}
+
+body.dark-mode .password-toggle {
+  color: #a0aec0;
+}
+
+body.dark-mode .password-toggle:hover {
+  color: #4299e1;
+}
+
+body.dark-mode .login-btn {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .login-btn:hover {
+  box-shadow: 0 10px 30px rgba(66, 153, 225, 0.4);
+}
+
+body.dark-mode .divider {
+  color: #a0aec0;
+}
+
+body.dark-mode .divider::before,
+body.dark-mode .divider::after {
+  border-bottom-color: #4a5568;
+}
+
+body.dark-mode .demo-credentials {
+  background: rgba(66, 153, 225, 0.1);
+  border-color: rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .demo-title {
+  color: #4299e1;
+}
+
+body.dark-mode .demo-item {
+  color: #4299e1;
+}
+
+body.dark-mode .back-link a {
+  color: #4299e1;
+}
+
+body.dark-mode .back-link a:hover {
+  color: #63b3ed;
+}
+
+body.dark-mode .modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .forgot-password-modal {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .modal-header {
+  border-bottom-color: rgba(66, 153, 225, 0.2);
+}
+
+body.dark-mode .modal-header h2 {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.dark-mode .modal-close {
+  color: #a0aec0;
+}
+
+body.dark-mode .modal-close:hover {
+  color: #4299e1;
+  background: rgba(66, 153, 225, 0.1);
+}
+
+body.dark-mode .step-description {
+  color: #cbd5e0;
+}
+
+body.dark-mode .security-question {
+  background: rgba(66, 153, 225, 0.1);
+  color: #e2e8f0;
+  border-left-color: #4299e1;
+}
+
+body.dark-mode .hint-text {
+  color: #a0aec0;
+}
+
+body.dark-mode .btn-secondary {
+  background: #4a5568;
+  color: #e2e8f0;
+  border-color: #5a6b7d;
+}
+
+body.dark-mode .btn-secondary:hover {
+  background: #5a6b7d;
+  border-color: #4299e1;
+}
+
+body.dark-mode .success-icon {
+  color: #68d391;
+}
+
+body.dark-mode .success-message h3 {
+  color: #68d391;
+}
+
+body.dark-mode .success-message p {
+  color: #cbd5e0;
+}
+
+body.dark-mode .forgot-password-link a {
+  color: #4299e1;
+}
+
+body.dark-mode .forgot-password-link a:hover {
+  color: #63b3ed;
+}
+
+/* ===== CUSTOMER DETAILS PAGE DARK MODE STYLES ===== */
+body.dark-mode .navbar {
+  background: rgba(45, 62, 80, 0.98);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .navbar.scrolled {
+  box-shadow: 0 2px 30px rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .logo {
+  color: #e2e8f0;
+}
+
+body.dark-mode .nav-links a {
+  color: #e2e8f0;
+}
+
+body.dark-mode .nav-links a::after {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+}
+
+body.dark-mode .nav-links a:hover {
+  color: #4299e1;
+}
+
+body.dark-mode .dark-mode-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+body.dark-mode .dark-mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Customer Details Form Styles */
+body.dark-mode .details-container {
+  background: #1a202c;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .form-section h2,
+body.dark-mode .section-title {
+  color: #e2e8f0;
+  border-bottom-color: rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .form-field input,
+body.dark-mode .form-field select,
+body.dark-mode .form-field textarea {
+  background: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .form-field input:focus,
+body.dark-mode .form-field select:focus,
+body.dark-mode .form-field textarea:focus {
+  background: #4a5568;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+body.dark-mode .form-field label {
+  color: #cbd5e0;
+}
+
+body.dark-mode .form-field input::placeholder,
+body.dark-mode .form-field textarea::placeholder {
+  color: #a0aec0;
+}
+
+body.dark-mode .table {
+  background: #2d3748;
+}
+
+body.dark-mode .table thead {
+  background: #1a202c;
+}
+
+body.dark-mode .table th {
+  color: #cbd5e0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .table td {
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .table tbody tr:hover {
+  background: #4a5568;
+}
+
+body.dark-mode .error-message {
+  background: rgba(245, 101, 101, 0.15);
+  color: #fc8181;
+  border-color: #f56565;
+}
+
+body.dark-mode .success-message {
+  background: rgba(72, 187, 120, 0.15);
+  color: #68d391;
+  border-color: #48bb78;
+}
+
+/* ===== ORDERED LIST PAGE DARK MODE STYLES ===== */
+body.dark-mode .order-item,
+body.dark-mode .order-card {
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border-color: #4a5568;
+}
+
+body.dark-mode .order-header {
+  color: #e2e8f0;
+  border-bottom-color: rgba(66, 153, 225, 0.2);
+}
+
+body.dark-mode .order-id,
+body.dark-mode .order-date,
+body.dark-mode .order-status {
+  color: #cbd5e0;
+}
+
+body.dark-mode .order-status.completed {
+  background: rgba(72, 187, 120, 0.2);
+  color: #68d391;
+}
+
+body.dark-mode .order-status.pending {
+  background: rgba(237, 137, 54, 0.2);
+  color: #ed8936;
+}
+
+body.dark-mode .order-status.cancelled {
+  background: rgba(245, 101, 101, 0.2);
+  color: #fc8181;
+}
+
+body.dark-mode .order-details {
+  color: #cbd5e0;
+}
+
+body.dark-mode .item-name {
+  color: #e2e8f0;
+}
+
+body.dark-mode .item-price {
+  color: #4299e1;
+}
+
+body.dark-mode .order-total {
+  color: #4299e1;
+  font-weight: 700;
+}
+
+body.dark-mode .btn-view,
+body.dark-mode .btn-edit,
+body.dark-mode .btn-delete {
+  background: #4a5568;
+  color: #e2e8f0;
+  border-color: #5a6b7d;
+}
+
+body.dark-mode .btn-view:hover,
+body.dark-mode .btn-edit:hover {
+  background: #4299e1;
+  color: white;
+  border-color: #4299e1;
+}
+
+body.dark-mode .btn-delete:hover {
+  background: #f56565;
+  color: white;
+  border-color: #f56565;
+}
+
+body.dark-mode .empty-state {
+  color: #cbd5e0;
+}
+
+body.dark-mode .no-orders-icon {
+  color: #4a5568;
+  opacity: 0.5;
+}
+
+/* ===== ADD ITEM PAGE DARK MODE STYLES ===== */
+body.dark-mode .panel-header {
+  background: #2d3748;
+  border-bottom-color: #4a5568;
+}
+
+body.dark-mode .panel-header h1 {
+  color: #4299e1;
+}
+
+body.dark-mode .actions .btn {
+  background: #4a5568;
+  color: #e2e8f0;
+  border-color: #5a6b7d;
+}
+
+body.dark-mode .actions .btn:hover {
+  background: #5a6b7d;
+  border-color: #4299e1;
+}
+
+body.dark-mode .form-group label {
+  color: #cbd5e0;
+}
+
+body.dark-mode .input-field,
+body.dark-mode .textarea-field {
+  background: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .input-field:focus,
+body.dark-mode .textarea-field:focus {
+  background: #4a5568;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+body.dark-mode .input-field::placeholder,
+body.dark-mode .textarea-field::placeholder {
+  color: #a0aec0;
+}
+
+body.dark-mode .checkbox-group label,
+body.dark-mode .radio-group label {
+  color: #cbd5e0;
+}
+
+body.dark-mode .form-submit,
+body.dark-mode .form-cancel {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  border: none;
+}
+
+body.dark-mode .form-cancel {
+  background: #4a5568;
+  color: #e2e8f0;
+}
+
+body.dark-mode .form-submit:hover {
+  background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .form-cancel:hover {
+  background: #5a6b7d;
+}
+
+/* ===== PAYMENT METHODS PAGE DARK MODE STYLES ===== */
+body.dark-mode .payment-container {
+  background: #1a202c;
+}
+
+body.dark-mode .payment-header h1,
+body.dark-mode .payment-header h2 {
+  color: #e2e8f0;
+}
+
+body.dark-mode .payment-header p {
+  color: #cbd5e0;
+}
+
+body.dark-mode .payment-card,
+body.dark-mode .payment-option {
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  border-color: #4a5568;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .payment-card:hover,
+body.dark-mode .payment-option:hover {
+  border-color: #4299e1;
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.2);
+}
+
+body.dark-mode .payment-method-name {
+  color: #e2e8f0;
+}
+
+body.dark-mode .payment-method-desc {
+  color: #cbd5e0;
+}
+
+body.dark-mode .payment-form input,
+body.dark-mode .payment-form select {
+  background: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.dark-mode .payment-form input:focus,
+body.dark-mode .payment-form select:focus {
+  background: #4a5568;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+body.dark-mode .payment-form label {
+  color: #cbd5e0;
+}
+
+body.dark-mode .payment-summary {
+  background: #2d3748;
+  border-top-color: #4a5568;
+  color: #e2e8f0;
+}
+
+body.dark-mode .summary-item {
+  color: #cbd5e0;
+}
+
+body.dark-mode .summary-total {
+  color: #4299e1;
+  font-weight: 700;
+}
+
+body.dark-mode .payment-btn {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .payment-btn:hover {
+  background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+  box-shadow: 0 10px 30px rgba(66, 153, 225, 0.4);
+}
+
+body.dark-mode .cancel-btn {
+  background: #4a5568;
+  color: #e2e8f0;
+  border-color: #5a6b7d;
+}
+
+body.dark-mode .cancel-btn:hover {
+  background: #5a6b7d;
+  border-color: #4299e1;
+}
+
+/* ===== RECEIPT PAGE DARK MODE STYLES ===== */
+body.dark-mode .receipt-container {
+  background: #1a202c;
+}
+
+body.dark-mode .receipt-box,
+body.dark-mode .receipt-section {
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border-color: #4a5568;
+}
+
+body.dark-mode .receipt-header h1,
+body.dark-mode .receipt-header h2,
+body.dark-mode .receipt-title {
+  color: #e2e8f0;
+}
+
+body.dark-mode .receipt-header-subtitle,
+body.dark-mode .receipt-subtitle {
+  color: #cbd5e0;
+}
+
+body.dark-mode .receipt-item-row {
+  border-bottom-color: #4a5568;
+  color: #e2e8f0;
+}
+
+body.dark-mode .receipt-item-name {
+  color: #e2e8f0;
+}
+
+body.dark-mode .receipt-item-price {
+  color: #4299e1;
+}
+
+body.dark-mode .receipt-total-row {
+  background: rgba(66, 153, 225, 0.1);
+  border-top-color: #4a5568;
+  border-bottom-color: #4a5568;
+}
+
+body.dark-mode .receipt-total-label,
+body.dark-mode .receipt-total-amount {
+  color: #4299e1;
+}
+
+body.dark-mode .receipt-summary {
+  color: #cbd5e0;
+}
+
+body.dark-mode .receipt-status-completed {
+  background: rgba(72, 187, 120, 0.2);
+  color: #68d391;
+  border-color: #48bb78;
+}
+
+body.dark-mode .receipt-status-pending {
+  background: rgba(237, 137, 54, 0.2);
+  color: #ed8936;
+  border-color: #ed8936;
+}
+
+body.dark-mode .receipt-actions {
+  background: transparent;
+}
+
+body.dark-mode .receipt-btn {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+}
+
+body.dark-mode .receipt-btn:hover {
+  background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .receipt-btn-secondary {
+  background: #4a5568;
+  color: #e2e8f0;
+  border: 1px solid #5a6b7d;
+}
+
+body.dark-mode .receipt-btn-secondary:hover {
+  background: #5a6b7d;
+  border-color: #4299e1;
+}
+
+body.dark-mode .print-btn {
+  color: #e2e8f0;
+}
+
+body.dark-mode .print-btn:hover {
+  color: #4299e1;
+}
+
+/* ===== ADMIN/OWNER PAGE ADDITIONAL DARK MODE STYLES ===== */
+body.dark-mode .content-area,
+body.dark-mode .container {
+  background: #1a202c;
+}
+
+body.dark-mode .card,
+body.dark-mode .panel {
+  background: #2d3748;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .card-header,
+body.dark-mode .panel-header {
+  background: rgba(66, 153, 225, 0.1);
+  border-bottom-color: #4a5568;
+}
+
+body.dark-mode .card-title,
+body.dark-mode .panel-title {
+  color: #e2e8f0;
+}
+
+body.dark-mode .list-group-item {
+  background: #2d3748;
+  border-color: #4a5568;
+  color: #e2e8f0;
+}
+
+body.dark-mode .list-group-item:hover {
+  background: #4a5568;
+}
+
+body.dark-mode .badge {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+}
+
+body.dark-mode .loading-spinner {
+  border-color: #4a5568;
+  border-top-color: #4299e1;
+}
+
+body.dark-mode .modal {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .modal-header {
+  background: #2d3748;
+  border-bottom-color: #4a5568;
+}
+
+body.dark-mode .modal-title {
+  color: #e2e8f0;
+}
+
+body.dark-mode .modal-body {
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+body.dark-mode .modal-footer {
+  background: #1a202c;
+  border-top-color: #4a5568;
+}
