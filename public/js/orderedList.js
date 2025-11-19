@@ -1,20 +1,17 @@
 import { stateService } from './services/state.service.js';
 
-// Function to update item quantity
-function updateItemQuantity(itemIndex, newQuantity) {
-    if (newQuantity <= 0) {
-        removeItem(itemIndex);
-        return;
-    }
-    
-    stateService.cart[itemIndex].quantity = newQuantity;
-    checkItem();
-}
-
 // Function to remove item from cart
 function removeItem(itemIndex) {
-    stateService.cart.splice(itemIndex, 1);
-    checkItem();
+    console.log('Removing item at index:', itemIndex);
+    console.log('Cart before removal:', stateService.cart);
+    
+    if (itemIndex >= 0 && itemIndex < stateService.cart.length) {
+        stateService.cart.splice(itemIndex, 1);
+        console.log('Cart after removal:', stateService.cart);
+        checkItem();
+    } else {
+        console.error('Invalid item index:', itemIndex);
+    }
 }
 
 // Dynamically read stateService for any items and render order
@@ -42,16 +39,16 @@ function checkItem() {
                     <span class="item-unit-price">₱${item.price} each</span>
                 </div>
                 <div class="item-controls">
-                    <button class="qty-btn minus-btn" onclick="window.decreaseQuantity(${index})" title="Decrease quantity">
+                    <button class="qty-btn minus-btn" data-action="decrease" data-index="${index}" title="Decrease quantity">
                         <i class="fas fa-minus"></i>
                     </button>
                     <span class="quantity-display">${item.quantity}</span>
-                    <button class="qty-btn plus-btn" onclick="window.increaseQuantity(${index})" title="Increase quantity">
+                    <button class="qty-btn plus-btn" data-action="increase" data-index="${index}" title="Increase quantity">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
                 <span class="item-price">₱${itemTotal}</span>
-                <button class="remove-btn" onclick="window.removeItemCart(${index})" title="Remove item">
+                <button class="remove-btn" data-action="remove" data-index="${index}" title="Remove item">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -60,26 +57,43 @@ function checkItem() {
 
     orderItemsContainer.innerHTML = html;
     document.getElementById('totalAmount').textContent = '₱' + total;
+    
+    // Rebind event listeners after re-rendering
+    bindQuantityButtons();
 }
 
-// Global functions for onclick handlers
-window.increaseQuantity = function(index) {
-    stateService.cart[index].quantity += 1;
-    checkItem();
-};
-
-window.decreaseQuantity = function(index) {
-    if (stateService.cart[index].quantity > 1) {
-        stateService.cart[index].quantity -= 1;
-    } else {
-        removeItem(index);
-    }
-    checkItem();
-};
-
-window.removeItemCart = function(index) {
-    removeItem(index);
-};
+// Function to handle all button clicks with event delegation
+function bindQuantityButtons() {
+    const orderItemsContainer = document.getElementById('orderItems');
+    
+    orderItemsContainer.addEventListener('click', function(e) {
+        const button = e.target.closest('button[data-action]');
+        if (!button) return;
+        
+        const action = button.getAttribute('data-action');
+        const index = parseInt(button.getAttribute('data-index'));
+        
+        console.log('Button clicked - Action:', action, 'Index:', index);
+        
+        if (action === 'increase') {
+            if (stateService.cart[index]) {
+                stateService.cart[index].quantity += 1;
+                checkItem();
+            }
+        } else if (action === 'decrease') {
+            if (stateService.cart[index]) {
+                if (stateService.cart[index].quantity > 1) {
+                    stateService.cart[index].quantity -= 1;
+                    checkItem();
+                } else {
+                    removeItem(index);
+                }
+            }
+        } else if (action === 'remove') {
+            removeItem(index);
+        }
+    });
+}
 
 // Initialize on DOMContentLoaded, not load (prevents duplicate execution)
 document.addEventListener('DOMContentLoaded', function() {
