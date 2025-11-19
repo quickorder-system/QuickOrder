@@ -528,4 +528,53 @@ function formatDate(date) {
     return `${year}-${month}-${day}`;
 }
 
+/**
+ * @route GET /api/reports/popular-items
+ * @description Get popular items based on completed orders
+ * @access Public
+ * @returns {Object} List of items ranked by order count
+ */
+router.get('/popular-items', async (req, res) => {
+    try {
+        const popularItems = await Order.aggregate([
+            {
+                $match: {
+                    status: 'complete'
+                }
+            },
+            {
+                $unwind: '$items'
+            },
+            {
+                $group: {
+                    _id: '$items.id',
+                    itemId: { $first: '$items.id' },
+                    itemName: { $first: '$items.name' },
+                    orderCount: { $sum: '$items.quantity' }
+                }
+            },
+            {
+                $sort: { orderCount: -1 }
+            },
+            {
+                $limit: 10
+            }
+        ]);
+
+        res.json({
+            items: popularItems.map(item => ({
+                itemId: item.itemId,
+                itemName: item.itemName,
+                orderCount: item.orderCount
+            }))
+        });
+    } catch (error) {
+        logger.error('Error fetching popular items:', error);
+        res.status(500).json({
+            message: 'Error fetching popular items',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;

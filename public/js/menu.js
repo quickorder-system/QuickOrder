@@ -90,6 +90,24 @@ import { stateService } from './services/state.service.js';
         });
     }
 
+    // Fetch popular items from completed orders
+    async function fetchPopularItems() {
+        try {
+            console.log('[Menu] Fetching popular items from completed orders');
+            const response = await fetch('/api/reports/popular-items');
+            if (!response.ok) {
+                console.warn('Could not fetch popular items:', response.status);
+                return [];
+            }
+            const data = await response.json();
+            console.log('[Menu] Popular items fetched:', data);
+            return data.items || [];
+        } catch (error) {
+            console.error('[Menu] Error fetching popular items:', error);
+            return [];
+        }
+    }
+
     // Render menu dynamically from inventory
     async function renderMenu() {
         const menuContainer = document.getElementById('dynamic-menu-container');
@@ -120,11 +138,77 @@ import { stateService } from './services/state.service.js';
         // Update category dropdown with custom categories
         updateCategoryDropdown(itemsByCategory);
 
+        // Fetch popular items and prepare data
+        const popularItemsData = await fetchPopularItems();
+        const popularItemsMap = new Map(popularItemsData.map(item => [item.itemId, item]));
+
         // Render categories in order - predefined first, then custom categories
         const predefinedCategoryOrder = ['burger', 'pizza', 'others', 'drinks', 'rice', 'pasta', 'coffee', 'bundle'];
         const customCategories = Object.keys(itemsByCategory).filter(cat => !predefinedCategoryOrder.includes(cat));
         const categoryOrder = [...predefinedCategoryOrder, ...customCategories];
         let menuHTML = '';
+        let itemCounter = 0;
+
+        // Add Popular Items section at the top if there are any
+        if (popularItemsData.length > 0) {
+            menuHTML += `
+                <div id="popularhead" class="section-header">
+                    <h2>⭐ Popular Items</h2>
+                </div>
+                <div id="popular" class="menu-grid">
+            `;
+
+            // Render popular items
+            popularItemsData.slice(0, 10).forEach((popularItem) => {
+                // Find the item in allItems to get full details
+                const fullItem = allItems.find(item => item._id === popularItem.itemId);
+                if (fullItem) {
+                    itemCounter++;
+                    const itemId = fullItem._id || `item-${itemCounter}`;
+                    const image = fullItem.image || '';
+                    const price = fullItem.price || 0;
+                    const description = fullItem.description || 'No description available';
+                    const name = fullItem.itemName || 'Unknown Item';
+                    const quantity = fullItem.quantity || 0;
+                    const isAvailable = (fullItem.isAvailable !== false) && (quantity > 0);
+                    
+                    const unavailableClass = !isAvailable ? 'unavailable' : '';
+                    const outOfStockReason = quantity <= 0 ? 'Out of Stock' : 'Unavailable';
+                    const availabilityBadge = !isAvailable ? `<span class="difficulty-badge badge-unavailable">${outOfStockReason}</span>` : '';
+                    const disabledAttr = !isAvailable ? 'disabled' : '';
+                    const orderCount = popularItem.orderCount || 0;
+
+                    menuHTML += `
+                        <div class="food-card ${unavailableClass}" data-item-id="${itemId}" data-item-name="${name}" data-item-price="${price}" data-available="${isAvailable}">
+                            ${availabilityBadge}
+                            <span class="popularity-badge">${orderCount} orders</span>
+                            ${image ? `<img src="${image}" alt="${name}" class="food-image">` : ''}
+                            <div class="food-details">
+                                <div class="food-header">
+                                    <div class="food-name">${name}</div>
+                                    <div class="food-price">₱${price.toFixed(2)}</div>
+                                </div>
+                                <div class="food-description">${description}</div>
+                                <div class="food-actions">
+                                    <div class="quantity-control">
+                                        <span class="qty-label">Qty:</span>
+                                        <input type="number" data-qty-id="${itemId}" min="1" value="1" max="10" class="qty-input" ${disabledAttr}>
+                                    </div>
+                                    <input type="checkbox" data-item-checkbox="${itemId}" class="custom-checkbox" title="Add to order" ${disabledAttr}>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            menuHTML += '</div>';
+        }
+
+        // Render categories in order - predefined first, then custom categories
+        const predefinedCategoryOrder = ['burger', 'pizza', 'others', 'drinks', 'rice', 'pasta', 'coffee', 'bundle'];
+        const customCategories = Object.keys(itemsByCategory).filter(cat => !predefinedCategoryOrder.includes(cat));
+        const categoryOrder = [...predefinedCategoryOrder, ...customCategories];
         let itemCounter = 0;
 
         categoryOrder.forEach(category => {
