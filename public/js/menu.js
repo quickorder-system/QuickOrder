@@ -3,14 +3,14 @@ import { stateService } from './services/state.service.js';
 (() => {
     let allItems = []; // Store all fetched items globally
     const categoryIcons = {
-        burger: '🍔',
-        pizza: '🍕',
-        others: '🍟',
-        drinks: '🥤',
-        rice: '🍚',
-        pasta: '🍝',
-        coffee: '☕',
-        bundle: '🎁'
+        burger: '',
+        pizza: '',
+        others: '',
+        drinks: '',
+        rice: '',
+        pasta: '',
+        coffee: '',
+        bundle: ''
     };
 
     const categoryLabels = {
@@ -138,7 +138,6 @@ import { stateService } from './services/state.service.js';
                 
                 menuHTML += `
                     <div id="${category}head" class="section-header">
-                        <span class="section-icon">${icon}</span>
                         <h2>${categoryLabel}</h2>
                     </div>
                     <div id="${category === 'pizza' ? 'Pizza' : category}" class="menu-grid">
