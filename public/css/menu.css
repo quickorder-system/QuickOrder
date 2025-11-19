@@ -223,21 +223,7 @@ body {
 
 /* Section Header */
 .section-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 3rem 0 1.5rem 0;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid #e1e8ed;
-}
-
-.section-header h2 {
-    font-size: 1.75rem;
-    color: #2d3436;
-}
-
-.section-icon {
-    font-size: 1.5rem;
+    display: none;
 }
 
 /* Menu Grid */
