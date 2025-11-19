@@ -205,12 +205,6 @@ import { stateService } from './services/state.service.js';
             menuHTML += '</div>';
         }
 
-        // Render categories in order - predefined first, then custom categories
-        const predefinedCategoryOrder = ['burger', 'pizza', 'others', 'drinks', 'rice', 'pasta', 'coffee', 'bundle'];
-        const customCategories = Object.keys(itemsByCategory).filter(cat => !predefinedCategoryOrder.includes(cat));
-        const categoryOrder = [...predefinedCategoryOrder, ...customCategories];
-        let itemCounter = 0;
-
         categoryOrder.forEach(category => {
             if (itemsByCategory[category] && itemsByCategory[category].length > 0) {
                 // For custom categories, format the label by capitalizing words
