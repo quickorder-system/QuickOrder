@@ -77,7 +77,7 @@
       else if (quantity <= alert) { status = 'Low Stock'; statusClass = 'low-stock'; }
 
       inventoryRows.innerHTML += `
-        <div class="table-row" data-id="${item._id}">
+        <div class="table-row" data-id="${item._id}" style="${quantity <= 0 ? 'opacity: 0.6;' : ''}">
           <div>${escapeHtml(item.itemName || item.name || '')}${item.description ? `<div style="font-size:0.85rem;color:#64748b;">${escapeHtml(item.description)}</div>` : ''}</div>
           <div>${escapeHtml(item.category || '')}</div>
           <div>${quantity} ${escapeHtml(unit)}</div>
@@ -134,10 +134,11 @@
 
       const availabilityBtnClass = isAvailable ? 'available' : 'unavailable';
       const availabilityIcon = isAvailable ? 'fa-check-circle' : 'fa-ban';
-      const availabilityTitle = isAvailable ? 'Click to mark unavailable' : 'Click to mark available';
+      const availabilityTitle = quantity <= 0 ? 'Out of Stock - Increase quantity to enable' : (isAvailable ? 'Click to mark unavailable' : 'Click to mark available');
+      const availabilityDisabled = quantity <= 0 ? 'disabled' : '';
 
       inventoryRows.innerHTML += `
-        <div class="table-row" data-id="${item._id}" style="${!isAvailable ? 'opacity: 0.6;' : ''}">
+        <div class="table-row" data-id="${item._id}" style="${(!isAvailable || quantity <= 0) ? 'opacity: 0.6;' : ''}">
           <div>${escapeHtml(item.itemName || item.name || '')}${item.description ? `<div style="font-size:0.85rem;color:#64748b;">${escapeHtml(item.description)}</div>` : ''}</div>
           <div>${escapeHtml(item.category || '')}</div>
           <div>₱${price.toFixed(2)}</div>
@@ -145,7 +146,7 @@
           <div>${alert} ${escapeHtml(unit)}</div>
           <div><span class="stock-status ${statusClass}">${status}</span></div>
           <div class="action-icons">
-            <button class="icon-btn ${availabilityBtnClass}" onclick="handleToggleAvailability('${item._id}', ${isAvailable})" title="${availabilityTitle}"><i class="fas ${availabilityIcon}"></i></button>
+            <button class="icon-btn ${availabilityBtnClass}" ${availabilityDisabled} onclick="handleToggleAvailability('${item._id}', ${isAvailable})" title="${availabilityTitle}"><i class="fas ${availabilityIcon}"></i></button>
             <button class="icon-btn" onclick="handleEditItem('${item._id}')" title="Edit item"><i class="fas fa-edit"></i></button>
             <button class="icon-btn delete" onclick="handleDeleteItem('${item._id}')" title="Delete item"><i class="fas fa-trash"></i></button>
           </div>
@@ -196,10 +197,11 @@
 
       const availabilityBtnClass = isAvailable ? 'available' : 'unavailable';
       const availabilityIcon = isAvailable ? 'fa-check-circle' : 'fa-ban';
-      const availabilityTitle = isAvailable ? 'Click to mark unavailable' : 'Click to mark available';
+      const availabilityTitle = quantity <= 0 ? 'Out of Stock - Increase quantity to enable' : (isAvailable ? 'Click to mark unavailable' : 'Click to mark available');
+      const availabilityDisabled = quantity <= 0 ? 'disabled' : '';
 
       inventoryRows.innerHTML += `
-        <div class="table-row" data-id="${item._id}" style="${!isAvailable ? 'opacity: 0.6;' : ''}">
+        <div class="table-row" data-id="${item._id}" style="${(!isAvailable || quantity <= 0) ? 'opacity: 0.6;' : ''}">
           <div>${escapeHtml(item.itemName || item.name || '')}${item.description ? `<div style="font-size:0.85rem;color:#64748b;">${escapeHtml(item.description)}</div>` : ''}</div>
           <div>${escapeHtml(item.category || '')}</div>
           <div>₱${price.toFixed(2)}</div>
@@ -207,7 +209,7 @@
           <div>${alert} ${escapeHtml(unit)}</div>
           <div><span class="stock-status ${statusClass}">${status}</span></div>
           <div class="action-icons">
-            <button class="icon-btn ${availabilityBtnClass}" onclick="handleToggleAvailability('${item._id}', ${isAvailable})" title="${availabilityTitle}"><i class="fas ${availabilityIcon}"></i></button>
+            <button class="icon-btn ${availabilityBtnClass}" ${availabilityDisabled} onclick="handleToggleAvailability('${item._id}', ${isAvailable})" title="${availabilityTitle}"><i class="fas ${availabilityIcon}"></i></button>
             <button class="icon-btn" onclick="editInventoryItem('${item._id}')" title="Edit"><i class="fas fa-edit"></i></button>
             <button class="icon-btn delete" onclick="deleteInventoryItem('${item._id}')" title="Delete"><i class="fas fa-trash"></i></button>
           </div>

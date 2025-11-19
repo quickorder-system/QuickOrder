@@ -151,11 +151,14 @@ import { stateService } from './services/state.service.js';
                     const price = item.price || 0;
                     const description = item.description || 'No description available';
                     const name = item.itemName || 'Unknown Item';
-                    const isAvailable = item.isAvailable !== false;
+                    const quantity = item.quantity || 0;
+                    // Check both isAvailable flag AND quantity > 0
+                    const isAvailable = (item.isAvailable !== false) && (quantity > 0);
                     
                     // CSS classes for availability
                     const unavailableClass = !isAvailable ? 'unavailable' : '';
-                    const availabilityBadge = !isAvailable ? '<span class="difficulty-badge badge-unavailable">Out of Stock</span>' : '';
+                    const outOfStockReason = quantity <= 0 ? 'Out of Stock' : 'Unavailable';
+                    const availabilityBadge = !isAvailable ? `<span class="difficulty-badge badge-unavailable">${outOfStockReason}</span>` : '';
                     
                     // Disabled attribute for checkbox
                     const disabledAttr = !isAvailable ? 'disabled' : '';
