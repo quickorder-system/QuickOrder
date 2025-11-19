@@ -547,8 +547,8 @@ router.get('/popular-items', async (req, res) => {
             },
             {
                 $group: {
-                    _id: '$items.id',
-                    itemId: { $first: '$items.id' },
+                    _id: '$items.itemId',
+                    itemId: { $first: '$items.itemId' },
                     itemName: { $first: '$items.name' },
                     orderCount: { $sum: '$items.quantity' }
                 }

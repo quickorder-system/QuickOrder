@@ -160,8 +160,8 @@ import { stateService } from './services/state.service.js';
 
             // Render popular items
             popularItemsData.slice(0, 10).forEach((popularItem) => {
-                // Find the item in allItems to get full details
-                const fullItem = allItems.find(item => item._id === popularItem.itemId);
+                // Find the item in allItems to get full details - compare as strings
+                const fullItem = allItems.find(item => String(item._id) === String(popularItem.itemId));
                 if (fullItem) {
                     itemCounter++;
                     const itemId = fullItem._id || `item-${itemCounter}`;
