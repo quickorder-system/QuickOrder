@@ -67,6 +67,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // Inventory search (live)
+  document.getElementById('inventorySearch')?.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    document.querySelectorAll('#inventoryRows .table-row').forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+  });
+
+  // Inventory stock filter
+  document.getElementById('stockFilter')?.addEventListener('change', function(e) {
+    const status = e.target.value;
+    document.querySelectorAll('#inventoryRows .table-row').forEach(row => {
+      if (status === 'all') {
+        row.style.display = '';
+      } else {
+        const stockBadge = row.querySelector('.stock-status');
+        row.style.display = stockBadge && stockBadge.classList.contains(status) ? '' : 'none';
+      }
+    });
+  });
+
+  // Inventory category filter
+  document.getElementById('categoryFilter')?.addEventListener('change', function(e) {
+    const selectedCategory = e.target.value;
+    document.querySelectorAll('#inventoryRows .table-row').forEach(row => {
+      const categoryCell = row.querySelector('div:nth-child(2)');
+      const categoryText = categoryCell ? categoryCell.textContent.toLowerCase().trim() : '';
+      
+      if (selectedCategory === 'all') {
+        row.style.display = '';
+      } else {
+        row.style.display = categoryText === selectedCategory ? '' : 'none';
+      }
+    });
+  });
+
   // Orders date filter
   document.getElementById('orderDate')?.addEventListener('change', function(e) {
     const selectedDate = e.target.value;

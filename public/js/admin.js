@@ -157,6 +157,20 @@ document.getElementById('stockFilter')?.addEventListener('change', function(e) {
   });
 });
 
+document.getElementById('categoryFilter')?.addEventListener('change', function(e) {
+  const selectedCategory = e.target.value;
+  document.querySelectorAll('#inventoryRows .table-row').forEach(row => {
+    const categoryCell = row.querySelector('div:nth-child(2)');
+    const categoryText = categoryCell ? categoryCell.textContent.toLowerCase().trim() : '';
+    
+    if (selectedCategory === 'all') {
+      row.style.display = '';
+    } else {
+      row.style.display = categoryText === selectedCategory ? '' : 'none';
+    }
+  });
+});
+
 // Orders: update status, cancel, search and filter
 function updateOrderStatus(btn, status) {
   const card = btn.closest('.order-card');
