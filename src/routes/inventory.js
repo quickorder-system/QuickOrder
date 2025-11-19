@@ -51,15 +51,15 @@ router.put('/:id', auth, async (req, res) => {
         const item = await InventoryItem.findById(req.params.id);
         if (!item) return res.status(404).json({ message: 'Inventory item not found' });
 
-        item.itemName = req.body.itemName || item.itemName;
-        item.category = req.body.category || item.category;
-        item.price = req.body.price || item.price;
-        item.unit = req.body.unit || item.unit;
-        item.quantity = req.body.quantity || item.quantity;
-        item.alertLevel = req.body.alertLevel || item.alertLevel;
-        item.description = req.body.description || item.description;
-        item.image = req.body.image || item.image;
-        item.isAvailable = req.body.isAvailable !== undefined ? req.body.isAvailable : item.isAvailable;
+        if (req.body.itemName !== undefined) item.itemName = req.body.itemName;
+        if (req.body.category !== undefined) item.category = req.body.category;
+        if (req.body.price !== undefined) item.price = req.body.price;
+        if (req.body.unit !== undefined) item.unit = req.body.unit;
+        if (req.body.quantity !== undefined) item.quantity = req.body.quantity;
+        if (req.body.alertLevel !== undefined) item.alertLevel = req.body.alertLevel;
+        if (req.body.description !== undefined) item.description = req.body.description;
+        if (req.body.image !== undefined) item.image = req.body.image;
+        if (req.body.isAvailable !== undefined) item.isAvailable = req.body.isAvailable;
 
         const updatedItem = await item.save();
         res.json(updatedItem);
