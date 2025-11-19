@@ -1,5 +1,7 @@
 import { stateService } from './services/state.service.js';
 
+let quantityButtonsListener = null; // Store reference to event listener
+
 // Function to remove item from cart
 function removeItem(itemIndex) {
     console.log('Removing item at index:', itemIndex);
@@ -68,7 +70,13 @@ function checkItem() {
 function bindQuantityButtons() {
     const orderItemsContainer = document.getElementById('orderItems');
     
-    orderItemsContainer.addEventListener('click', function(e) {
+    // Remove old listener if it exists
+    if (quantityButtonsListener) {
+        orderItemsContainer.removeEventListener('click', quantityButtonsListener);
+    }
+    
+    // Create new listener function
+    quantityButtonsListener = function(e) {
         const button = e.target.closest('button[data-action]');
         if (!button) return;
         
@@ -98,7 +106,10 @@ function bindQuantityButtons() {
         } else if (action === 'remove') {
             removeItem(index);
         }
-    });
+    };
+    
+    // Add the new listener
+    orderItemsContainer.addEventListener('click', quantityButtonsListener);
 }
 
 // Initialize on DOMContentLoaded, not load (prevents duplicate execution)
