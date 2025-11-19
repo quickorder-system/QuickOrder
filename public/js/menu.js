@@ -127,11 +127,21 @@ import { stateService } from './services/state.service.js';
         let menuHTML = '';
         let itemCounter = 0;
 
-        // Create single horizontal scrolling container for all items
-        menuHTML += `<div class="menu-grid">`;
-
         categoryOrder.forEach(category => {
             if (itemsByCategory[category] && itemsByCategory[category].length > 0) {
+                // For custom categories, format the label by capitalizing words
+                let categoryLabel = categoryLabels[category];
+                if (!categoryLabel) {
+                    categoryLabel = category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                }
+                
+                menuHTML += `
+                    <div id="${category}head" class="section-header">
+                        <h2>${categoryLabel}</h2>
+                    </div>
+                    <div id="${category === 'pizza' ? 'Pizza' : category}" class="menu-grid">
+                `;
+
                 itemsByCategory[category].forEach(item => {
                     itemCounter++;
                     const itemId = item._id || `item-${itemCounter}`;
@@ -152,7 +162,7 @@ import { stateService } from './services/state.service.js';
                     const disabledAttr = !isAvailable ? 'disabled' : '';
 
                     menuHTML += `
-                        <div class="food-card ${unavailableClass}" data-item-id="${itemId}" data-item-name="${name}" data-item-price="${price}" data-available="${isAvailable}" data-category="${category}">
+                        <div class="food-card ${unavailableClass}" data-item-id="${itemId}" data-item-name="${name}" data-item-price="${price}" data-available="${isAvailable}">
                             ${availabilityBadge}
                             ${image ? `<img src="${image}" alt="${name}" class="food-image">` : ''}
                             <div class="food-details">
@@ -172,11 +182,10 @@ import { stateService } from './services/state.service.js';
                         </div>
                     `;
                 });
+
+                menuHTML += '</div>';
             }
         });
-
-        // Close the single menu grid container
-        menuHTML += '</div>';
 
         // Insert the rendered menu
         menuContainer.innerHTML = menuHTML;
@@ -192,14 +201,21 @@ import { stateService } from './services/state.service.js';
         const selected = categorySelect.value;
         
         if (selected === 'all') {
-            // Show all items
-            document.querySelectorAll('.food-card').forEach(el => el.style.display = 'flex');
+            // Show all categories
+            document.querySelectorAll('[id$="head"]').forEach(el => el.style.display = 'flex');
+            document.querySelectorAll('.menu-grid').forEach(el => el.style.display = 'flex');
         } else {
-            // Filter items by category
-            document.querySelectorAll('.food-card').forEach(el => {
-                const itemCategory = el.getAttribute('data-category');
-                el.style.display = itemCategory === selected ? 'flex' : 'none';
-            });
+            // Hide all categories first
+            document.querySelectorAll('[id$="head"]').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.menu-grid').forEach(el => el.style.display = 'none');
+            
+            // Show selected category
+            const headId = selected === 'pizza' ? 'pizzahead' : selected + 'head';
+            const gridId = selected === 'pizza' ? 'Pizza' : selected;
+            const head = document.getElementById(headId);
+            const grid = document.getElementById(gridId);
+            if (head) head.style.display = 'flex';
+            if (grid) grid.style.display = 'flex';
         }
     }
 
