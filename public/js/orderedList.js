@@ -6,7 +6,9 @@ function removeItem(itemIndex) {
     console.log('Cart before removal:', stateService.cart);
     
     if (itemIndex >= 0 && itemIndex < stateService.cart.length) {
-        stateService.cart.splice(itemIndex, 1);
+        const updatedCart = stateService.cart;
+        updatedCart.splice(itemIndex, 1);
+        stateService.updateCart(updatedCart);
         console.log('Cart after removal:', stateService.cart);
         checkItem();
     } else {
@@ -75,15 +77,19 @@ function bindQuantityButtons() {
         
         console.log('Button clicked - Action:', action, 'Index:', index);
         
+        const cart = stateService.cart;
+        
         if (action === 'increase') {
-            if (stateService.cart[index]) {
-                stateService.cart[index].quantity += 1;
+            if (cart[index]) {
+                cart[index].quantity += 1;
+                stateService.updateCart(cart);
                 checkItem();
             }
         } else if (action === 'decrease') {
-            if (stateService.cart[index]) {
-                if (stateService.cart[index].quantity > 1) {
-                    stateService.cart[index].quantity -= 1;
+            if (cart[index]) {
+                if (cart[index].quantity > 1) {
+                    cart[index].quantity -= 1;
+                    stateService.updateCart(cart);
                     checkItem();
                 } else {
                     removeItem(index);

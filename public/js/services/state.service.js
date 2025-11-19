@@ -48,6 +48,12 @@ function removeFromCart(itemId) {
   notifyListeners('cart');
 }
 
+function updateCart(newCart) {
+  state.cart = newCart;
+  sessionStorage.setItem('cart', JSON.stringify(state.cart));
+  notifyListeners('cart');
+}
+
 function clearCart() {
   state.cart = [];
   state.currentOrder = null;
@@ -109,6 +115,7 @@ export const stateService = {
   subscribe,
   addToCart,
   removeFromCart,
+  updateCart,
   clearCart,
   setUser,
   logout,
