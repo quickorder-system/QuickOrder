@@ -138,23 +138,6 @@
           if (e.target === aboutModal) aboutModal.style.display = 'none';
           if (e.target === contactsModal) contactsModal.style.display = 'none';
         });
-
-        const backBtn = document.getElementById('backBtn');
-        if (backBtn) {
-            backBtn.addEventListener('click', function() {
-                window.location.href = 'QuickOrder.html';
-            });
-        }
-
-        const orderButton = document.getElementById('orderButton');
-        if (orderButton) {
-            orderButton.addEventListener('click', function(event) {
-                event.preventDefault();
-                if (window.orderedList && window.orderedList()) {
-                    window.location.href = 'orderedList.html';
-                }
-            });
-        }
       });
     </script>
 </body>
