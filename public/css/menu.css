@@ -242,10 +242,34 @@ body {
 
 /* Menu Grid */
 .menu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    display: flex;
     gap: 1.5rem;
     margin-bottom: 3rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1rem 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+}
+
+.menu-grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.menu-grid::-webkit-scrollbar-track {
+    background: #f1f3f5;
+    border-radius: 10px;
+}
+
+.menu-grid::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+    transition: background 0.3s;
+}
+
+.menu-grid::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
 }
 
 /* Food Card */
@@ -258,6 +282,10 @@ body {
     position: relative;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
+    width: 320px;
+    min-width: 320px;
+    scroll-snap-align: start;
 }
 
 .food-card:hover {
@@ -489,8 +517,13 @@ body {
     }
 
     .menu-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1rem;
+        padding: 0.75rem 0;
+    }
+
+    .food-card {
+        width: 280px;
+        min-width: 280px;
     }
 
     .order-section {
