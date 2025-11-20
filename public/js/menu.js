@@ -97,6 +97,8 @@ import { stateService } from './services/state.service.js';
         });
 
         console.log('[Menu] Category dropdown updated. Available categories:', Object.keys(normalizedItemsByCategory));
+        console.log('[Menu] Custom categories found:', customCategories);
+        console.log('[Menu] Dropdown now has', categorySelect.options.length, 'options');
     }
 
     // Fetch popular items from completed orders
