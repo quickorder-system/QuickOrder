@@ -1,0 +1,155 @@
+/* Shared interaction animations and micro-interactions */
+:root{
+  --anim-fast: 150ms;
+  --anim-medium: 280ms;
+  --anim-slow: 420ms;
+  --ripple-color: rgba(255,255,255,0.24);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  * { animation-duration: 0s !important; transition-duration: 0s !important; }
+}
+
+/* Generic interactive transitions for common controls */
+button, .btn-cta, .btn-primary, .home-btn, .order-btn, .back-btn, .close-btn, .next-button, input[type="submit"], .submit-button, a.btn-cta{
+  transition: transform var(--anim-fast) cubic-bezier(.2,.9,.2,1), box-shadow var(--anim-fast), opacity var(--anim-fast);
+  will-change: transform, box-shadow, opacity;
+}
+
+/* Hover / active micro interactions */
+button:hover, .btn-cta:hover, .btn-primary:hover, .order-btn:hover, .back-btn:hover, .next-button:hover, .submit-button:hover{
+  transform: translateY(-3px);
+}
+button:active, .btn-cta:active, .btn-primary:active, .order-btn:active, .back-btn:active, .next-button:active, .submit-button:active{
+  transform: translateY(0) scale(0.99);
+}
+
+/* Focus visible for keyboard users */
+:focus-visible{
+  outline: 3px solid rgba(102,126,234,0.18);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* Ripple effect container + element */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+.ripple .ripple-ink{
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 0.9;
+  pointer-events: none;
+  background: var(--ripple-color);
+}
+@keyframes rippleAnim{
+  to{ transform: scale(3); opacity: 0; }
+}
+
+/* Toast animation */
+.toast{ transform: translateY(8px); opacity: 0; transition: transform var(--anim-medium) ease, opacity var(--anim-medium) ease; }
+.toast.show{ transform: translateY(0); opacity: 1; }
+
+/* Modal: subtle pop */
+.modal .modal-content{ transform-origin: center top; transition: transform var(--anim-medium) ease, opacity var(--anim-medium) ease; }
+.modal.show .modal-content{ transform: translateY(0) scale(1); opacity: 1; }
+
+/* Add a subtle elevation for cards on hover (cards remain small) */
+.feature-card, .food-card, .stat-item, .order-item-card, .order-review-section, .receipt-container, .form-container, .payment-container{
+  transition: transform var(--anim-medium) ease, box-shadow var(--anim-medium) ease;
+}
+.feature-card:hover, .food-card:hover, .stat-item:hover, .order-item-card:hover, .order-review-section:hover, .receipt-container:hover, .form-container:hover, .payment-container:hover{
+  transform: translateY(-6px);
+}
+
+/* Input focus lift */
+input:focus, textarea:focus, select:focus{
+  box-shadow: 0 8px 24px rgba(90,93,224,0.06);
+  transform: translateY(-2px);
+}
+
+/* Small animation for nav links underline */
+.nav-links a::after{ transition: width var(--anim-fast) ease; }
+
+/* Utility to temporarily disable animations (used by JS when toggling reduced motion) */
+.no-anim *{ transition: none !important; animation: none !important; }
+
+/* Ensure ripple elements animate */
+.ripple .ripple-ink.animate{ animation: rippleAnim 560ms cubic-bezier(.2,.8,.2,1); }
+
+/* Custom select (animated dropdown) */
+.custom-select{
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 360px;
+  font-family: inherit;
+}
+.custom-select .select-toggle{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:8px; padding:10px 14px; border-radius:10px; cursor:pointer;
+  background: white; border: 2px solid rgba(90,93,224,0.16); box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+  transition: box-shadow var(--anim-fast), transform var(--anim-fast);
+}
+.custom-select .select-toggle:focus{ outline: none; box-shadow: 0 10px 30px rgba(90,93,224,0.12); transform: translateY(-2px); }
+.custom-select .select-toggle .label{ flex:1; text-align:left; color:#1e293b; }
+.custom-select .select-toggle .caret{ margin-left:8px; transition: transform var(--anim-fast) ease; }
+.custom-select.open .select-toggle .caret{ transform: rotate(180deg); }
+.custom-select .options{
+  position: absolute; left:0; right:0; top:calc(100% + 8px); z-index: 1200;
+  background: white; border-radius: 10px; overflow: hidden;
+  transform-origin: top center; transform: scaleY(0); opacity:0; pointer-events:none;
+  box-shadow: 0 18px 40px rgba(16,24,40,0.12); transition: transform var(--anim-medium) ease, opacity var(--anim-medium) ease;
+  max-height: 260px; overflow-y: auto;
+}
+.custom-select .options::before{
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0; height: 1px;
+  background: rgba(16,24,40,0.06); /* thin top divider */
+}
+.custom-select.open .options{ transform: scaleY(1); opacity:1; pointer-events:auto; }
+.custom-select .options .option{
+  padding: 10px 14px; cursor: pointer; transition: background var(--anim-fast);
+}
+.custom-select .options .option[aria-selected="true"], .custom-select .options .option:hover{ background: rgba(90,93,224,0.04); }
+
+/* small responsive tweak */
+@media (max-width:600px){ .custom-select{ max-width: 100%; } }
+
+/* Dark mode overrides for custom select */
+body.dark-mode .custom-select{
+  /* keep container transparent to blend with page */
+  background: transparent;
+}
+body.dark-mode .custom-select .select-toggle{
+  background: linear-gradient(180deg,#0b1220 0%, #07101a 100%);
+  color: #e6eef8;
+  border: 2px solid rgba(118,75,162,0.14);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+}
+body.dark-mode .custom-select .select-toggle .label{ color: #dbeafe; }
+body.dark-mode .custom-select .select-toggle .caret{ color: #c7d2fe; }
+body.dark-mode .custom-select .options{
+  background: linear-gradient(180deg,#07101a 0%, #081320 100%);
+  box-shadow: 0 22px 48px rgba(2,6,23,0.7);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+body.dark-mode .custom-select .options .option{
+  color: #dbeafe;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+body.dark-mode .custom-select .options .option[aria-selected="true"],
+body.dark-mode .custom-select .options .option:hover{
+  background: rgba(118,75,162,0.12);
+  color: #ffffff;
+}
+body.dark-mode .custom-select .options .option[aria-disabled="true"]{
+  color: rgba(255,255,255,0.35);
+}
+/* scrollbar for options in dark mode */
+body.dark-mode .custom-select .options::-webkit-scrollbar{ height:8px; width:8px; }
+body.dark-mode .custom-select .options::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.06); border-radius:8px; }

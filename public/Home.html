@@ -490,6 +490,7 @@
       background: rgba(0, 0, 0, 0.5);
     }
   </style>
+  <link rel="stylesheet" href="css/animations.css">
 </head>
 <body>
   <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
@@ -610,6 +611,8 @@
         darkModeToggle.textContent = '☀️';
       }
     });
+    // load animations helper
+    const _s = document.createElement('script'); _s.src = 'js/animations.js'; _s.defer = true; document.body.appendChild(_s);
   </script>
 </body>
 </html>
