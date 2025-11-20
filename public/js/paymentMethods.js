@@ -158,6 +158,25 @@ function showToast(message, type) {
     }, 3000);
 }
 
+/**
+ * Toggle payment instruction based on selected payment method
+ */
+function togglePaymentInstructions() {
+    const gcashRadio = document.getElementById('gcash');
+    const mayaRadio = document.getElementById('maya');
+    const gcashInstructions = document.getElementById('gcashInstructions');
+    const mayaInstructions = document.getElementById('mayaInstructions');
+
+    if (!gcashInstructions || !mayaInstructions) return;
+
+    if (gcashRadio && gcashRadio.checked) {
+        gcashInstructions.style.display = 'block';
+        mayaInstructions.style.display = 'none';
+    } else if (mayaRadio && mayaRadio.checked) {
+        gcashInstructions.style.display = 'none';
+        mayaInstructions.style.display = 'block';
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     ApiService.checkApiHealth();
@@ -168,6 +187,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.payment-option-clickable').forEach(option => {
         option.addEventListener('click', () => selectPayment(option));
     });
+
+    // Add event listeners for payment method radio buttons to toggle instructions
+    const gcashRadio = document.getElementById('gcash');
+    const mayaRadio = document.getElementById('maya');
+    if (gcashRadio) {
+        gcashRadio.addEventListener('change', togglePaymentInstructions);
+    }
+    if (mayaRadio) {
+        mayaRadio.addEventListener('change', togglePaymentInstructions);
+    }
 
     screenshotInput.addEventListener('change', previewScreenshot);
 
