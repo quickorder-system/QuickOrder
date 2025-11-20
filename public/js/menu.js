@@ -59,8 +59,15 @@ import { stateService } from './services/state.service.js';
             bundle: 'Bundle Meals'
         };
 
+        // Normalize category keys to lowercase for comparison
+        const normalizedItemsByCategory = {};
+        Object.keys(itemsByCategory).forEach(cat => {
+            const normalizedCat = cat.toLowerCase().trim();
+            normalizedItemsByCategory[normalizedCat] = itemsByCategory[cat];
+        });
+
         // Get custom categories that exist in inventory
-        const customCategories = Object.keys(itemsByCategory).filter(cat => !predefinedCategories.includes(cat));
+        const customCategories = Object.keys(normalizedItemsByCategory).filter(cat => !predefinedCategories.includes(cat));
 
         // Clear options except the "All Categories" default
         const options = categorySelect.querySelectorAll('option');
@@ -70,9 +77,9 @@ import { stateService } from './services/state.service.js';
             }
         });
 
-        // Re-add predefined categories
+        // Re-add predefined categories that exist in inventory
         predefinedCategories.forEach(cat => {
-            if (itemsByCategory[cat]) {
+            if (normalizedItemsByCategory[cat]) {
                 const option = document.createElement('option');
                 option.value = cat;
                 option.textContent = categoryLabelsMap[cat] || cat;
@@ -80,14 +87,16 @@ import { stateService } from './services/state.service.js';
             }
         });
 
-        // Add custom categories
-        customCategories.forEach(cat => {
+        // Add custom categories (sorted alphabetically)
+        customCategories.sort().forEach(cat => {
             const option = document.createElement('option');
             option.value = cat;
             // Format custom category name: capitalize words
             option.textContent = cat.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
             categorySelect.appendChild(option);
         });
+
+        console.log('[Menu] Category dropdown updated. Available categories:', Object.keys(normalizedItemsByCategory));
     }
 
     // Fetch popular items from completed orders
@@ -123,10 +132,10 @@ import { stateService } from './services/state.service.js';
             return;
         }
 
-        // Group items by category
+        // Group items by category (normalized to lowercase)
         const itemsByCategory = {};
         allItems.forEach(item => {
-            const category = item.category || 'others';
+            const category = (item.category || 'others').toLowerCase().trim();
             if (!itemsByCategory[category]) {
                 itemsByCategory[category] = [];
             }
@@ -217,7 +226,7 @@ import { stateService } from './services/state.service.js';
                     <div id="${category}head" class="section-header">
                         <h2>${categoryLabel}</h2>
                     </div>
-                    <div id="${category === 'pizza' ? 'Pizza' : category}" class="menu-grid">
+                    <div id="${category}" class="menu-grid">
                 `;
 
                 itemsByCategory[category].forEach(item => {
@@ -288,8 +297,8 @@ import { stateService } from './services/state.service.js';
             document.querySelectorAll('.menu-grid').forEach(el => el.style.display = 'none');
             
             // Show selected category
-            const headId = selected === 'pizza' ? 'pizzahead' : selected + 'head';
-            const gridId = selected === 'pizza' ? 'Pizza' : selected;
+            const headId = selected + 'head';
+            const gridId = selected;
             const head = document.getElementById(headId);
             const grid = document.getElementById(gridId);
             if (head) head.style.display = 'flex';
