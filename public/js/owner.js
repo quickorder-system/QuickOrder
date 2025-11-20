@@ -210,10 +210,76 @@ function showTab(tabId, clickedButton) {
     loadOrders();
   } else if (tabId === 'inventoryTab') {
     renderInventoryOwner();
+    // Update category filter with actual categories from inventory
+    updateCategoryFilterOptionsOwner();
   }
 }
 
-// ===== Payment Modal Functions =====
+/**
+ * Dynamically update category filter options based on actual inventory categories
+ */
+async function updateCategoryFilterOptionsOwner() {
+  try {
+    const response = await fetch('/api/inventory');
+    if (!response.ok) return;
+    
+    const items = await response.json();
+    const categorySelect = document.getElementById('categoryFilter');
+    if (!categorySelect) return;
+
+    // Get all unique categories from inventory
+    const predefinedCategories = ['burger', 'pizza', 'others', 'drinks', 'rice', 'pasta', 'coffee', 'bundle'];
+    const categoryLabels = {
+      burger: 'Burgers',
+      pizza: 'Pizza',
+      others: 'Snacks',
+      drinks: 'Drinks',
+      rice: 'Rice Meals',
+      pasta: 'Pasta',
+      coffee: 'Coffee',
+      bundle: 'Bundle Meals'
+    };
+
+    // Extract all unique categories from inventory
+    const categoriesFromInventory = new Set();
+    items.forEach(item => {
+      if (item.category) {
+        categoriesFromInventory.add(item.category.toLowerCase().trim());
+      }
+    });
+
+    // Clear existing options except "All Categories"
+    const allCategoriesOption = categorySelect.querySelector('option[value="all"]');
+    categorySelect.innerHTML = '';
+    if (allCategoriesOption) {
+      categorySelect.appendChild(allCategoriesOption);
+    }
+
+    // Add predefined categories that exist in inventory
+    predefinedCategories.forEach(cat => {
+      if (categoriesFromInventory.has(cat)) {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = categoryLabels[cat] || cat;
+        categorySelect.appendChild(option);
+      }
+    });
+
+    // Add custom categories that aren't predefined
+    const customCategories = Array.from(categoriesFromInventory).filter(cat => !predefinedCategories.includes(cat));
+    customCategories.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat;
+      // Format custom category name: capitalize words
+      option.textContent = cat.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+      categorySelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error updating category filter:', error);
+  }
+}
+
+
 
 /**
  * Open payment modal with screenshot image
