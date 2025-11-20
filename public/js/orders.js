@@ -73,10 +73,23 @@ async function loadOrders() {
     try {
         const orders = await OrderService.getAllOrders();
         renderOrders(orders);
+        updateOrdersBadge(orders);
     } catch (error) {
         ordersContainer.innerHTML = '<p class="error">Failed to load orders. Please try again later.</p>';
         console.error('Error loading orders:', error);
     }
+}
+
+/**
+ * Update the orders badge with the count of active orders
+ */
+function updateOrdersBadge(orders) {
+    const badge = document.getElementById('ordersBadge');
+    if (!badge) return;
+    
+    // Count only active orders (not completed or cancelled)
+    const activeOrders = orders.filter(order => order.status !== 'completed' && order.status !== 'cancelled');
+    badge.textContent = activeOrders.length;
 }
 
 async function refreshOrdersList() {
@@ -85,6 +98,9 @@ async function refreshOrdersList() {
         const ordersContainer = document.getElementById('ordersContainer');
         
         if (!ordersContainer) return;
+
+        // Update badge
+        updateOrdersBadge(orders);
 
         // Get currently active order IDs in the DOM
         const currentOrderIds = new Set(
