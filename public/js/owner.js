@@ -435,6 +435,17 @@ function exportReportToPDF() {
       return;
     }
 
+    // Get username from state service (will be available after login)
+    let username = 'System Administrator';
+    try {
+      // Try to get from stateService if available (ES module context)
+      if (typeof stateService !== 'undefined' && stateService.user) {
+        username = stateService.user.username || username;
+      }
+    } catch (e) {
+      console.log('stateService not available in this context, using default');
+    }
+
     // Show loading state
     const pdfBtn = document.querySelector('button[onclick="exportReportToPDF()"]');
     if (pdfBtn) {
@@ -443,7 +454,7 @@ function exportReportToPDF() {
       pdfBtn.disabled = true;
 
       // Build URL with query parameters
-      let url = `/api/reports/export-pdf?startDate=${startDate}&endDate=${endDate}`;
+      let url = `/api/reports/export-pdf?startDate=${startDate}&endDate=${endDate}&username=${encodeURIComponent(username)}`;
       if (paymentMethod) {
         url += `&paymentMethod=${paymentMethod}`;
       }
@@ -529,56 +540,112 @@ function renderPaymentBreakdown(data) {
     const methodData = paymentMethods[methodName];
     if (methodData) {
       amount.textContent = `₱${methodData.sales.toFixed(2)}`;
-      percentage.textContent = `${methodData.percentage}%`;
+      percentage.textContent = `${methodData.percentage.toFixed(2)}%`;
       orderCount.textContent = `${methodData.orders} orders`;
+    } else {
+      // Fallback if method data not found
+      amount.textContent = '₱0.00';
+      percentage.textContent = '0%';
+      orderCount.textContent = '0 orders';
     }
   });
+
+  console.log('Payment breakdown cards updated');
 }
 
 /**
  * Render payment method pie chart
  */
 function renderPaymentChart(data) {
-  const ctx = document.getElementById('paymentChart');
-  if (!ctx) return;
+  const canvas = document.getElementById('paymentChart');
+  if (!canvas) {
+    console.warn('Payment chart canvas not found');
+    return;
+  }
 
   const paymentMethods = data.paymentMethods;
   
-  const labels = Object.keys(paymentMethods);
-  const chartData = labels.map(method => paymentMethods[method].sales);
-  const colors = ['#667eea', '#f5576c', '#00f2fe'];
-  const borderColors = ['#667eea', '#f5576c', '#00f2fe'];
+  // Only include methods with actual sales data (non-zero)
+  const labels = [];
+  const chartData = [];
+  const colors = [];
+  const borderColors = [];
+  
+  const colorMap = {
+    'GCash': { bg: '#667eea', border: '#667eea' },
+    'Maya': { bg: '#f5576c', border: '#f5576c' },
+    'Cash': { bg: '#00f2fe', border: '#00f2fe' }
+  };
+
+  for (const method of Object.keys(paymentMethods)) {
+    const methodData = paymentMethods[method];
+    if (methodData.sales > 0) {
+      labels.push(method);
+      chartData.push(methodData.sales);
+      colors.push(colorMap[method]?.bg || '#667eea');
+      borderColors.push(colorMap[method]?.border || '#667eea');
+    }
+  }
+
+  // If no data, don't render chart
+  if (chartData.length === 0) {
+    console.log('No payment data available for chart');
+    return;
+  }
 
   // Destroy previous chart if exists
   if (window.paymentChartInstance) {
     window.paymentChartInstance.destroy();
+    window.paymentChartInstance = null;
   }
 
-  window.paymentChartInstance = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: labels,
-      datasets: [{
-        data: chartData,
-        backgroundColor: colors,
-        borderColor: borderColors,
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            padding: 20,
-            font: { size: 12 }
+  try {
+    // Get 2D context
+    const ctx = canvas.getContext('2d');
+    
+    window.paymentChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: chartData,
+          backgroundColor: colors,
+          borderColor: borderColors,
+          borderWidth: 2,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              font: { size: 12 },
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const percentage = ((value / chartData.reduce((a, b) => a + b, 0)) * 100).toFixed(2);
+                return `${label}: ₱${value.toFixed(2)} (${percentage}%)`;
+              }
+            }
           }
         }
       }
-    }
-  });
+    });
+    
+    console.log('Payment chart rendered successfully');
+  } catch (error) {
+    console.error('Error rendering payment chart:', error);
+  }
 }
 
 /**
