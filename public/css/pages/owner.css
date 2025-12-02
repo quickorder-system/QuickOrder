@@ -97,3 +97,102 @@
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
+
+/* Payment Method Breakdown Grid */
+.payment-breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.payment-method-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea;
+}
+
+.payment-method-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.payment-method-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    color: white;
+}
+
+.payment-method-icon.gcash {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.payment-method-icon.maya {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.payment-method-icon.cash {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.payment-method-info {
+    flex: 1;
+}
+
+.payment-method-info h4 {
+    font-size: 1.1rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.payment-method-info .amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.25rem;
+}
+
+.payment-method-info .percentage {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.payment-method-info .order-count {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+/* Dark mode support for payment breakdown */
+body.dark-mode .payment-method-card {
+    background: #1e293b;
+    border-left-color: #4299e1;
+}
+
+body.dark-mode .payment-method-info h4 {
+    color: #e2e8f0;
+}
+
+body.dark-mode .payment-method-info .amount {
+    color: #63b3ed;
+}
+
+body.dark-mode .payment-method-info .percentage {
+    color: #cbd5e0;
+}
+
+body.dark-mode .payment-method-info .order-count {
+    color: #94a3b8;
+}

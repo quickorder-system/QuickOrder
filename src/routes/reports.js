@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/order');
 const logger = require('../utils/logger');
+const PDFDocument = require('pdfkit');
 
 /**
  * @route GET /api/reports/sales
@@ -572,6 +573,188 @@ router.get('/popular-items', async (req, res) => {
         logger.error('Error fetching popular items:', error);
         res.status(500).json({
             message: 'Error fetching popular items',
+            error: error.message
+        });
+    }
+});
+
+/**
+ * @route GET /api/reports/export-pdf
+ * @description Export sales report to PDF format
+ * @query startDate - Start date (ISO 8601 format: YYYY-MM-DD)
+ * @query endDate - End date (ISO 8601 format: YYYY-MM-DD)
+ * @query paymentMethod - Optional filter by payment method (GCash, Maya, Cash)
+ * @access Private (Admin/Owner only)
+ * @returns {Stream} PDF file
+ */
+router.get('/export-pdf', async (req, res) => {
+    try {
+        const { startDate, endDate, paymentMethod } = req.query;
+
+        if (!startDate || !endDate) {
+            return res.status(400).json({
+                message: 'Both startDate and endDate query parameters are required (format: YYYY-MM-DD)'
+            });
+        }
+
+        // Parse dates
+        const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+        const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+        
+        const start = new Date(startYear, startMonth - 1, startDay, 0, 0, 0, 0);
+        const end = new Date(endYear, endMonth - 1, endDay, 23, 59, 59, 999);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return res.status(400).json({
+                message: 'Invalid date format. Please use YYYY-MM-DD format.'
+            });
+        }
+
+        if (start > end) {
+            return res.status(400).json({
+                message: 'startDate must be before or equal to endDate'
+            });
+        }
+
+        logger.info(`Generating PDF report from ${startDate} to ${endDate}`);
+
+        // Build query
+        const query = {
+            status: 'complete',
+            createdAt: { $gte: start, $lte: end }
+        };
+
+        if (paymentMethod && ['GCash', 'Maya', 'Cash'].includes(paymentMethod)) {
+            query.paymentMethod = paymentMethod;
+        }
+
+        // Fetch sales data
+        const salesData = await Order.aggregate([
+            { $match: query },
+            {
+                $project: {
+                    date: {
+                        $dateToString: {
+                            format: '%Y-%m-%d',
+                            date: '$createdAt'
+                        }
+                    },
+                    total: 1,
+                    paymentMethod: 1
+                }
+            },
+            {
+                $group: {
+                    _id: '$date',
+                    dailySales: { $sum: '$total' },
+                    orderCount: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Fetch payment breakdown for same period
+        const paymentBreakdown = await Order.aggregate([
+            { $match: query },
+            {
+                $group: {
+                    _id: '$paymentMethod',
+                    totalSales: { $sum: '$total' },
+                    orderCount: { $sum: 1 }
+                }
+            },
+            { $sort: { totalSales: -1 } }
+        ]);
+
+        // Calculate totals
+        const totalRevenue = salesData.reduce((sum, day) => sum + day.dailySales, 0);
+        const totalOrders = salesData.reduce((sum, day) => sum + day.orderCount, 0);
+        const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+        // Create PDF document
+        const doc = new PDFDocument({ margin: 50 });
+        const filename = `Sales_Report_${startDate}_to_${endDate}.pdf`;
+
+        // Set response headers
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+        // Pipe document to response
+        doc.pipe(res);
+
+        // Header
+        doc.fontSize(24).font('Helvetica-Bold').text('Quick Order', { align: 'center' });
+        doc.fontSize(14).font('Helvetica').text('Sales Report', { align: 'center' });
+        doc.fontSize(10).font('Helvetica').text(`Generated on ${new Date().toLocaleString()}`, { align: 'center' });
+        doc.moveDown(1);
+
+        // Report period
+        doc.fontSize(12).font('Helvetica-Bold').text('Report Period');
+        doc.fontSize(10).font('Helvetica').text(`From: ${startDate} to ${endDate}`);
+        if (paymentMethod) {
+            doc.text(`Payment Method: ${paymentMethod}`);
+        }
+        doc.moveDown(1);
+
+        // Summary Section
+        doc.fontSize(12).font('Helvetica-Bold').text('Summary Metrics');
+        doc.fontSize(10).font('Helvetica');
+        doc.text(`Total Revenue: ₱${totalRevenue.toFixed(2)}`);
+        doc.text(`Total Orders: ${totalOrders}`);
+        doc.text(`Average Order Value: ₱${averageOrderValue.toFixed(2)}`);
+        doc.moveDown(1);
+
+        // Payment Method Breakdown (if not filtered by single method)
+        if (!paymentMethod) {
+            doc.fontSize(12).font('Helvetica-Bold').text('Payment Method Breakdown');
+            doc.fontSize(10).font('Helvetica');
+            
+            paymentBreakdown.forEach(method => {
+                const percentage = ((method.totalSales / totalRevenue) * 100).toFixed(2);
+                doc.text(`${method._id}: ₱${method.totalSales.toFixed(2)} (${method.orderCount} orders, ${percentage}%)`);
+            });
+            doc.moveDown(1);
+        }
+
+        // Daily Breakdown Table
+        doc.fontSize(12).font('Helvetica-Bold').text('Daily Sales Breakdown');
+        doc.fontSize(9).font('Helvetica');
+
+        // Table header
+        const tableTop = doc.y;
+        const col1 = 60;
+        const col2 = 250;
+        const col3 = 400;
+
+        doc.text('Date', col1, tableTop);
+        doc.text('Daily Sales (₱)', col2, tableTop);
+        doc.text('Orders', col3, tableTop);
+
+        // Horizontal line
+        doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+
+        let yPosition = tableTop + 25;
+        salesData.forEach(day => {
+            if (yPosition > doc.page.height - 100) {
+                doc.addPage();
+                yPosition = 50;
+            }
+            doc.text(day._id, col1, yPosition);
+            doc.text(day.dailySales.toFixed(2), col2, yPosition);
+            doc.text(day.orderCount.toString(), col3, yPosition);
+            yPosition += 20;
+        });
+
+        // Footer
+        doc.fontSize(8).font('Helvetica').text('This is an automatically generated report from Quick Order System', 50, doc.page.height - 40, { align: 'center' });
+
+        // Finalize PDF
+        doc.end();
+
+    } catch (error) {
+        logger.error('Error generating PDF report:', error);
+        res.status(500).json({
+            message: 'Error generating PDF report',
             error: error.message
         });
     }

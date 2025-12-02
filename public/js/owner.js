@@ -417,6 +417,171 @@ function exportReportToExcel() {
 }
 
 /**
+ * Export current report data to PDF
+ */
+function exportReportToPDF() {
+  try {
+    const startDate = document.getElementById('reportStartDate')?.value;
+    const endDate = document.getElementById('reportEndDate')?.value;
+    const paymentMethod = document.getElementById('paymentMethodFilter')?.value || '';
+
+    if (!startDate || !endDate) {
+      alert('Please select both start and end dates before exporting.');
+      return;
+    }
+
+    if (!reportChartData) {
+      alert('Please generate a report first before exporting.');
+      return;
+    }
+
+    // Show loading state
+    const pdfBtn = document.querySelector('button[onclick="exportReportToPDF()"]');
+    if (pdfBtn) {
+      const originalHTML = pdfBtn.innerHTML;
+      pdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+      pdfBtn.disabled = true;
+
+      // Build URL with query parameters
+      let url = `/api/reports/export-pdf?startDate=${startDate}&endDate=${endDate}`;
+      if (paymentMethod) {
+        url += `&paymentMethod=${paymentMethod}`;
+      }
+
+      // Fetch PDF from backend
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error('PDF generation failed');
+          return response.blob();
+        })
+        .then(blob => {
+          // Create download link
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `Sales_Report_${startDate}_to_${endDate}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(downloadUrl);
+
+          // Show success message
+          pdfBtn.innerHTML = '<i class="fas fa-check"></i> Downloaded!';
+          setTimeout(() => {
+            pdfBtn.innerHTML = originalHTML;
+            pdfBtn.disabled = false;
+          }, 2000);
+        })
+        .catch(error => {
+          console.error('Error exporting PDF:', error);
+          alert('Failed to export PDF. Please try again.');
+          pdfBtn.innerHTML = originalHTML;
+          pdfBtn.disabled = false;
+        });
+    }
+  } catch (error) {
+    console.error('Error exporting report to PDF:', error);
+    alert('Failed to export report. Please try again.');
+  }
+}
+
+/**
+ * Fetch payment method breakdown and render on page
+ */
+async function fetchAndRenderPaymentBreakdown() {
+  try {
+    const startDate = document.getElementById('reportStartDate')?.value;
+    const endDate = document.getElementById('reportEndDate')?.value;
+
+    if (!startDate || !endDate) {
+      return;
+    }
+
+    const response = await fetch(`/api/reports/payment-breakdown?startDate=${startDate}&endDate=${endDate}`);
+    if (!response.ok) throw new Error('Failed to fetch payment breakdown');
+
+    const breakdownData = await response.json();
+    renderPaymentBreakdown(breakdownData);
+    renderPaymentChart(breakdownData);
+
+  } catch (error) {
+    console.error('Error fetching payment breakdown:', error);
+  }
+}
+
+/**
+ * Render payment method breakdown cards
+ */
+function renderPaymentBreakdown(data) {
+  const container = document.getElementById('paymentBreakdownContainer');
+  if (!container) return;
+
+  const paymentMethods = data.paymentMethods;
+  const cards = container.querySelectorAll('.payment-method-card');
+
+  cards.forEach(card => {
+    const icon = card.querySelector('.payment-method-icon');
+    const methodName = card.querySelector('h4').textContent;
+    const amount = card.querySelector('.amount');
+    const percentage = card.querySelector('.percentage');
+    const orderCount = card.querySelector('.order-count');
+
+    const methodData = paymentMethods[methodName];
+    if (methodData) {
+      amount.textContent = `₱${methodData.sales.toFixed(2)}`;
+      percentage.textContent = `${methodData.percentage}%`;
+      orderCount.textContent = `${methodData.orders} orders`;
+    }
+  });
+}
+
+/**
+ * Render payment method pie chart
+ */
+function renderPaymentChart(data) {
+  const ctx = document.getElementById('paymentChart');
+  if (!ctx) return;
+
+  const paymentMethods = data.paymentMethods;
+  
+  const labels = Object.keys(paymentMethods);
+  const chartData = labels.map(method => paymentMethods[method].sales);
+  const colors = ['#667eea', '#f5576c', '#00f2fe'];
+  const borderColors = ['#667eea', '#f5576c', '#00f2fe'];
+
+  // Destroy previous chart if exists
+  if (window.paymentChartInstance) {
+    window.paymentChartInstance.destroy();
+  }
+
+  window.paymentChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: chartData,
+        backgroundColor: colors,
+        borderColor: borderColors,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            font: { size: 12 }
+          }
+        }
+      }
+    }
+  });
+}
+
+/**
  * Fetch sales data from backend and render chart + metrics
  */
 async function fetchAndRenderSalesReport() {
@@ -456,6 +621,9 @@ async function fetchAndRenderSalesReport() {
     
     // Update metrics
     updateReportMetrics(chartData.summary);
+
+    // Fetch and render payment breakdown
+    fetchAndRenderPaymentBreakdown();
 
   } catch (error) {
     console.error('Error fetching sales report:', error);

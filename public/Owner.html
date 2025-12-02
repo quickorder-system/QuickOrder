@@ -336,6 +336,13 @@
           <label for="reportEndDate" class="visually-hidden">End date</label>
           <input type="date" class="date-input" id="reportEndDate" title="Report end date" aria-label="Report end date">
         </div>
+
+        <select class="filter-select" id="paymentMethodFilter" title="Filter report by payment method" aria-label="Filter by payment method">
+          <option value="">All Payment Methods</option>
+          <option value="GCash">GCash</option>
+          <option value="Maya">Maya</option>
+          <option value="Cash">Cash</option>
+        </select>
         
         <button class="btn-primary" onclick="generateReport()" title="Generate sales report">
           <i class="fas fa-sync" aria-hidden="true"></i>
@@ -345,6 +352,11 @@
         <button class="btn-primary" onclick="exportReportToExcel()" title="Export current report to Excel">
           <i class="fas fa-file-excel" aria-hidden="true"></i>
           Export to Excel
+        </button>
+
+        <button class="btn-primary" onclick="exportReportToPDF()" title="Export current report to PDF">
+          <i class="fas fa-file-pdf" aria-hidden="true"></i>
+          Export to PDF
         </button>
       </div>
 
@@ -420,6 +432,51 @@
           </div>
         </div>
         <canvas id="salesChart"></canvas>
+      </div>
+
+      <!-- Payment Method Breakdown Section -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3 class="chart-title">Payment Method Breakdown</h3>
+        </div>
+        <div class="payment-breakdown-grid" id="paymentBreakdownContainer">
+          <div class="payment-method-card">
+            <div class="payment-method-icon gcash">
+              <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="payment-method-info">
+              <h4>GCash</h4>
+              <p class="amount">₱0.00</p>
+              <p class="percentage">0%</p>
+              <p class="order-count">0 orders</p>
+            </div>
+          </div>
+
+          <div class="payment-method-card">
+            <div class="payment-method-icon maya">
+              <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="payment-method-info">
+              <h4>Maya</h4>
+              <p class="amount">₱0.00</p>
+              <p class="percentage">0%</p>
+              <p class="order-count">0 orders</p>
+            </div>
+          </div>
+
+          <div class="payment-method-card">
+            <div class="payment-method-icon cash">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="payment-method-info">
+              <h4>Cash</h4>
+              <p class="amount">₱0.00</p>
+              <p class="percentage">0%</p>
+              <p class="order-count">0 orders</p>
+            </div>
+          </div>
+        </div>
+        <canvas id="paymentChart"></canvas>
       </div>
     </div>
 
