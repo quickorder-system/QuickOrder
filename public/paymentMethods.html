@@ -54,7 +54,7 @@
             <div class="right-section">
                 <div class="payment-container">
                     <form id="paymentForm">
-                        <div class="section">
+                        <div class="section" id="uploadSection">
                             <div class="section-title">📸 Upload Proof of Payment</div>
                             <div class="upload-area" id="uploadAreaClick">
                                 <div class="upload-icon">📤</div>
@@ -81,6 +81,12 @@
                                     <input type="radio" value="Maya" name="payMethod" id="maya">
                                     <label for="maya">Maya</label>
                                     <img src="image/Paymaya.png" class="payment-logo" alt="Maya">
+                                </div>
+
+                                <div class="payment-option payment-option-clickable">
+                                    <input type="radio" value="Cash" name="payMethod" id="cash">
+                                    <label for="cash">Cash</label>
+                                    <i class="fas fa-money-bill-wave cash-logo"></i>
                                 </div>
                             </div>
                         </div>
@@ -124,6 +130,18 @@
                                     5. Complete the transaction<br>
                                     6. Take a screenshot of the successful transaction<br>
                                     7. Upload the screenshot in the form above
+                                </p>
+                            </div>
+
+                            <div id="cashInstructions" class="payment-instruction-box" style="display: none;">
+                                <h4><i class="fas fa-money-bill-wave"></i> Cash Payment</h4>
+                                <p style="font-size: 0.95em; color: #333;">
+                                    <strong>Instructions:</strong><br>
+                                    1. Your order total is shown below<br>
+                                    2. Proceed with your order<br>
+                                    3. Payment will be collected upon pickup/delivery<br>
+                                    4. Have the exact amount ready for faster transaction<br>
+                                    5. A receipt will be provided after payment
                                 </p>
                             </div>
                         </div>

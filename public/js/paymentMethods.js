@@ -81,7 +81,8 @@ async function handleOrderSubmit(event) {
     const paymentMethod = document.querySelector('input[name="payMethod"]:checked').value;
     const screenshotFile = screenshotInput.files[0];
 
-    if (!screenshotFile) {
+    // For Cash payment, no screenshot is required
+    if (paymentMethod !== 'Cash' && !screenshotFile) {
         screenshotError.textContent = 'Please upload a payment screenshot.';
         submitButton.disabled = false;
         submitButton.textContent = 'Confirm & Place Order →';
@@ -90,33 +91,38 @@ async function handleOrderSubmit(event) {
 
     screenshotError.textContent = ''; // Clear any previous error
 
-    const formData = new FormData();
-    formData.append('paymentScreenshot', screenshotFile);
-
     try {
-        // Simulate upload progress
-        progressBar.style.width = '0%';
-        progressText.textContent = 'Uploading... 0%';
-        const uploadProgress = setInterval(() => {
-            let width = parseInt(progressBar.style.width);
-            if (width < 90) {
-                width += 10;
-                progressBar.style.width = `${width}%`;
-                progressText.textContent = `Uploading... ${width}%`;
-            } else {
-                clearInterval(uploadProgress);
+        let uploadResponse = { fileUrl: null };
+
+        // Only upload screenshot for online payment methods
+        if (paymentMethod !== 'Cash' && screenshotFile) {
+            // Simulate upload progress
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Uploading... 0%';
+            const uploadProgress = setInterval(() => {
+                let width = parseInt(progressBar.style.width);
+                if (width < 90) {
+                    width += 10;
+                    progressBar.style.width = `${width}%`;
+                    progressText.textContent = `Uploading... ${width}%`;
+                } else {
+                    clearInterval(uploadProgress);
+                }
+            }, 200);
+
+            uploadResponse = await ApiService.uploadImage(screenshotFile);
+            clearInterval(uploadProgress); // Ensure interval is cleared on successful upload
+
+            if (!uploadResponse || !uploadResponse.fileUrl) {
+                throw new Error('Failed to upload screenshot.');
             }
-        }, 200);
 
-        const uploadResponse = await ApiService.uploadImage(screenshotFile);
-        clearInterval(uploadProgress); // Ensure interval is cleared on successful upload
-
-        if (!uploadResponse || !uploadResponse.fileUrl) {
-            throw new Error('Failed to upload screenshot.');
+            progressBar.style.width = '100%';
+            progressText.textContent = 'Upload Complete!';
+        } else if (paymentMethod === 'Cash') {
+            progressBar.style.width = '100%';
+            progressText.textContent = 'Ready to proceed!';
         }
-
-        progressBar.style.width = '100%';
-        progressText.textContent = 'Upload Complete!';
 
         const orderData = {
             ...stateService.currentOrder,
@@ -128,7 +134,7 @@ async function handleOrderSubmit(event) {
             })),
             total: stateService.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
             paymentMethod: paymentMethod,
-            paymentScreenshot: uploadResponse.fileUrl,
+            paymentScreenshot: uploadResponse.fileUrl || 'N/A (Cash Payment)',
             status: 'pending'
         };
 
@@ -164,17 +170,29 @@ function showToast(message, type) {
 function togglePaymentInstructions() {
     const gcashRadio = document.getElementById('gcash');
     const mayaRadio = document.getElementById('maya');
+    const cashRadio = document.getElementById('cash');
     const gcashInstructions = document.getElementById('gcashInstructions');
     const mayaInstructions = document.getElementById('mayaInstructions');
+    const cashInstructions = document.getElementById('cashInstructions');
+    const uploadSection = document.getElementById('uploadSection');
 
-    if (!gcashInstructions || !mayaInstructions) return;
+    if (!gcashInstructions || !mayaInstructions || !cashInstructions) return;
 
     if (gcashRadio && gcashRadio.checked) {
         gcashInstructions.style.display = 'block';
         mayaInstructions.style.display = 'none';
+        cashInstructions.style.display = 'none';
+        uploadSection.style.display = 'block';
     } else if (mayaRadio && mayaRadio.checked) {
         gcashInstructions.style.display = 'none';
         mayaInstructions.style.display = 'block';
+        cashInstructions.style.display = 'none';
+        uploadSection.style.display = 'block';
+    } else if (cashRadio && cashRadio.checked) {
+        gcashInstructions.style.display = 'none';
+        mayaInstructions.style.display = 'none';
+        cashInstructions.style.display = 'block';
+        uploadSection.style.display = 'none';
     }
 }
 
@@ -191,11 +209,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add event listeners for payment method radio buttons to toggle instructions
     const gcashRadio = document.getElementById('gcash');
     const mayaRadio = document.getElementById('maya');
+    const cashRadio = document.getElementById('cash');
     if (gcashRadio) {
         gcashRadio.addEventListener('change', togglePaymentInstructions);
     }
     if (mayaRadio) {
         mayaRadio.addEventListener('change', togglePaymentInstructions);
+    }
+    if (cashRadio) {
+        cashRadio.addEventListener('change', togglePaymentInstructions);
     }
 
     screenshotInput.addEventListener('change', previewScreenshot);

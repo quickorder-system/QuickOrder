@@ -34,7 +34,7 @@ const orderSchema = new mongoose.Schema({
     },
     paymentScreenshot: {
         type: String,
-        required: true
+        required: false  // Changed to not required for Cash payments
     },
     specialInstructions: {
         type: String
