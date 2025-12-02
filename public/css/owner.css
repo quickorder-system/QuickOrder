@@ -423,22 +423,22 @@ body {
 /* Chart Container */
 .chart-container {
   background: white;
-  padding: 2.25rem;
-  border-radius: 18px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem;
 }
 
 .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .chart-title {
-  font-size: 1.4rem;
-  font-weight: 800;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #1e293b;
 }
 
@@ -1785,4 +1785,20 @@ body {
     grid-template-columns: 1fr 40px 70px;
     font-size: 0.85rem;
   }
+}
+
+/* Canvas styling for compact charts */
+canvas {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+#paymentChart {
+  max-height: 250px;
+  display: block;
+}
+
+#salesChart {
+  max-height: 300px;
+  display: block;
 }
