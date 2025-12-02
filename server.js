@@ -60,6 +60,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// Health check endpoint to verify deployment
+app.get('/api/deployment-check', (req, res) => {
+    res.json({ status: 'ok', message: 'Deployment check passed' });
+});
+
 // Rate limiting (apply to all requests)
 /*
 const limiter = rateLimit({
