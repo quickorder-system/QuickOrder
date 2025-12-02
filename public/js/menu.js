@@ -119,6 +119,51 @@ import { stateService } from './services/state.service.js';
         }
     }
 
+    // Generate HTML for variation selectors
+    function generateVariationsHTML(item, itemId, basePrice) {
+        if (!item.variations || item.variations.length === 0) {
+            return '';
+        }
+
+        let variationsHTML = '<div class="variations-container">';
+        
+        item.variations.forEach((variation, varIndex) => {
+            variationsHTML += `
+                <div class="variation-group">
+                    <label class="variation-label">${variation.variationName}:</label>
+                    <select data-variation-id="${itemId}" data-variation-index="${varIndex}" class="variation-select">
+                        <option value="">-- Select ${variation.variationName} --</option>
+            `;
+
+            variation.options.forEach((option, optIndex) => {
+                const priceDisplay = option.priceModifier !== 0 
+                    ? ` (+₱${Math.abs(option.priceModifier).toFixed(2)})` 
+                    : '';
+                const isDisabled = !option.isAvailable || option.quantity <= 0;
+                const disabledAttr = isDisabled ? 'disabled' : '';
+                
+                variationsHTML += `
+                    <option 
+                        value="${optIndex}" 
+                        data-price-modifier="${option.priceModifier}" 
+                        data-option-name="${option.optionName}"
+                        ${disabledAttr}
+                    >
+                        ${option.optionName}${priceDisplay}
+                    </option>
+                `;
+            });
+
+            variationsHTML += `
+                    </select>
+                </div>
+            `;
+        });
+
+        variationsHTML += '</div>';
+        return variationsHTML;
+    }
+
     // Render menu dynamically from inventory
     async function renderMenu() {
         const menuContainer = document.getElementById('dynamic-menu-container');
@@ -182,6 +227,7 @@ import { stateService } from './services/state.service.js';
                     const name = fullItem.itemName || 'Unknown Item';
                     const quantity = fullItem.quantity || 0;
                     const isAvailable = (fullItem.isAvailable !== false) && (quantity > 0);
+                    const variationsHTML = generateVariationsHTML(fullItem, itemId, price);
                     
                     const unavailableClass = !isAvailable ? 'unavailable' : '';
                     const outOfStockReason = quantity <= 0 ? 'Out of Stock' : 'Unavailable';
@@ -200,6 +246,7 @@ import { stateService } from './services/state.service.js';
                                     <div class="food-price">₱${price.toFixed(2)}</div>
                                 </div>
                                 <div class="food-description">${description}</div>
+                                ${variationsHTML}
                                 <div class="food-actions">
                                     <div class="quantity-control">
                                         <span class="qty-label">Qty:</span>
@@ -239,6 +286,7 @@ import { stateService } from './services/state.service.js';
                     const description = item.description || 'No description available';
                     const name = item.itemName || 'Unknown Item';
                     const quantity = item.quantity || 0;
+                    const variationsHTML = generateVariationsHTML(item, itemId, price);
                     // Check both isAvailable flag AND quantity > 0
                     const isAvailable = (item.isAvailable !== false) && (quantity > 0);
                     
@@ -260,6 +308,7 @@ import { stateService } from './services/state.service.js';
                                     <div class="food-price">₱${price.toFixed(2)}</div>
                                 </div>
                                 <div class="food-description">${description}</div>
+                                ${variationsHTML}
                                 <div class="food-actions">
                                     <div class="quantity-control">
                                         <span class="qty-label">Qty:</span>

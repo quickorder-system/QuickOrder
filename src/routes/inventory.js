@@ -103,4 +103,211 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
+/**
+ * @route POST /api/inventory/:itemId/variations
+ * @description Add a new variation group to an item (e.g., "Size")
+ * @access Private (Admin/Owner only)
+ */
+router.post('/:itemId/variations', auth, async (req, res) => {
+    try {
+        const { variationName, options } = req.body;
+        
+        if (!variationName || !Array.isArray(options) || options.length === 0) {
+            return res.status(400).json({ 
+                message: 'variationName and options array are required' 
+            });
+        }
+
+        const item = await InventoryItem.findById(req.params.itemId);
+        if (!item) return res.status(404).json({ message: 'Inventory item not found' });
+
+        // Check if variation with same name already exists
+        const existingVariation = item.variations.find(v => v.variationName === variationName);
+        if (existingVariation) {
+            return res.status(400).json({ 
+                message: 'Variation with this name already exists' 
+            });
+        }
+
+        // Add new variation
+        item.variations.push({
+            variationName,
+            options: options.map(opt => ({
+                optionName: opt.optionName,
+                priceModifier: opt.priceModifier || 0,
+                quantity: opt.quantity || 0,
+                isAvailable: opt.isAvailable !== false
+            }))
+        });
+
+        const updatedItem = await item.save();
+        res.json(updatedItem);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+/**
+ * @route PUT /api/inventory/:itemId/variations/:variationIndex
+ * @description Update a variation group
+ * @access Private (Admin/Owner only)
+ */
+router.put('/:itemId/variations/:variationIndex', auth, async (req, res) => {
+    try {
+        const { variationIndex } = req.params;
+        const { variationName, options } = req.body;
+
+        const item = await InventoryItem.findById(req.params.itemId);
+        if (!item) return res.status(404).json({ message: 'Inventory item not found' });
+
+        if (variationIndex < 0 || variationIndex >= item.variations.length) {
+            return res.status(404).json({ message: 'Variation not found' });
+        }
+
+        if (variationName) item.variations[variationIndex].variationName = variationName;
+        if (Array.isArray(options)) {
+            item.variations[variationIndex].options = options.map(opt => ({
+                optionName: opt.optionName,
+                priceModifier: opt.priceModifier || 0,
+                quantity: opt.quantity || 0,
+                isAvailable: opt.isAvailable !== false
+            }));
+        }
+
+        const updatedItem = await item.save();
+        res.json(updatedItem);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+/**
+ * @route DELETE /api/inventory/:itemId/variations/:variationIndex
+ * @description Delete a variation group
+ * @access Private (Admin/Owner only)
+ */
+router.delete('/:itemId/variations/:variationIndex', auth, async (req, res) => {
+    try {
+        const { itemId, variationIndex } = req.params;
+
+        const item = await InventoryItem.findById(itemId);
+        if (!item) return res.status(404).json({ message: 'Inventory item not found' });
+
+        if (variationIndex < 0 || variationIndex >= item.variations.length) {
+            return res.status(404).json({ message: 'Variation not found' });
+        }
+
+        item.variations.splice(variationIndex, 1);
+        const updatedItem = await item.save();
+        res.json(updatedItem);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+/**
+ * @route POST /api/inventory/:itemId/variations/:variationIndex/options
+ * @description Add a new option to a variation
+ * @access Private (Admin/Owner only)
+ */
+router.post('/:itemId/variations/:variationIndex/options', auth, async (req, res) => {
+    try {
+        const { itemId, variationIndex } = req.params;
+        const { optionName, priceModifier, quantity } = req.body;
+
+        if (!optionName) {
+            return res.status(400).json({ message: 'optionName is required' });
+        }
+
+        const item = await InventoryItem.findById(itemId);
+        if (!item) return res.status(404).json({ message: 'Inventory item not found' });
+
+        if (variationIndex < 0 || variationIndex >= item.variations.length) {
+            return res.status(404).json({ message: 'Variation not found' });
+        }
+
+        // Check if option already exists
+        const existingOption = item.variations[variationIndex].options.find(
+            o => o.optionName === optionName
+        );
+        if (existingOption) {
+            return res.status(400).json({ message: 'Option with this name already exists' });
+        }
+
+        item.variations[variationIndex].options.push({
+            optionName,
+            priceModifier: priceModifier || 0,
+            quantity: quantity || 0,
+            isAvailable: true
+        });
+
+        const updatedItem = await item.save();
+        res.json(updatedItem);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+/**
+ * @route PUT /api/inventory/:itemId/variations/:variationIndex/options/:optionIndex
+ * @description Update an option in a variation
+ * @access Private (Admin/Owner only)
+ */
+router.put('/:itemId/variations/:variationIndex/options/:optionIndex', auth, async (req, res) => {
+    try {
+        const { itemId, variationIndex, optionIndex } = req.params;
+        const { optionName, priceModifier, quantity, isAvailable } = req.body;
+
+        const item = await InventoryItem.findById(itemId);
+        if (!item) return res.status(404).json({ message: 'Inventory item not found' });
+
+        if (variationIndex < 0 || variationIndex >= item.variations.length) {
+            return res.status(404).json({ message: 'Variation not found' });
+        }
+
+        if (optionIndex < 0 || optionIndex >= item.variations[variationIndex].options.length) {
+            return res.status(404).json({ message: 'Option not found' });
+        }
+
+        const option = item.variations[variationIndex].options[optionIndex];
+        if (optionName) option.optionName = optionName;
+        if (priceModifier !== undefined) option.priceModifier = priceModifier;
+        if (quantity !== undefined) option.quantity = quantity;
+        if (isAvailable !== undefined) option.isAvailable = isAvailable;
+
+        const updatedItem = await item.save();
+        res.json(updatedItem);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+/**
+ * @route DELETE /api/inventory/:itemId/variations/:variationIndex/options/:optionIndex
+ * @description Delete an option from a variation
+ * @access Private (Admin/Owner only)
+ */
+router.delete('/:itemId/variations/:variationIndex/options/:optionIndex', auth, async (req, res) => {
+    try {
+        const { itemId, variationIndex, optionIndex } = req.params;
+
+        const item = await InventoryItem.findById(itemId);
+        if (!item) return res.status(404).json({ message: 'Inventory item not found' });
+
+        if (variationIndex < 0 || variationIndex >= item.variations.length) {
+            return res.status(404).json({ message: 'Variation not found' });
+        }
+
+        if (optionIndex < 0 || optionIndex >= item.variations[variationIndex].options.length) {
+            return res.status(404).json({ message: 'Option not found' });
+        }
+
+        item.variations[variationIndex].options.splice(optionIndex, 1);
+        const updatedItem = await item.save();
+        res.json(updatedItem);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 module.exports = router;

@@ -58,7 +58,22 @@ const orderSchema = new mongoose.Schema({
             type: Number,
             required: true,
             min: 0
-        }
+        },
+        // New field: Store selected variations
+        selectedVariations: [{
+            variationName: {
+                type: String
+                // e.g., "Size"
+            },
+            selectedOption: {
+                type: String
+                // e.g., "Medium"
+            },
+            priceModifier: {
+                type: Number,
+                default: 0
+            }
+        }]
     }],
     total: {
         type: Number,
