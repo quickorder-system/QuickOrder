@@ -34,7 +34,8 @@ router.post('/', auth, async (req, res) => {
         quantity: req.body.quantity,
         alertLevel: req.body.alertLevel,
         description: req.body.description,
-        image: req.body.image
+        image: req.body.image,
+        variations: req.body.variations || []
     });
 
     try {
@@ -60,6 +61,7 @@ router.put('/:id', auth, async (req, res) => {
         if (req.body.description !== undefined) item.description = req.body.description;
         if (req.body.image !== undefined) item.image = req.body.image;
         if (req.body.isAvailable !== undefined) item.isAvailable = req.body.isAvailable;
+        if (req.body.variations !== undefined) item.variations = req.body.variations;
 
         const updatedItem = await item.save();
         res.json(updatedItem);
