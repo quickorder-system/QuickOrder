@@ -329,6 +329,11 @@
         const hid = document.getElementById('itemImageData'); if (hid) hid.value = '';
       }
       const idxField = document.getElementById('itemEditIndex'); if (idxField) idxField.value = item._id;
+      
+      // Load variations if they exist
+      variationsData = item.variations || [];
+      renderVariationsList();
+      
       openAddItemModal();
     } catch (error) {
       console.error('Error fetching item for edit:', error);
@@ -412,6 +417,124 @@
       reader.readAsDataURL(file);
     }
   });
+
+  // ===== VARIATIONS MANAGEMENT =====
+  let variationsData = [];  // Store variations being created/edited
+
+  // Get variations data from form
+  function getVariationsFromForm() {
+    return variationsData;
+  }
+
+  // Render variations list UI
+  function renderVariationsList() {
+    const container = document.getElementById('variationsList');
+    if (!container) return;
+
+    if (variationsData.length === 0) {
+      container.innerHTML = '<p style="color: #999; font-size: 0.9rem; margin: 8px 0;">No variations added yet</p>';
+      return;
+    }
+
+    container.innerHTML = variationsData.map((variation, varIndex) => `
+      <div class="variation-group-card">
+        <div class="variation-group-header">
+          <h4>${variation.variationName}</h4>
+          <button type="button" class="btn-small btn-danger" data-delete-variation="${varIndex}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+        <div class="variation-options">
+          ${variation.options.map((option, optIndex) => `
+            <div class="variation-option-item">
+              <span class="option-name">${option.optionName}</span>
+              <span class="option-price">${option.priceModifier >= 0 ? '+' : ''}₱${option.priceModifier.toFixed(2)}</span>
+              <button type="button" class="btn-small btn-danger" data-delete-option="${varIndex}-${optIndex}">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          `).join('')}
+          <button type="button" class="btn-small btn-secondary" data-add-option="${varIndex}">
+            + Add Option
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach event listeners
+    container.querySelectorAll('[data-delete-variation]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const idx = parseInt(btn.getAttribute('data-delete-variation'));
+        variationsData.splice(idx, 1);
+        renderVariationsList();
+      });
+    });
+
+    container.querySelectorAll('[data-delete-option]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const [varIdx, optIdx] = btn.getAttribute('data-delete-option').split('-').map(Number);
+        variationsData[varIdx].options.splice(optIdx, 1);
+        renderVariationsList();
+      });
+    });
+
+    container.querySelectorAll('[data-add-option]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const varIdx = parseInt(btn.getAttribute('data-add-option'));
+        const optionName = prompt('Enter option name (e.g., "Small", "Medium", "Large"):');
+        if (!optionName) return;
+        
+        const priceModifier = parseFloat(prompt('Price modifier (₱) [e.g., 0, 15, 30]:') || '0');
+        const quantity = parseInt(prompt('Stock quantity:') || '0');
+        
+        variationsData[varIdx].options.push({
+          optionName: optionName.trim(),
+          priceModifier: priceModifier,
+          quantity: quantity,
+          isAvailable: true
+        });
+        renderVariationsList();
+      });
+    });
+  }
+
+  // Add variation button
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#addVariationBtn')) {
+      e.preventDefault();
+      const variationName = prompt('Enter variation name (e.g., "Size", "Flavor", "Portion"):');
+      if (!variationName) return;
+
+      const optionName = prompt('Enter first option name (e.g., "Small"):');
+      if (!optionName) return;
+
+      const priceModifier = parseFloat(prompt('Price modifier for this option (₱) [e.g., 0]:') || '0');
+      const quantity = parseInt(prompt('Stock quantity for this option:') || '0');
+
+      variationsData.push({
+        variationName: variationName.trim(),
+        options: [{
+          optionName: optionName.trim(),
+          priceModifier: priceModifier,
+          quantity: quantity,
+          isAvailable: true
+        }]
+      });
+
+      renderVariationsList();
+    }
+  });
+
+  // Initialize on modal open
+  const originalOpenNewItemModal = window.openNewItemModal;
+  window.openNewItemModal = function() {
+    variationsData = [];  // Reset variations
+    renderVariationsList();
+    if (originalOpenNewItemModal) originalOpenNewItemModal();
+  };
 
   // Add/edit submit handler (works if a form with id addItemForm exists)
   document.addEventListener('submit', async function(e) {
@@ -500,7 +623,8 @@
       quantity: stock,
       alertLevel: alertLevel,
       description: description,
-      image: imageUrl
+      image: imageUrl,
+      variations: getVariationsFromForm()  // NEW: Get variations from form
     };
 
     try {
