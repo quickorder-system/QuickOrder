@@ -579,6 +579,129 @@ router.get('/popular-items', async (req, res) => {
 });
 
 /**
+ * @route GET /api/reports/payment-breakdown
+ * @description Get sales breakdown by payment method within a date range
+ * @query startDate - Start date (ISO 8601 format: YYYY-MM-DD)
+ * @query endDate - End date (ISO 8601 format: YYYY-MM-DD)
+ * @access Private (Admin/Owner only)
+ * @returns {Object} Sales data grouped by payment method
+ */
+router.get('/payment-breakdown', async (req, res) => {
+    try {
+        const { startDate, endDate } = req.query;
+
+        if (!startDate || !endDate) {
+            return res.status(400).json({
+                message: 'Both startDate and endDate query parameters are required (format: YYYY-MM-DD)'
+            });
+        }
+
+        // Parse dates
+        const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+        const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+        
+        const start = new Date(startYear, startMonth - 1, startDay, 0, 0, 0, 0);
+        const end = new Date(endYear, endMonth - 1, endDay, 23, 59, 59, 999);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return res.status(400).json({
+                message: 'Invalid date format. Please use YYYY-MM-DD format.'
+            });
+        }
+
+        if (start > end) {
+            return res.status(400).json({
+                message: 'startDate must be before or equal to endDate'
+            });
+        }
+
+        logger.info(`Fetching payment breakdown from ${startDate} to ${endDate}`);
+
+        // Aggregate sales by payment method
+        const paymentBreakdown = await Order.aggregate([
+            {
+                $match: {
+                    status: 'complete',
+                    createdAt: {
+                        $gte: start,
+                        $lte: end
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: '$paymentMethod',
+                    totalSales: { $sum: '$total' },
+                    orderCount: { $sum: 1 },
+                    averageOrderValue: { $avg: '$total' }
+                }
+            },
+            {
+                $sort: { totalSales: -1 }
+            }
+        ]);
+
+        // Transform data for easier frontend consumption
+        const paymentMethods = ['GCash', 'Maya', 'Cash'];
+        const paymentData = {};
+        let grandTotal = 0;
+        let totalOrders = 0;
+
+        // Initialize all payment methods with zero values
+        paymentMethods.forEach(method => {
+            paymentData[method] = {
+                sales: 0,
+                orders: 0,
+                percentage: 0,
+                averageOrderValue: 0
+            };
+        });
+
+        // Populate with actual data
+        paymentBreakdown.forEach(item => {
+            const method = item._id || 'Unknown';
+            if (paymentData[method]) {
+                paymentData[method] = {
+                    sales: parseFloat(item.totalSales.toFixed(2)),
+                    orders: item.orderCount,
+                    percentage: 0,
+                    averageOrderValue: parseFloat(item.averageOrderValue.toFixed(2))
+                };
+                grandTotal += item.totalSales;
+                totalOrders += item.orderCount;
+            }
+        });
+
+        // Calculate percentages
+        if (grandTotal > 0) {
+            Object.keys(paymentData).forEach(method => {
+                paymentData[method].percentage = parseFloat(
+                    ((paymentData[method].sales / grandTotal) * 100).toFixed(2)
+                );
+            });
+        }
+
+        const response = {
+            paymentMethods: paymentData,
+            summary: {
+                totalRevenue: parseFloat(grandTotal.toFixed(2)),
+                totalOrders: totalOrders,
+                dateRange: { startDate, endDate }
+            }
+        };
+
+        res.json(response);
+
+    } catch (error) {
+        logger.error('Error generating payment breakdown report:', error);
+        res.status(500).json({
+            message: 'Error generating payment breakdown report',
+            error: error.message
+        });
+    }
+});
+
+/**
  * @route GET /api/reports/export-pdf
  * @description Export sales report to PDF format
  * @query startDate - Start date (ISO 8601 format: YYYY-MM-DD)
