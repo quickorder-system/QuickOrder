@@ -101,6 +101,13 @@ class CartComponent {
             <div class="cart-item" data-item-id="${item.id}">
                 <div class="cart-item-info">
                     <h4 class="cart-item-title">${item.name}</h4>
+                    ${item.selectedVariations && item.selectedVariations.length > 0 ? `
+                        <div class="cart-item-variations">
+                            ${item.selectedVariations.map(v => `
+                                <span class="variation-badge">${v.variationName}: ${v.selectedOption}</span>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                     <p class="cart-item-price">${uiUtils.formatCurrency(item.price)}</p>
                 </div>
                 <div class="cart-item-actions">

@@ -394,7 +394,7 @@ import { stateService } from './services/state.service.js';
         });
     }
 
-    // Prepare order data with MongoDB IDs
+    // Prepare order data with MongoDB IDs and variations
     function orderedList() {
         console.log('[Menu] orderedList function called');
         const checkboxes = document.querySelectorAll('[data-item-checkbox]');
@@ -424,18 +424,59 @@ import { stateService } from './services/state.service.js';
                     const qtyInput = card.querySelector('[data-qty-id]');
                     
                     const name = nameElem ? nameElem.textContent.trim() : 'Unknown Item';
-                    const priceText = priceElem ? priceElem.textContent : '0';
-                    const price = parseFloat(priceText.replace(/[^0-9\.]/g, '')) || 0;
+                    const basePriceText = priceElem ? priceElem.textContent : '0';
+                    let price = parseFloat(basePriceText.replace(/[^0-9\.]/g, '')) || 0;
                     const qty = qtyInput ? parseInt(qtyInput.value) : 1;
                     
+                    // Capture selected variations
+                    const selectedVariations = [];
+                    const variationSelects = card.querySelectorAll('.variation-select');
+                    let hasInvalidVariations = false;
+                    
+                    variationSelects.forEach(select => {
+                        if (select.value === '') {
+                            // Variation is required but not selected
+                            console.warn('[Menu] Variation not selected:', select.getAttribute('data-variation-index'));
+                            hasInvalidVariations = true;
+                        } else {
+                            const variationIndex = select.getAttribute('data-variation-index');
+                            const optionIndex = select.value;
+                            const selectedOption = select.options[select.selectedIndex];
+                            const optionName = selectedOption.getAttribute('data-option-name');
+                            const priceModifier = parseFloat(selectedOption.getAttribute('data-price-modifier')) || 0;
+                            const variationName = select.options[select.selectedIndex].parentElement?.label || 
+                                                  allItems.find(item => String(item._id) === String(itemId))?.variations?.[variationIndex]?.variationName || '';
+                            
+                            selectedVariations.push({
+                                variationName,
+                                selectedOption: optionName,
+                                priceModifier
+                            });
+                            
+                            // Add price modifier to total price
+                            price += priceModifier;
+                            
+                            console.log('[Menu] Variation selected:', { variationName, selectedOption: optionName, priceModifier });
+                        }
+                    });
+                    
+                    // If there are variation selects but some are invalid, don't add to cart
+                    if (variationSelects.length > 0 && hasInvalidVariations) {
+                        alert(`Please select all options for "${name}" before adding to cart.`);
+                        return false;
+                    }
+                    
                     // Use MongoDB _id for cart item ID
-                    stateService.addToCart({ 
+                    const cartItem = { 
                         id: itemId,  // MongoDB _id 
                         name, 
                         quantity: qty, 
-                        price 
-                    });
-                    console.log('[Menu] Item added to cart:', { id: itemId, name, quantity: qty, price });
+                        price,
+                        selectedVariations: selectedVariations.length > 0 ? selectedVariations : undefined
+                    };
+                    
+                    stateService.addToCart(cartItem);
+                    console.log('[Menu] Item added to cart:', cartItem);
                 }
             }
         });
