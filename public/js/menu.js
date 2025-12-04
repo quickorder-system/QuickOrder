@@ -434,10 +434,17 @@ import { stateService } from './services/state.service.js';
                     let hasInvalidVariations = false;
                     
                     variationSelects.forEach(select => {
+                        // Only validate if a variation has been started to be selected
+                        // If all variations are empty, the item can be added without variants
                         if (select.value === '') {
-                            // Variation is required but not selected
-                            console.warn('[Menu] Variation not selected:', select.getAttribute('data-variation-index'));
-                            hasInvalidVariations = true;
+                            // Check if other variations in this group have selections
+                            // If ANY variation is selected, all must be selected
+                            const allEmpty = Array.from(variationSelects).every(s => s.value === '');
+                            if (!allEmpty) {
+                                // Some variations are selected, so all must be selected
+                                console.warn('[Menu] Variation not selected:', select.getAttribute('data-variation-index'));
+                                hasInvalidVariations = true;
+                            }
                         } else {
                             const variationIndex = select.getAttribute('data-variation-index');
                             const optionIndex = select.value;
@@ -466,9 +473,17 @@ import { stateService } from './services/state.service.js';
                         return false;
                     }
                     
+                    // Generate unique cart item ID: combine item ID with variant selections
+                    // This allows same item with different variants to be separate cart entries
+                    const variantHash = selectedVariations.length > 0 
+                        ? '_' + selectedVariations.map(v => v.selectedOption.replace(/\s+/g, '_')).join('_')
+                        : '';
+                    const cartItemId = itemId + variantHash;
+                    
                     // Use MongoDB _id for cart item ID
                     const cartItem = { 
-                        id: itemId,  // MongoDB _id 
+                        id: cartItemId,  // Unique ID including variant selection
+                        itemId: itemId,  // Store original MongoDB _id
                         name, 
                         quantity: qty, 
                         price,
