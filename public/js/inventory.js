@@ -296,6 +296,7 @@
       }
       const item = await response.json();
       console.log('[Edit] Item loaded successfully:', item);
+      console.log('[Edit] Item variations from API:', item.variations);
 
       document.getElementById('itemName').value = item.itemName || '';
       
@@ -332,7 +333,8 @@
       
       // Load variations if they exist
       variationsData = item.variations || [];
-      console.log('[Edit] Loaded variations:', variationsData);
+      console.log('[Edit] After assignment, variationsData is:', variationsData);
+      console.log('[Edit] variationsData length:', variationsData.length);
       console.log('[Edit] Calling renderVariationsList with', variationsData.length, 'variations');
       renderVariationsList();
       
@@ -637,6 +639,9 @@
       image: imageUrl,
       variations: getVariationsFromForm()  // NEW: Get variations from form
     };
+
+    console.log('[Submit] Submitting item data with variations:', itemData.variations);
+    console.log('[Submit] variations count:', itemData.variations.length);
 
     try {
       let response;
