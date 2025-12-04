@@ -332,7 +332,6 @@ import MenuCartComponent from './components/menu-cart.component.js';
 
         // Rebind event listeners
         bindCheckboxListeners();
-        updateOrderCount();
     }
 
     // Category filter function (works with dynamic elements)
