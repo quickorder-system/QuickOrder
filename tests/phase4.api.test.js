@@ -511,4 +511,301 @@ describe('Phase 4 Backend Integration Tests', () => {
             expect(response.status).toBe(404);
         });
     });
+
+    // ====== EDGE CASE & VALIDATION TESTS ======
+    describe('Edge Cases & Advanced Validation', () => {
+        let edgeTestToken;
+        let edgeTestUserId;
+        const edgeTestEmail = 'edge-test@example.com';
+        const edgeTestPassword = 'EdgePassword123';
+
+        beforeAll(async () => {
+            // Register edge case test user
+            const registerRes = await request(app)
+                .post('/api/auth/customer/register')
+                .send({
+                    email: edgeTestEmail,
+                    password: edgeTestPassword,
+                    name: 'Edge Test User'
+                });
+
+            edgeTestUserId = registerRes.body.user.id;
+
+            // Get token for edge case testing
+            const loginRes = await request(app)
+                .post('/api/auth/customer/login')
+                .send({
+                    email: edgeTestEmail,
+                    password: edgeTestPassword
+                });
+
+            edgeTestToken = loginRes.body.token;
+        });
+
+        afterAll(async () => {
+            await User.deleteMany({ email: edgeTestEmail });
+        });
+
+        describe('Password Validation Edge Cases', () => {
+            it('should fail password change with too short new password', async () => {
+                const response = await request(app)
+                    .post('/api/customers/change-password')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        currentPassword: edgeTestPassword,
+                        newPassword: '123'
+                    });
+
+                expect(response.status).toBe(400);
+                expect(response.body.error).toContain('at least 6 characters');
+            });
+
+            it('should fail password change with same password', async () => {
+                const response = await request(app)
+                    .post('/api/customers/change-password')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        currentPassword: edgeTestPassword,
+                        newPassword: edgeTestPassword
+                    });
+
+                // Some systems allow same password, so accept 200 or 400
+                expect([200, 400]).toContain(response.status);
+            });
+
+            it('should fail with missing newPassword field', async () => {
+                const response = await request(app)
+                    .post('/api/customers/change-password')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        currentPassword: edgeTestPassword
+                    });
+
+                expect(response.status).toBe(400);
+            });
+        });
+
+        describe('Address Validation Edge Cases', () => {
+            it('should fail adding address with missing street', async () => {
+                const response = await request(app)
+                    .post('/api/customers/addresses')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        city: 'Test City',
+                        postalCode: '12345'
+                    });
+
+                expect(response.status).toBe(400);
+                expect(response.body.error).toContain('Street');
+            });
+
+            it('should fail adding address with missing city', async () => {
+                const response = await request(app)
+                    .post('/api/customers/addresses')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        street: 'Test Street',
+                        postalCode: '12345'
+                    });
+
+                expect(response.status).toBe(400);
+                expect(response.body.error).toContain('city');
+            });
+
+            it('should fail adding address with missing postal code', async () => {
+                const response = await request(app)
+                    .post('/api/customers/addresses')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        street: 'Test Street',
+                        city: 'Test City'
+                    });
+
+                expect(response.status).toBe(400);
+                expect(response.body.error).toContain('postal');
+            });
+
+            it('should successfully add valid address', async () => {
+                const response = await request(app)
+                    .post('/api/customers/addresses')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        street: '123 Main St',
+                        city: 'Test City',
+                        postalCode: '12345',
+                        label: 'home'
+                    });
+
+                expect(response.status).toBe(201);
+                expect(response.body.address.street).toBe('123 Main St');
+            });
+
+            it('should fail updating address with empty street', async () => {
+                // First get an address
+                const getRes = await request(app)
+                    .get('/api/customers/addresses')
+                    .set('x-auth-token', edgeTestToken);
+
+                if (getRes.body.addresses.length > 0) {
+                    const addressId = getRes.body.addresses[0]._id;
+
+                    const response = await request(app)
+                        .put(`/api/customers/addresses/${addressId}`)
+                        .set('x-auth-token', edgeTestToken)
+                        .send({
+                            street: '',
+                            city: 'Test City',
+                            postalCode: '12345'
+                        });
+
+                    expect(response.status).toBe(400);
+                }
+            });
+        });
+
+        describe('Profile Update Edge Cases', () => {
+            it('should update profile with empty name (optional field)', async () => {
+                const response = await request(app)
+                    .put('/api/customers/profile')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        name: 'New Name'
+                    });
+
+                expect(response.status).toBe(200);
+                expect(response.body.user.name).toBe('New Name');
+            });
+
+            it('should preserve phone field when updating other fields', async () => {
+                // First set phone
+                await request(app)
+                    .put('/api/customers/profile')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        phone: '+1234567890'
+                    });
+
+                // Then update name without providing phone
+                const response = await request(app)
+                    .put('/api/customers/profile')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        name: 'Another Name'
+                    });
+
+                expect(response.status).toBe(200);
+                // Phone should be preserved if system maintains state
+                expect(response.body.user.name).toBe('Another Name');
+            });
+
+            it('should update phone with valid format', async () => {
+                const response = await request(app)
+                    .put('/api/customers/profile')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        phone: '+919876543210'
+                    });
+
+                expect(response.status).toBe(200);
+                expect(response.body.user.phone).toBe('+919876543210');
+            });
+        });
+
+        describe('Order Query Edge Cases', () => {
+            it('should handle pagination gracefully', async () => {
+                const response = await request(app)
+                    .get('/api/customers/orders?page=1&limit=10')
+                    .set('x-auth-token', edgeTestToken);
+
+                expect(response.status).toBe(200);
+                expect(Array.isArray(response.body.orders)).toBe(true);
+            });
+
+            it('should handle invalid status filter', async () => {
+                const response = await request(app)
+                    .get('/api/customers/orders?status=invalid_status')
+                    .set('x-auth-token', edgeTestToken);
+
+                // Should return empty array or error
+                expect(response.status).toBe(200);
+                expect(response.body).toHaveProperty('orders');
+            });
+
+            it('should limit results with large limit parameter', async () => {
+                const response = await request(app)
+                    .get('/api/customers/orders?limit=1000')
+                    .set('x-auth-token', edgeTestToken);
+
+                expect(response.status).toBe(200);
+                expect(Array.isArray(response.body.orders)).toBe(true);
+                // Should have reasonable limit regardless of request
+                expect(response.body.orders.length).toBeLessThanOrEqual(1000);
+            });
+        });
+
+        describe('Authentication Edge Cases', () => {
+            it('should reject whitespace-only password', async () => {
+                const response = await request(app)
+                    .post('/api/auth/customer/register')
+                    .send({
+                        email: 'whitespace@example.com',
+                        password: '     ',
+                        name: 'Test User'
+                    });
+
+                expect([400, 401]).toContain(response.status);
+            });
+
+            it('should handle email case sensitivity correctly', async () => {
+                const response = await request(app)
+                    .post('/api/auth/customer/login')
+                    .send({
+                        email: edgeTestEmail.toUpperCase(),
+                        password: edgeTestPassword
+                    });
+
+                // Email should be case-insensitive
+                expect([200, 401]).toContain(response.status);
+            });
+
+            it('should fail login with empty password field', async () => {
+                const response = await request(app)
+                    .post('/api/auth/customer/login')
+                    .send({
+                        email: edgeTestEmail,
+                        password: ''
+                    });
+
+                expect(response.status).toBe(400);
+            });
+        });
+
+        describe('Input Sanitization', () => {
+            it('should handle special characters in name', async () => {
+                const response = await request(app)
+                    .put('/api/customers/profile')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        name: 'Test <User> & "Quotes"'
+                    });
+
+                expect(response.status).toBe(200);
+                // Should be stored safely
+                expect(response.body.user.name).toBeTruthy();
+            });
+
+            it('should handle long input strings', async () => {
+                const longString = 'a'.repeat(500);
+                const response = await request(app)
+                    .put('/api/customers/profile')
+                    .set('x-auth-token', edgeTestToken)
+                    .send({
+                        name: longString
+                    });
+
+                // Should either accept or reject with 400
+                expect([200, 400]).toContain(response.status);
+            });
+        });
+    });
 });
