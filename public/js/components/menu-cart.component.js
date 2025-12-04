@@ -1,6 +1,5 @@
 // Menu Cart Component - Shopping cart sidebar in the menu page
 import { stateService } from '../services/state.service.js';
-import { uiUtils } from '../utils/ui.utils.js';
 
 class MenuCartComponent {
     constructor(cartContainerId = 'menu-cart-modal') {
@@ -140,7 +139,7 @@ class MenuCartComponent {
 
     removeItem(cartItemId) {
         stateService.removeFromCart(cartItemId);
-        uiUtils.showAlert('Item removed from cart', 'success');
+        window.uiUtils.showAlert('Item removed from cart', 'success');
     }
 
     updateQuantity(cartItemId, change) {
@@ -164,14 +163,14 @@ class MenuCartComponent {
     clearCart() {
         if (confirm('Are you sure you want to clear the entire cart?')) {
             stateService.clearCart();
-            uiUtils.showAlert('Cart cleared', 'success');
+            window.uiUtils.showAlert('Cart cleared', 'success');
         }
     }
 
     proceedToCheckout() {
         const cart = stateService.cart;
         if (cart.length === 0) {
-            uiUtils.showAlert('Your cart is empty. Please add items first.', 'warning');
+            window.uiUtils.showAlert('Your cart is empty. Please add items first.', 'warning');
             return;
         }
         
