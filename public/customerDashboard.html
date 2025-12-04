@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - QuickOrder</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <div class="dashboard-header">
+        <div class="dashboard-header-content">
+            <a href="customerDashboard.html" class="dashboard-logo">QuickOrder</a>
+            
+            <nav class="dashboard-nav">
+                <a href="customerDashboard.html" class="active">Dashboard</a>
+                <a href="customerProfile.html">Profile</a>
+                <a href="orderHistory.html">Order History</a>
+                <a href="menu.html">Order Now</a>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn" id="userMenuBtn">
+                        <span id="userEmail">User</span> ▼
+                    </button>
+                    <div class="user-menu-dropdown" id="userMenuDropdown">
+                        <a href="customerProfile.html">Edit Profile</a>
+                        <button id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="dashboard-container">
+        <h1 class="page-title">Welcome Back, <span id="displayName">User</span>!</h1>
+        <p class="page-subtitle">Here's your account overview</p>
+
+        <div id="alertMessage" class="alert"></div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-label">Total Orders</div>
+                <div class="stat-card-value" id="totalOrders">0</div>
+                <div class="stat-card-unit">all time</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-label">Amount Spent</div>
+                <div class="stat-card-value" id="totalSpent">₱0</div>
+                <div class="stat-card-unit">total</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-label">Pending Orders</div>
+                <div class="stat-card-value" id="pendingOrders">0</div>
+                <div class="stat-card-unit">waiting</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-label">Member Since</div>
+                <div class="stat-card-value" id="memberSince">-</div>
+                <div class="stat-card-unit">date</div>
+            </div>
+        </div>
+
+        <!-- Recent Orders Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Recent Orders</h2>
+                <div class="card-header-action">
+                    <a href="orderHistory.html" class="btn btn-edit">View All</a>
+                </div>
+            </div>
+
+            <div id="recentOrdersContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Quick Actions</h2>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <a href="menu.html" class="btn btn-primary" style="text-align: center;">
+                    Place New Order
+                </a>
+                <a href="customerProfile.html" class="btn btn-secondary" style="text-align: center;">
+                    Update Profile
+                </a>
+                <a href="orderHistory.html" class="btn btn-secondary" style="text-align: center;">
+                    View All Orders
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/services/auth.service.js"></script>
+    <script src="js/services/customer.service.js"></script>
+    <script src="js/utils/auth-ui.utils.js"></script>
+    <script>
+        const alertMessage = document.getElementById('alertMessage');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const recentOrdersContainer = document.getElementById('recentOrdersContainer');
+
+        // Check authentication
+        window.addEventListener('load', () => {
+            if (!authService.isAuthenticated()) {
+                window.location.href = 'customerLogin.html';
+                return;
+            }
+
+            loadDashboard();
+        });
+
+        // User menu toggle
+        userMenuBtn.addEventListener('click', () => {
+            userMenuDropdown.classList.toggle('show');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                userMenuDropdown.classList.remove('show');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await authService.logout();
+                window.location.href = 'customerLogin.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = 'customerLogin.html';
+            }
+        });
+
+        async function loadDashboard() {
+            try {
+                // Load profile
+                const profile = await customerService.getProfile();
+                document.getElementById('userEmail').textContent = profile.email;
+                document.getElementById('displayName').textContent = profile.name || profile.email;
+
+                // Format member since date
+                const memberSince = new Date(profile.createdAt);
+                document.getElementById('memberSince').textContent = 
+                    memberSince.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+                // Load orders
+                const ordersResponse = await customerService.getOrders(1, 5);
+                displayRecentOrders(ordersResponse.orders);
+                calculateStats(ordersResponse.orders);
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                authUIUtils.showError(error.message, alertMessage);
+
+                // If authentication failed, redirect to login
+                if (error.message.includes('Not authenticated')) {
+                    setTimeout(() => {
+                        window.location.href = 'customerLogin.html';
+                    }, 2000);
+                }
+            }
+        }
+
+        function calculateStats(orders) {
+            let totalSpent = 0;
+            let pendingCount = 0;
+            const allOrders = orders || [];
+
+            allOrders.forEach(order => {
+                totalSpent += order.totalAmount || 0;
+                if (['pending', 'preparing', 'ready'].includes(order.status)) {
+                    pendingCount++;
+                }
+            });
+
+            document.getElementById('totalOrders').textContent = allOrders.length;
+            document.getElementById('totalSpent').textContent = `₱${totalSpent.toLocaleString()}`;
+            document.getElementById('pendingOrders').textContent = pendingCount;
+        }
+
+        function displayRecentOrders(orders) {
+            if (!orders || orders.length === 0) {
+                recentOrdersContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <div class="empty-state-title">No Orders Yet</div>
+                        <div class="empty-state-message">Start ordering from our menu to see your orders here</div>
+                        <a href="menu.html" class="btn btn-primary">Browse Menu</a>
+                    </div>
+                `;
+                return;
+            }
+
+            recentOrdersContainer.innerHTML = orders.map(order => `
+                <div class="order-item" onclick="window.location.href='orderHistory.html#${order._id}'">
+                    <div class="order-header">
+                        <div class="order-id">Order #${order._id.slice(-8).toUpperCase()}</div>
+                        <div class="order-status ${order.status}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</div>
+                    </div>
+
+                    <div class="order-details">
+                        <div class="order-detail">
+                            <span class="order-detail-label">Date</span>
+                            <span class="order-detail-value">${new Date(order.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <div class="order-detail">
+                            <span class="order-detail-label">Items</span>
+                            <span class="order-detail-value">${order.items?.length || 0} item(s)</span>
+                        </div>
+                        <div class="order-detail">
+                            <span class="order-detail-label">Total</span>
+                            <span class="order-detail-value" style="color: var(--primary-color); font-weight: 600;">₱${(order.totalAmount || 0).toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - QuickOrder</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <div class="dashboard-header">
+        <div class="dashboard-header-content">
+            <a href="customerDashboard.html" class="dashboard-logo">QuickOrder</a>
+            
+            <nav class="dashboard-nav">
+                <a href="customerDashboard.html">Dashboard</a>
+                <a href="customerProfile.html" class="active">Profile</a>
+                <a href="orderHistory.html">Order History</a>
+                <a href="menu.html">Order Now</a>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn" id="userMenuBtn">
+                        <span id="userEmail">User</span> ▼
+                    </button>
+                    <div class="user-menu-dropdown" id="userMenuDropdown">
+                        <a href="customerProfile.html">Edit Profile</a>
+                        <button id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="dashboard-container">
+        <h1 class="page-title">Profile Settings</h1>
+        <p class="page-subtitle">Manage your account information</p>
+
+        <div id="alertMessage" class="alert"></div>
+
+        <div class="card">
+            <form id="profileForm">
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h3>Personal Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" placeholder="Your email" disabled>
+                            <small style="color: var(--text-light); font-size: 12px; margin-top: 5px;">Email cannot be changed</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <div class="form-section">
+                    <h3>Delivery Address</h3>
+                    
+                    <div class="form-group">
+                        <label for="street">Street Address</label>
+                        <input type="text" id="street" name="street" placeholder="Enter street address">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" placeholder="Enter city">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="postalCode">Postal Code</label>
+                            <input type="text" id="postalCode" name="postalCode" placeholder="Enter postal code">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="Enter phone number">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferences -->
+                <div class="form-section">
+                    <h3>Preferences</h3>
+                    
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="emailNotifications" name="emailNotifications">
+                            Receive email notifications for order updates
+                        </label>
+
+                        <label>
+                            <input type="checkbox" id="smsNotifications" name="smsNotifications">
+                            Receive SMS notifications (if phone number provided)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Account Information -->
+                <div class="form-section">
+                    <h3>Account Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emailVerified">Email Status</label>
+                            <input type="text" id="emailVerified" placeholder="Verified" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="memberSince">Member Since</label>
+                            <input type="text" id="memberSince" placeholder="Date" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <a href="resetPassword.html" class="btn btn-secondary">Change Password</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/services/auth.service.js"></script>
+    <script src="js/services/customer.service.js"></script>
+    <script src="js/utils/auth-ui.utils.js"></script>
+    <script>
+        const profileForm = document.getElementById('profileForm');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const alertMessage = document.getElementById('alertMessage');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        let originalFormData = {};
+
+        // Check authentication
+        window.addEventListener('load', () => {
+            if (!authService.isAuthenticated()) {
+                window.location.href = 'customerLogin.html';
+                return;
+            }
+
+            loadProfile();
+        });
+
+        // User menu toggle
+        userMenuBtn.addEventListener('click', () => {
+            userMenuDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                userMenuDropdown.classList.remove('show');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await authService.logout();
+                window.location.href = 'customerLogin.html';
+            } catch (error) {
+                window.location.href = 'customerLogin.html';
+            }
+        });
+
+        async function loadProfile() {
+            try {
+                const profile = await customerService.getProfile();
+                populateForm(profile);
+                document.getElementById('userEmail').textContent = profile.email;
+                originalFormData = getFormData();
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                authUIUtils.showError(error.message, alertMessage);
+
+                if (error.message.includes('Not authenticated')) {
+                    setTimeout(() => {
+                        window.location.href = 'customerLogin.html';
+                    }, 2000);
+                }
+            }
+        }
+
+        function populateForm(profile) {
+            document.getElementById('name').value = profile.name || '';
+            document.getElementById('email').value = profile.email || '';
+            document.getElementById('street').value = profile.address?.street || '';
+            document.getElementById('city').value = profile.address?.city || '';
+            document.getElementById('postalCode').value = profile.address?.postalCode || '';
+            document.getElementById('phone').value = profile.address?.phone || '';
+            
+            document.getElementById('emailNotifications').checked = 
+                profile.preferences?.notifications !== false;
+            document.getElementById('smsNotifications').checked = 
+                profile.preferences?.smsNotifications === true;
+
+            document.getElementById('emailVerified').value = 
+                profile.emailVerified ? 'Verified' : 'Not Verified';
+
+            const memberSince = new Date(profile.createdAt);
+            document.getElementById('memberSince').value = 
+                memberSince.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+        }
+
+        function getFormData() {
+            return {
+                name: document.getElementById('name').value,
+                address: {
+                    street: document.getElementById('street').value,
+                    city: document.getElementById('city').value,
+                    postalCode: document.getElementById('postalCode').value,
+                    phone: document.getElementById('phone').value
+                },
+                preferences: {
+                    notifications: document.getElementById('emailNotifications').checked,
+                    smsNotifications: document.getElementById('smsNotifications').checked
+                }
+            };
+        }
+
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            authUIUtils.clearMessages(alertMessage.parentElement);
+
+            const formData = getFormData();
+
+            // Validate name
+            if (!formData.name || formData.name.trim().length < 2) {
+                authUIUtils.showError('Please enter a valid full name', alertMessage);
+                return;
+            }
+
+            authUIUtils.disableButton(saveBtn, 'Saving...');
+
+            try {
+                const response = await customerService.updateProfile(formData);
+                authUIUtils.showSuccess('Profile updated successfully!', alertMessage);
+                originalFormData = getFormData();
+
+                // Reload profile
+                setTimeout(() => {
+                    loadProfile();
+                }, 1500);
+            } catch (error) {
+                authUIUtils.showError(error.message, alertMessage);
+                authUIUtils.enableButton(saveBtn);
+            }
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            populateForm({
+                name: originalFormData.name,
+                address: originalFormData.address,
+                preferences: originalFormData.preferences,
+                email: document.getElementById('email').value
+            });
+            authUIUtils.clearMessages(alertMessage.parentElement);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History - QuickOrder</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <div class="dashboard-header">
+        <div class="dashboard-header-content">
+            <a href="customerDashboard.html" class="dashboard-logo">QuickOrder</a>
+            
+            <nav class="dashboard-nav">
+                <a href="customerDashboard.html">Dashboard</a>
+                <a href="customerProfile.html">Profile</a>
+                <a href="orderHistory.html" class="active">Order History</a>
+                <a href="menu.html">Order Now</a>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn" id="userMenuBtn">
+                        <span id="userEmail">User</span> ▼
+                    </button>
+                    <div class="user-menu-dropdown" id="userMenuDropdown">
+                        <a href="customerProfile.html">Edit Profile</a>
+                        <button id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="dashboard-container">
+        <h1 class="page-title">Order History</h1>
+        <p class="page-subtitle">View and manage your past orders</p>
+
+        <div id="alertMessage" class="alert"></div>
+
+        <!-- Filters -->
+        <div class="card">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                    <label for="statusFilter">Filter by Status</label>
+                    <select id="statusFilter" style="padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 4px; font-size: 14px;">
+                        <option value="">All Orders</option>
+                        <option value="pending">Pending</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="ready">Ready</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <button id="resetFilterBtn" class="btn btn-secondary">Reset Filters</button>
+            </div>
+        </div>
+
+        <!-- Orders Container -->
+        <div id="ordersContainer" class="card">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="paginationContainer" style="display: none;"></div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="orderDetailModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; overflow-y: auto;">
+        <div class="card" style="max-width: 600px; margin: 30px auto; position: relative;">
+            <button onclick="closeOrderDetail()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+
+            <div id="orderDetailContent" style="padding-top: 30px;"></div>
+        </div>
+    </div>
+
+    <script src="js/services/auth.service.js"></script>
+    <script src="js/services/customer.service.js"></script>
+    <script src="js/utils/auth-ui.utils.js"></script>
+    <script>
+        const alertMessage = document.getElementById('alertMessage');
+        const ordersContainer = document.getElementById('ordersContainer');
+        const paginationContainer = document.getElementById('paginationContainer');
+        const statusFilter = document.getElementById('statusFilter');
+        const resetFilterBtn = document.getElementById('resetFilterBtn');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const orderDetailModal = document.getElementById('orderDetailModal');
+
+        let currentPage = 1;
+        const limit = 10;
+        let currentStatus = null;
+
+        // Check authentication
+        window.addEventListener('load', () => {
+            if (!authService.isAuthenticated()) {
+                window.location.href = 'customerLogin.html';
+                return;
+            }
+
+            document.getElementById('userEmail').textContent = authService.getUser().email;
+            loadOrders();
+
+            // Check for order ID in URL hash
+            const orderId = window.location.hash.substring(1);
+            if (orderId) {
+                showOrderDetail(orderId);
+            }
+        });
+
+        // User menu toggle
+        userMenuBtn.addEventListener('click', () => {
+            userMenuDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                userMenuDropdown.classList.remove('show');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await authService.logout();
+                window.location.href = 'customerLogin.html';
+            } catch (error) {
+                window.location.href = 'customerLogin.html';
+            }
+        });
+
+        // Filter
+        statusFilter.addEventListener('change', () => {
+            currentStatus = statusFilter.value || null;
+            currentPage = 1;
+            loadOrders();
+        });
+
+        resetFilterBtn.addEventListener('click', () => {
+            statusFilter.value = '';
+            currentStatus = null;
+            currentPage = 1;
+            loadOrders();
+        });
+
+        async function loadOrders() {
+            try {
+                authUIUtils.clearMessages(alertMessage.parentElement);
+                ordersContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+                const response = await customerService.getOrders(currentPage, limit, currentStatus);
+                displayOrders(response.orders);
+                displayPagination(response.pagination);
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                authUIUtils.showError(error.message, alertMessage);
+
+                if (error.message.includes('Not authenticated')) {
+                    setTimeout(() => {
+                        window.location.href = 'customerLogin.html';
+                    }, 2000);
+                }
+            }
+        }
+
+        function displayOrders(orders) {
+            if (!orders || orders.length === 0) {
+                ordersContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <div class="empty-state-title">No Orders Found</div>
+                        <div class="empty-state-message">You haven't placed any orders yet. Start ordering from our menu today!</div>
+                        <a href="menu.html" class="btn btn-primary">Browse Menu</a>
+                    </div>
+                `;
+                return;
+            }
+
+            ordersContainer.innerHTML = `
+                <div class="orders-list">
+                    ${orders.map(order => `
+                        <div class="order-item" onclick="showOrderDetail('${order._id}')">
+                            <div class="order-header">
+                                <div class="order-id">Order #${order._id.slice(-8).toUpperCase()}</div>
+                                <div class="order-status ${order.status}">${formatStatus(order.status)}</div>
+                            </div>
+
+                            <div class="order-details">
+                                <div class="order-detail">
+                                    <span class="order-detail-label">Date</span>
+                                    <span class="order-detail-value">${new Date(order.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <div class="order-detail">
+                                    <span class="order-detail-label">Time</span>
+                                    <span class="order-detail-value">${new Date(order.createdAt).toLocaleTimeString()}</span>
+                                </div>
+                                <div class="order-detail">
+                                    <span class="order-detail-label">Items</span>
+                                    <span class="order-detail-value">${order.items?.length || 0} item(s)</span>
+                                </div>
+                                <div class="order-detail">
+                                    <span class="order-detail-label">Total</span>
+                                    <span class="order-detail-value" style="color: var(--primary-color); font-weight: 600;">₱${(order.totalAmount || 0).toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            <div class="order-items-summary">
+                                <strong>Items:</strong>
+                                <div class="order-items-list">
+                                    ${(order.items || []).slice(0, 2).map(item => `
+                                        <div class="order-item-detail">
+                                            <span class="order-item-name">${item.itemId?.name || 'Item'}</span>
+                                            <span class="order-item-qty">x${item.quantity}</span>
+                                            <span class="order-item-price">₱${(item.price * item.quantity).toLocaleString()}</span>
+                                        </div>
+                                    `).join('')}
+                                    ${(order.items?.length || 0) > 2 ? `
+                                        <div style="color: var(--text-light); font-size: 12px; margin-top: 5px;">
+                                            +${(order.items?.length || 0) - 2} more item(s)
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function displayPagination(pagination) {
+            if (pagination.pages <= 1) {
+                paginationContainer.style.display = 'none';
+                return;
+            }
+
+            let html = '<div class="pagination">';
+
+            // Previous button
+            if (pagination.page > 1) {
+                html += `<button onclick="goToPage(${pagination.page - 1})">← Previous</button>`;
+            } else {
+                html += '<button disabled class="disabled">← Previous</button>';
+            }
+
+            // Page numbers
+            for (let i = 1; i <= pagination.pages; i++) {
+                if (i === pagination.page) {
+                    html += `<button class="active">${i}</button>`;
+                } else {
+                    html += `<button onclick="goToPage(${i})">${i}</button>`;
+                }
+            }
+
+            // Next button
+            if (pagination.page < pagination.pages) {
+                html += `<button onclick="goToPage(${pagination.page + 1})">Next →</button>`;
+            } else {
+                html += '<button disabled class="disabled">Next →</button>';
+            }
+
+            html += '</div>';
+            paginationContainer.innerHTML = html;
+            paginationContainer.style.display = 'block';
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            loadOrders();
+            window.scrollTo(0, 0);
+        }
+
+        function formatStatus(status) {
+            const statusMap = {
+                pending: 'Pending',
+                preparing: 'Preparing',
+                ready: 'Ready',
+                completed: 'Completed',
+                cancelled: 'Cancelled'
+            };
+            return statusMap[status] || status;
+        }
+
+        async function showOrderDetail(orderId) {
+            try {
+                const order = await customerService.getOrderDetails(orderId);
+
+                const orderDetailContent = document.getElementById('orderDetailContent');
+                orderDetailContent.innerHTML = `
+                    <h2>Order #${orderId.slice(-8).toUpperCase()}</h2>
+                    
+                    <div style="margin: 20px 0; padding: 15px; background: var(--light-gray); border-radius: 4px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <div>
+                                <div style="font-size: 12px; color: var(--text-light); margin-bottom: 5px;">Status</div>
+                                <div class="order-status ${order.status}">${formatStatus(order.status)}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: var(--text-light); margin-bottom: 5px;">Ordered On</div>
+                                <div>${new Date(order.createdAt).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 25px; margin-bottom: 15px; font-size: 16px;">Items</h3>
+                    <div class="order-items-list" style="gap: 0;">
+                        ${(order.items || []).map(item => `
+                            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-gray);">
+                                <div>
+                                    <div style="font-weight: 500;">${item.itemId?.name || 'Item'}</div>
+                                    <div style="color: var(--text-light); font-size: 13px;">Qty: ${item.quantity}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 600; color: var(--primary-color);">₱${(item.price * item.quantity).toLocaleString()}</div>
+                                    <div style="color: var(--text-light); font-size: 12px;">₱${item.price.toLocaleString()} each</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border-gray);">
+                        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 600; color: var(--primary-color);">
+                            <span>Total:</span>
+                            <span>₱${(order.totalAmount || 0).toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    <button onclick="closeOrderDetail()" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Close</button>
+                `;
+
+                orderDetailModal.style.display = 'block';
+            } catch (error) {
+                authUIUtils.showError(error.message, alertMessage);
+            }
+        }
+
+        function closeOrderDetail() {
+            orderDetailModal.style.display = 'none';
+            window.location.hash = '';
+        }
+
+        // Close modal on outside click
+        orderDetailModal.addEventListener('click', (e) => {
+            if (e.target === orderDetailModal) {
+                closeOrderDetail();
+            }
+        });
+    </script>
+</body>
+</html>
