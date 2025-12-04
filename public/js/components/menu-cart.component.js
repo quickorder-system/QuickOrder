@@ -30,33 +30,35 @@ class MenuCartComponent {
         const container = this.container;
         if (!container) return;
 
-        // Delegate events for cart items
+        // Use event delegation for all clicks in the container
         container.addEventListener('click', (e) => {
-            const target = e.target.closest('.order-cart-item-btn');
-            if (!target) return;
+            // Handle cart item buttons
+            const itemBtn = e.target.closest('.order-cart-item-btn');
+            if (itemBtn) {
+                const cartItemId = itemBtn.dataset.cartItemId;
+                
+                if (itemBtn.classList.contains('order-cart-remove-btn')) {
+                    this.removeItem(cartItemId);
+                } else if (itemBtn.classList.contains('order-cart-qty-decrease')) {
+                    this.updateQuantity(cartItemId, -1);
+                } else if (itemBtn.classList.contains('order-cart-qty-increase')) {
+                    this.updateQuantity(cartItemId, 1);
+                }
+                return;
+            }
 
-            const cartItemId = target.dataset.cartItemId;
-            
-            if (target.classList.contains('order-cart-remove-btn')) {
-                this.removeItem(cartItemId);
-            } else if (target.classList.contains('order-cart-qty-decrease')) {
-                this.updateQuantity(cartItemId, -1);
-            } else if (target.classList.contains('order-cart-qty-increase')) {
-                this.updateQuantity(cartItemId, 1);
+            // Handle clear cart button
+            if (e.target.closest('.order-cart-clear-btn')) {
+                this.clearCart();
+                return;
+            }
+
+            // Handle checkout button
+            if (e.target.closest('.order-cart-checkout-btn')) {
+                this.proceedToCheckout();
+                return;
             }
         });
-
-        // Clear cart button
-        const clearBtn = container.querySelector('.order-cart-clear-btn');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', () => this.clearCart());
-        }
-
-        // Checkout button
-        const checkoutBtn = container.querySelector('.order-cart-checkout-btn');
-        if (checkoutBtn) {
-            checkoutBtn.addEventListener('click', () => this.proceedToCheckout());
-        }
     }
 
     removeItem(cartItemId) {
