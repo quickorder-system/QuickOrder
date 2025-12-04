@@ -3,6 +3,24 @@
  * Used by both Admin and Owner pages to log user actions
  */
 
+// Helper function to decode JWT and get username
+const getUsernameFromToken = () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    
+    // Decode JWT (basic decoding - no verification needed on client)
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    
+    const decoded = JSON.parse(atob(parts[1]));
+    return decoded.user?.username || null;
+  } catch (error) {
+    console.error('[ActivityLogger] Error decoding token:', error);
+    return null;
+  }
+};
+
 const logActivity = async (action, page, description, details = {}) => {
   try {
     const token = localStorage.getItem('token');
@@ -10,6 +28,8 @@ const logActivity = async (action, page, description, details = {}) => {
       console.warn('[ActivityLogger] No token found, skipping log');
       return;
     }
+
+    const username = getUsernameFromToken();
 
     const response = await fetch('/api/activity-logs', {
       method: 'POST',
@@ -21,7 +41,8 @@ const logActivity = async (action, page, description, details = {}) => {
         action,
         page,
         description,
-        details
+        details,
+        username
       })
     });
 

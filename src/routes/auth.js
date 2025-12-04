@@ -30,6 +30,7 @@ router.post('/login', validateLogin, async (req, res, next) => {
         const payload = {
             user: {
                 id: user.id,
+                username: user.username,
                 role: user.role
             }
         };
@@ -40,7 +41,7 @@ router.post('/login', validateLogin, async (req, res, next) => {
             { expiresIn: process.env.JWT_EXPIRES_IN || '1h' },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, role: user.role } });
+                res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
             }
         );
 

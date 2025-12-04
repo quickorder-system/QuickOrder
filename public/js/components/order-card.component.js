@@ -454,12 +454,15 @@ async function updatePaymentStatus(orderId, newStatus) {
 
         const updatedOrder = await response.json();
         
-        // Log activity
+        // Log activity with proper order ID
         const action = newStatus === 'verified' ? 'VERIFY_PAYMENT' : 'REJECT_PAYMENT';
-        const page = document.body.id === 'adminPage' || document.body.id === 'ownerPage' ? (document.body.id === 'adminPage' ? 'ADMIN' : 'OWNER') : 'OWNER';
-        await logActivity(action, page, `${action === 'VERIFY_PAYMENT' ? 'Verified' : 'Rejected'} payment for order: ${orderId}`, {
-          orderId: orderId,
-          paymentStatus: newStatus
+        const page = document.body.id === 'adminPage' ? 'ADMIN' : 'OWNER';
+        await logActivity(action, page, `${action === 'VERIFY_PAYMENT' ? 'Verified' : 'Rejected'} payment for order: ${updatedOrder.orderId || orderId}`, {
+          orderId: updatedOrder.orderId || orderId,
+          _id: orderId,
+          paymentStatus: newStatus,
+          customerName: updatedOrder.customerName,
+          total: updatedOrder.total
         });
         
         // Update the UI
