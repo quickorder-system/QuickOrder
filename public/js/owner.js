@@ -212,6 +212,8 @@ function showTab(tabId, clickedButton) {
     renderInventoryOwner();
     // Update category filter with actual categories from inventory
     updateCategoryFilterOptionsOwner();
+  } else if (tabId === 'categoriesTab') {
+    categoryManager.init();
   }
 }
 
