@@ -459,6 +459,7 @@
     }
 
     console.log('[RenderVariations] Rendering', variationsData.length, 'variations');
+    container.innerHTML = variationsData.map((variation, varIndex) => `
       <div class="variation-group-card">
         <div class="variation-group-header">
           <h4>${variation.variationName || 'Unknown'}</h4>
