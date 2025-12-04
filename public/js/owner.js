@@ -1205,7 +1205,24 @@ async function handleEditItem(itemId) {
 
     // Pre-fill modal with item data
     document.getElementById('itemName').value = item.itemName || '';
-    document.getElementById('itemCategory').value = item.category || '';
+    
+    // Handle category display (same as in inventory.js)
+    const categorySelect = document.getElementById('itemCategory');
+    const customInput = document.getElementById('customCategory');
+    const predefinedCategories = ['burger', 'pizza', 'others', 'drinks', 'rice', 'pasta', 'coffee', 'bundle'];
+    
+    if (predefinedCategories.includes(item.category)) {
+      categorySelect.value = item.category;
+      if (customInput) { customInput.style.display = 'none'; customInput.value = ''; }
+    } else if (item.category) {
+      // Custom category
+      categorySelect.value = 'custom';
+      if (customInput) { customInput.style.display = 'block'; customInput.value = item.category; }
+    } else {
+      categorySelect.value = '';
+      if (customInput) { customInput.style.display = 'none'; customInput.value = ''; }
+    }
+    
     const priceEl = document.getElementById('itemPrice');
     if (priceEl) priceEl.value = item.price !== undefined ? item.price : '';
     const unitEl = document.getElementById('itemUnit');
@@ -1233,6 +1250,13 @@ async function handleEditItem(itemId) {
     // Store the item ID for form submission
     const idxField = document.getElementById('itemEditIndex');
     if (idxField) idxField.value = item._id;
+
+    // Load variations if they exist
+    variationsData = item.variations || [];
+    console.log('[Owner] Loaded variations into variationsData:', variationsData);
+    console.log('[Owner] variationsData.length:', variationsData.length);
+    renderVariationsList();
+    console.log('[Owner] After renderVariationsList');
 
     // Open modal
     openAddItemModal();
