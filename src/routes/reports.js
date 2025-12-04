@@ -777,6 +777,34 @@ router.get('/export-pdf', async (req, res) => {
             { $sort: { _id: 1 } }
         ]);
 
+        // Fetch payment breakdown by day (detailed)
+        const paymentByDay = await Order.aggregate([
+            { $match: query },
+            {
+                $project: {
+                    date: {
+                        $dateToString: {
+                            format: '%Y-%m-%d',
+                            date: '$createdAt'
+                        }
+                    },
+                    total: 1,
+                    paymentMethod: 1
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        date: '$date',
+                        method: '$paymentMethod'
+                    },
+                    methodSales: { $sum: '$total' },
+                    methodOrders: { $sum: 1 }
+                }
+            },
+            { $sort: { '_id.date': 1, '_id.method': 1 } }
+        ]);
+
         // Fetch payment breakdown for same period
         const paymentBreakdown = await Order.aggregate([
             { $match: query },
@@ -788,6 +816,90 @@ router.get('/export-pdf', async (req, res) => {
                 }
             },
             { $sort: { totalSales: -1 } }
+        ]);
+
+        // Fetch weekly breakdown with payment methods
+        const weeklyData = await Order.aggregate([
+            { $match: query },
+            {
+                $project: {
+                    week: {
+                        $dateToString: {
+                            format: '%Y-W%V',
+                            date: '$createdAt'
+                        }
+                    },
+                    total: 1,
+                    paymentMethod: 1
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        week: '$week',
+                        method: '$paymentMethod'
+                    },
+                    weekSales: { $sum: '$total' },
+                    weekOrders: { $sum: 1 }
+                }
+            },
+            { $sort: { '_id.week': 1 } }
+        ]);
+
+        // Fetch monthly breakdown with payment methods
+        const monthlyData = await Order.aggregate([
+            { $match: query },
+            {
+                $project: {
+                    month: {
+                        $dateToString: {
+                            format: '%Y-%m',
+                            date: '$createdAt'
+                        }
+                    },
+                    total: 1,
+                    paymentMethod: 1
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        month: '$month',
+                        method: '$paymentMethod'
+                    },
+                    monthSales: { $sum: '$total' },
+                    monthOrders: { $sum: 1 }
+                }
+            },
+            { $sort: { '_id.month': 1 } }
+        ]);
+
+        // Fetch yearly breakdown with payment methods
+        const yearlyData = await Order.aggregate([
+            { $match: query },
+            {
+                $project: {
+                    year: {
+                        $dateToString: {
+                            format: '%Y',
+                            date: '$createdAt'
+                        }
+                    },
+                    total: 1,
+                    paymentMethod: 1
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: '$year',
+                        method: '$paymentMethod'
+                    },
+                    yearSales: { $sum: '$total' },
+                    yearOrders: { $sum: 1 }
+                }
+            },
+            { $sort: { '_id.year': 1 } }
         ]);
 
         // Calculate totals
@@ -843,34 +955,272 @@ router.get('/export-pdf', async (req, res) => {
             doc.moveDown(1);
         }
 
-        // Daily Breakdown Table
-        doc.fontSize(12).font('Helvetica-Bold').text('Daily Sales Breakdown');
+        // Daily Breakdown Table with Payment Method Breakdown
+        doc.fontSize(12).font('Helvetica-Bold').text('Daily Sales Breakdown (by Payment Method)');
         doc.fontSize(9).font('Helvetica');
 
         // Table header
         const tableTop = doc.y;
         const col1 = 60;
-        const col2 = 250;
-        const col3 = 400;
+        const col2 = 130;
+        const col3 = 200;
+        const col4 = 270;
+        const col5 = 340;
+        const col6 = 410;
 
         doc.text('Date', col1, tableTop);
-        doc.text('Daily Sales (₱)', col2, tableTop);
-        doc.text('Orders', col3, tableTop);
+        doc.text('GCash', col2, tableTop);
+        doc.text('Maya', col3, tableTop);
+        doc.text('Cash', col4, tableTop);
+        doc.text('Orders', col5, tableTop);
+        doc.text('Total (₱)', col6, tableTop);
 
         // Horizontal line
         doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
 
         let yPosition = tableTop + 25;
+        
+        // Group payment data by date
+        const paymentByDateMap = {};
+        paymentByDay.forEach(item => {
+            if (!paymentByDateMap[item._id.date]) {
+                paymentByDateMap[item._id.date] = {};
+            }
+            paymentByDateMap[item._id.date][item._id.method] = {
+                sales: item.methodSales,
+                orders: item.methodOrders
+            };
+        });
+
+        // Display each day with payment breakdown
         salesData.forEach(day => {
             if (yPosition > doc.page.height - 100) {
                 doc.addPage();
                 yPosition = 50;
             }
+            
+            const dayPayments = paymentByDateMap[day._id] || {};
+            const gcashSales = dayPayments['GCash']?.sales || 0;
+            const mayaSales = dayPayments['Maya']?.sales || 0;
+            const cashSales = dayPayments['Cash']?.sales || 0;
+            
             doc.text(day._id, col1, yPosition);
-            doc.text(day.dailySales.toFixed(2), col2, yPosition);
-            doc.text(day.orderCount.toString(), col3, yPosition);
+            doc.text(gcashSales.toFixed(2), col2, yPosition);
+            doc.text(mayaSales.toFixed(2), col3, yPosition);
+            doc.text(cashSales.toFixed(2), col4, yPosition);
+            doc.text(day.orderCount.toString(), col5, yPosition);
+            doc.text(day.dailySales.toFixed(2), col6, yPosition);
             yPosition += 20;
         });
+
+        // Add summary by time period
+        doc.moveDown(2);
+        doc.fontSize(12).font('Helvetica-Bold').text('Payment Method Summary');
+        doc.fontSize(10).font('Helvetica');
+        
+        let gcashTotal = 0, mayaTotal = 0, cashTotal = 0;
+        paymentBreakdown.forEach(method => {
+            if (method._id === 'GCash') gcashTotal = method.totalSales;
+            if (method._id === 'Maya') mayaTotal = method.totalSales;
+            if (method._id === 'Cash') cashTotal = method.totalSales;
+        });
+
+        const totalRevenue = gcashTotal + mayaTotal + cashTotal;
+        
+        doc.text(`GCash: ₱${gcashTotal.toFixed(2)} (${((gcashTotal/totalRevenue)*100).toFixed(2)}%)`);
+        doc.text(`Maya: ₱${mayaTotal.toFixed(2)} (${((mayaTotal/totalRevenue)*100).toFixed(2)}%)`);
+        doc.text(`Cash: ₱${cashTotal.toFixed(2)} (${((cashTotal/totalRevenue)*100).toFixed(2)}%)`);
+        doc.moveDown(1);
+        doc.fontSize(11).font('Helvetica-Bold').text(`Total: ₱${totalRevenue.toFixed(2)}`);
+
+        // Weekly Summary
+        if (weeklyData.length > 0) {
+            doc.addPage();
+            doc.fontSize(12).font('Helvetica-Bold').text('Weekly Sales Breakdown');
+            doc.fontSize(9).font('Helvetica');
+
+            const weeklyByDate = {};
+            weeklyData.forEach(item => {
+                if (!weeklyByDate[item._id.week]) {
+                    weeklyByDate[item._id.week] = {};
+                }
+                weeklyByDate[item._id.week][item._id.method] = {
+                    sales: item.weekSales,
+                    orders: item.weekOrders
+                };
+            });
+
+            const weeklyTableTop = doc.y;
+            const wCol1 = 60;
+            const wCol2 = 130;
+            const wCol3 = 200;
+            const wCol4 = 270;
+            const wCol5 = 340;
+            const wCol6 = 410;
+
+            doc.text('Week', wCol1, weeklyTableTop);
+            doc.text('GCash', wCol2, weeklyTableTop);
+            doc.text('Maya', wCol3, weeklyTableTop);
+            doc.text('Cash', wCol4, weeklyTableTop);
+            doc.text('Orders', wCol5, weeklyTableTop);
+            doc.text('Total (₱)', wCol6, weeklyTableTop);
+
+            doc.moveTo(50, weeklyTableTop + 15).lineTo(550, weeklyTableTop + 15).stroke();
+
+            let weeklyY = weeklyTableTop + 25;
+            const uniqueWeeks = [...new Set(weeklyData.map(w => w._id.week))].sort();
+            
+            uniqueWeeks.forEach(week => {
+                if (weeklyY > doc.page.height - 100) {
+                    doc.addPage();
+                    weeklyY = 50;
+                }
+                
+                const weekPayments = weeklyByDate[week] || {};
+                const wGcash = weekPayments['GCash']?.sales || 0;
+                const wMaya = weekPayments['Maya']?.sales || 0;
+                const wCash = weekPayments['Cash']?.sales || 0;
+                const wTotal = wGcash + wMaya + wCash;
+                const wOrders = (weekPayments['GCash']?.orders || 0) + 
+                               (weekPayments['Maya']?.orders || 0) + 
+                               (weekPayments['Cash']?.orders || 0);
+                
+                doc.text(week, wCol1, weeklyY);
+                doc.text(wGcash.toFixed(2), wCol2, weeklyY);
+                doc.text(wMaya.toFixed(2), wCol3, weeklyY);
+                doc.text(wCash.toFixed(2), wCol4, weeklyY);
+                doc.text(wOrders.toString(), wCol5, weeklyY);
+                doc.text(wTotal.toFixed(2), wCol6, weeklyY);
+                weeklyY += 20;
+            });
+        }
+
+        // Monthly Summary
+        if (monthlyData.length > 0) {
+            doc.addPage();
+            doc.fontSize(12).font('Helvetica-Bold').text('Monthly Sales Breakdown');
+            doc.fontSize(9).font('Helvetica');
+
+            const monthlyByDate = {};
+            monthlyData.forEach(item => {
+                if (!monthlyByDate[item._id.month]) {
+                    monthlyByDate[item._id.month] = {};
+                }
+                monthlyByDate[item._id.month][item._id.method] = {
+                    sales: item.monthSales,
+                    orders: item.monthOrders
+                };
+            });
+
+            const monthlyTableTop = doc.y;
+            const mCol1 = 60;
+            const mCol2 = 130;
+            const mCol3 = 200;
+            const mCol4 = 270;
+            const mCol5 = 340;
+            const mCol6 = 410;
+
+            doc.text('Month', mCol1, monthlyTableTop);
+            doc.text('GCash', mCol2, monthlyTableTop);
+            doc.text('Maya', mCol3, monthlyTableTop);
+            doc.text('Cash', mCol4, monthlyTableTop);
+            doc.text('Orders', mCol5, monthlyTableTop);
+            doc.text('Total (₱)', mCol6, monthlyTableTop);
+
+            doc.moveTo(50, monthlyTableTop + 15).lineTo(550, monthlyTableTop + 15).stroke();
+
+            let monthlyY = monthlyTableTop + 25;
+            const uniqueMonths = [...new Set(monthlyData.map(m => m._id.month))].sort();
+            
+            uniqueMonths.forEach(month => {
+                if (monthlyY > doc.page.height - 100) {
+                    doc.addPage();
+                    monthlyY = 50;
+                }
+                
+                const monthPayments = monthlyByDate[month] || {};
+                const mGcash = monthPayments['GCash']?.sales || 0;
+                const mMaya = monthPayments['Maya']?.sales || 0;
+                const mCash = monthPayments['Cash']?.sales || 0;
+                const mTotal = mGcash + mMaya + mCash;
+                const mOrders = (monthPayments['GCash']?.orders || 0) + 
+                               (monthPayments['Maya']?.orders || 0) + 
+                               (monthPayments['Cash']?.orders || 0);
+                
+                doc.text(month, mCol1, monthlyY);
+                doc.text(mGcash.toFixed(2), mCol2, monthlyY);
+                doc.text(mMaya.toFixed(2), mCol3, monthlyY);
+                doc.text(mCash.toFixed(2), mCol4, monthlyY);
+                doc.text(mOrders.toString(), mCol5, monthlyY);
+                doc.text(mTotal.toFixed(2), mCol6, monthlyY);
+                monthlyY += 20;
+            });
+        }
+
+        // Yearly Summary
+        if (yearlyData.length > 0) {
+            doc.addPage();
+            doc.fontSize(12).font('Helvetica-Bold').text('Yearly Sales Breakdown');
+            doc.fontSize(9).font('Helvetica');
+
+            const yearlyByDate = {};
+            yearlyData.forEach(item => {
+                if (!yearlyByDate[item._id.year]) {
+                    yearlyByDate[item._id.year] = {};
+                }
+                yearlyByDate[item._id.year][item._id.method] = {
+                    sales: item.yearSales,
+                    orders: item.yearOrders
+                };
+            });
+
+            const yearlyTableTop = doc.y;
+            const yCol1 = 60;
+            const yCol2 = 130;
+            const yCol3 = 200;
+            const yCol4 = 270;
+            const yCol5 = 340;
+            const yCol6 = 410;
+
+            doc.text('Year', yCol1, yearlyTableTop);
+            doc.text('GCash', yCol2, yearlyTableTop);
+            doc.text('Maya', yCol3, yearlyTableTop);
+            doc.text('Cash', yCol4, yearlyTableTop);
+            doc.text('Orders', yCol5, yearlyTableTop);
+            doc.text('Total (₱)', yCol6, yearlyTableTop);
+
+            doc.moveTo(50, yearlyTableTop + 15).lineTo(550, yearlyTableTop + 15).stroke();
+
+            let yearlyY = yearlyTableTop + 25;
+            const uniqueYears = [...new Set(yearlyData.map(y => y._id.year))].sort();
+            
+            uniqueYears.forEach(year => {
+                if (yearlyY > doc.page.height - 100) {
+                    doc.addPage();
+                    yearlyY = 50;
+                }
+                
+                const yearPayments = yearlyByDate[year] || {};
+                const yGcash = yearPayments['GCash']?.sales || 0;
+                const yMaya = yearPayments['Maya']?.sales || 0;
+                const yCash = yearPayments['Cash']?.sales || 0;
+                const yTotal = yGcash + yMaya + yCash;
+                const yOrders = (yearPayments['GCash']?.orders || 0) + 
+                               (yearPayments['Maya']?.orders || 0) + 
+                               (yearPayments['Cash']?.orders || 0);
+                
+                doc.text(year, yCol1, yearlyY);
+                doc.text(yGcash.toFixed(2), yCol2, yearlyY);
+                doc.text(yMaya.toFixed(2), yCol3, yearlyY);
+                doc.text(yCash.toFixed(2), yCol4, yearlyY);
+                doc.text(yOrders.toString(), yCol5, yearlyY);
+                doc.text(yTotal.toFixed(2), yCol6, yearlyY);
+                yearlyY += 20;
+            });
+        }
+
+        // Old Daily Breakdown Table (removed - keeping payment method version above)
+        
 
         // Footer
         doc.fontSize(8).font('Helvetica').text('This is an automatically generated report from Quick Order System', 50, doc.page.height - 40, { align: 'center' });
