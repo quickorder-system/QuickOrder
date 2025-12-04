@@ -443,25 +443,37 @@
     }
 
     console.log('[RenderVariations] variationsData:', variationsData);
+    console.log('[RenderVariations] variationsData type:', typeof variationsData);
+    console.log('[RenderVariations] Array.isArray(variationsData):', Array.isArray(variationsData));
+    
+    // Ensure variationsData is an array
+    if (!Array.isArray(variationsData)) {
+      console.warn('[RenderVariations] variationsData is not an array, converting to empty array');
+      variationsData = [];
+    }
     
     if (variationsData.length === 0) {
       container.innerHTML = '<p style="color: #999; font-size: 0.9rem; margin: 8px 0;">No variations added yet</p>';
+      console.log('[RenderVariations] No variations to display');
       return;
     }
 
-    container.innerHTML = variationsData.map((variation, varIndex) => `
+    console.log('[RenderVariations] Rendering', variationsData.length, 'variations');
+    container.innerHTML = variationsData.map((variation, varIndex) => {
+      console.log('[RenderVariations] Variation', varIndex, ':', variation);
+      return `
       <div class="variation-group-card">
         <div class="variation-group-header">
-          <h4>${variation.variationName}</h4>
+          <h4>${variation.variationName || 'Unknown'}</h4>
           <button type="button" class="btn-small btn-danger" data-delete-variation="${varIndex}">
             <i class="fas fa-trash"></i>
           </button>
         </div>
         <div class="variation-options">
-          ${variation.options.map((option, optIndex) => `
+          ${(variation.options || []).map((option, optIndex) => `
             <div class="variation-option-item">
-              <span class="option-name">${option.optionName}</span>
-              <span class="option-price">${option.priceModifier >= 0 ? '+' : ''}₱${option.priceModifier.toFixed(2)}</span>
+              <span class="option-name">${option.optionName || 'Unknown'}</span>
+              <span class="option-price">${option.priceModifier >= 0 ? '+' : ''}₱${(option.priceModifier || 0).toFixed(2)}</span>
               <button type="button" class="btn-small btn-danger" data-delete-option="${varIndex}-${optIndex}">
                 <i class="fas fa-times"></i>
               </button>

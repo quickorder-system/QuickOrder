@@ -77,7 +77,7 @@ router.patch('/:id', auth, async (req, res) => {
         if (!item) return res.status(404).json({ message: 'Inventory item not found' });
 
         // Dynamically update only provided fields
-        const allowedFields = ['itemName', 'category', 'price', 'unit', 'quantity', 'alertLevel', 'description', 'image', 'isAvailable'];
+        const allowedFields = ['itemName', 'category', 'price', 'unit', 'quantity', 'alertLevel', 'description', 'image', 'isAvailable', 'variations'];
         
         allowedFields.forEach(field => {
             if (req.body[field] !== undefined) {
