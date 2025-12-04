@@ -266,6 +266,8 @@
     const hid = document.getElementById('itemImageData'); if (hid) hid.value = '';
     const idxField = document.getElementById('itemEditIndex'); if (idxField) idxField.value = '';
     const customCat = document.getElementById('customCategory'); if (customCat) { customCat.style.display = 'none'; customCat.value = ''; }
+    // Note: variationsData is NOT cleared here because it will be reloaded when editing a new item
+    // or cleared when opening a new item modal via the wrapped openNewItemModal function
   }
 
   async function editInventoryItem(id) {
@@ -295,8 +297,7 @@
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const item = await response.json();
-      console.log('[Edit] Item loaded successfully:', item);
-      console.log('[Edit] Item variations from API:', item.variations);
+      console.log('[Edit] Item loaded successfully with variations:', item.variations);
 
       document.getElementById('itemName').value = item.itemName || '';
       
@@ -333,9 +334,6 @@
       
       // Load variations if they exist
       variationsData = item.variations || [];
-      console.log('[Edit] After assignment, variationsData is:', variationsData);
-      console.log('[Edit] variationsData length:', variationsData.length);
-      console.log('[Edit] Calling renderVariationsList with', variationsData.length, 'variations');
       renderVariationsList();
       
       openAddItemModal();
@@ -442,10 +440,6 @@
       return;
     }
 
-    console.log('[RenderVariations] variationsData:', variationsData);
-    console.log('[RenderVariations] variationsData type:', typeof variationsData);
-    console.log('[RenderVariations] Array.isArray(variationsData):', Array.isArray(variationsData));
-    
     // Ensure variationsData is an array
     if (!Array.isArray(variationsData)) {
       console.warn('[RenderVariations] variationsData is not an array, converting to empty array');
@@ -454,14 +448,10 @@
     
     if (variationsData.length === 0) {
       container.innerHTML = '<p style="color: #999; font-size: 0.9rem; margin: 8px 0;">No variations added yet</p>';
-      console.log('[RenderVariations] No variations to display');
       return;
     }
 
-    console.log('[RenderVariations] Rendering', variationsData.length, 'variations');
-    container.innerHTML = variationsData.map((variation, varIndex) => {
-      console.log('[RenderVariations] Variation', varIndex, ':', variation);
-      return `
+    container.innerHTML = variationsData.map((variation, varIndex) => `
       <div class="variation-group-card">
         <div class="variation-group-header">
           <h4>${variation.variationName || 'Unknown'}</h4>
@@ -651,9 +641,6 @@
       image: imageUrl,
       variations: getVariationsFromForm()  // NEW: Get variations from form
     };
-
-    console.log('[Submit] Submitting item data with variations:', itemData.variations);
-    console.log('[Submit] variations count:', itemData.variations.length);
 
     try {
       let response;
