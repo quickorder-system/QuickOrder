@@ -47,12 +47,41 @@ const userSchema = new mongoose.Schema({
         default: null
     },
     // Customer profile fields
+    phone: {
+        type: String,
+        default: null
+    },
+    // Primary address (legacy support)
     address: {
         street: String,
         city: String,
         postalCode: String,
         phone: String
     },
+    // Multiple delivery addresses
+    addresses: [{
+        _id: {
+            type: mongoose.Schema.Types.ObjectId,
+            default: () => new mongoose.Types.ObjectId()
+        },
+        label: {
+            type: String,
+            enum: ['home', 'work', 'other'],
+            default: 'home'
+        },
+        street: String,
+        city: String,
+        postalCode: String,
+        phone: String,
+        isDefault: {
+            type: Boolean,
+            default: false
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     preferences: {
         notifications: {
             type: Boolean,
@@ -61,6 +90,10 @@ const userSchema = new mongoose.Schema({
         smsNotifications: {
             type: Boolean,
             default: false
+        },
+        marketingEmails: {
+            type: Boolean,
+            default: true
         }
     },
     lastLogin: {

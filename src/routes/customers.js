@@ -146,4 +146,240 @@ router.get('/orders/:orderId', auth, async (req, res, next) => {
     }
 });
 
+/**
+ * @route POST /api/customers/change-password
+ * @description Change customer password
+ * @access Private
+ */
+router.post('/change-password', auth, async (req, res, next) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const bcrypt = require('bcrypt');
+
+        if (!currentPassword || !newPassword) {
+            throw new BadRequestError('Current password and new password are required');
+        }
+
+        if (newPassword.length < 6) {
+            throw new BadRequestError('New password must be at least 6 characters');
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            throw new BadRequestError('User not found');
+        }
+
+        // Verify current password
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isPasswordValid) {
+            throw new BadRequestError('Current password is incorrect');
+        }
+
+        // Update password (will be hashed by pre-save hook)
+        user.password = newPassword;
+        user.updatedAt = new Date();
+        await user.save();
+
+        logger.info(`Customer password changed: ${user.email}`);
+
+        res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route GET /api/customers/addresses
+ * @description Get all delivery addresses
+ * @access Private
+ */
+router.get('/addresses', auth, async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id).select('addresses');
+
+        if (!user) {
+            throw new BadRequestError('User not found');
+        }
+
+        res.json({
+            addresses: user.addresses || []
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route POST /api/customers/addresses
+ * @description Add new delivery address
+ * @access Private
+ */
+router.post('/addresses', auth, async (req, res, next) => {
+    try {
+        const { label, street, city, postalCode, phone } = req.body;
+
+        if (!street || !city || !postalCode) {
+            throw new BadRequestError('Street, city, and postal code are required');
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            throw new BadRequestError('User not found');
+        }
+
+        // Initialize addresses array if it doesn't exist
+        if (!user.addresses) {
+            user.addresses = [];
+        }
+
+        // If this is the first address, make it default
+        const isDefault = user.addresses.length === 0;
+
+        const newAddress = {
+            label: label || 'home',
+            street,
+            city,
+            postalCode,
+            phone: phone || '',
+            isDefault
+        };
+
+        user.addresses.push(newAddress);
+        user.updatedAt = new Date();
+        await user.save();
+
+        logger.info(`Address added for customer: ${user.email}`);
+
+        res.status(201).json({
+            message: 'Address added successfully',
+            address: user.addresses[user.addresses.length - 1]
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route PUT /api/customers/addresses/:addressId
+ * @description Update delivery address
+ * @access Private
+ */
+router.put('/addresses/:addressId', auth, async (req, res, next) => {
+    try {
+        const { addressId } = req.params;
+        const { label, street, city, postalCode, phone } = req.body;
+
+        if (!street || !city || !postalCode) {
+            throw new BadRequestError('Street, city, and postal code are required');
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            throw new BadRequestError('User not found');
+        }
+
+        const address = user.addresses.find(addr => addr._id.toString() === addressId);
+        if (!address) {
+            throw new BadRequestError('Address not found');
+        }
+
+        // Update address fields
+        address.label = label || address.label;
+        address.street = street;
+        address.city = city;
+        address.postalCode = postalCode;
+        address.phone = phone || address.phone;
+
+        user.updatedAt = new Date();
+        await user.save();
+
+        logger.info(`Address updated for customer: ${user.email}`);
+
+        res.json({
+            message: 'Address updated successfully',
+            address
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route DELETE /api/customers/addresses/:addressId
+ * @description Delete delivery address
+ * @access Private
+ */
+router.delete('/addresses/:addressId', auth, async (req, res, next) => {
+    try {
+        const { addressId } = req.params;
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            throw new BadRequestError('User not found');
+        }
+
+        const addressIndex = user.addresses.findIndex(addr => addr._id.toString() === addressId);
+        if (addressIndex === -1) {
+            throw new BadRequestError('Address not found');
+        }
+
+        // If deleting the default address, set the first remaining as default
+        if (user.addresses[addressIndex].isDefault && user.addresses.length > 1) {
+            user.addresses[0].isDefault = true;
+        }
+
+        user.addresses.splice(addressIndex, 1);
+        user.updatedAt = new Date();
+        await user.save();
+
+        logger.info(`Address deleted for customer: ${user.email}`);
+
+        res.json({ message: 'Address deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route PUT /api/customers/addresses/:addressId/default
+ * @description Set address as default
+ * @access Private
+ */
+router.put('/addresses/:addressId/default', auth, async (req, res, next) => {
+    try {
+        const { addressId } = req.params;
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            throw new BadRequestError('User not found');
+        }
+
+        // Find the address
+        const address = user.addresses.find(addr => addr._id.toString() === addressId);
+        if (!address) {
+            throw new BadRequestError('Address not found');
+        }
+
+        // Reset all addresses to not default
+        user.addresses.forEach(addr => {
+            addr.isDefault = false;
+        });
+
+        // Set selected address as default
+        address.isDefault = true;
+
+        user.updatedAt = new Date();
+        await user.save();
+
+        logger.info(`Default address set for customer: ${user.email}`);
+
+        res.json({
+            message: 'Default address set successfully',
+            address
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
 module.exports = router;
