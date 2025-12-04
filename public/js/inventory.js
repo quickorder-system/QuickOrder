@@ -332,6 +332,8 @@
       
       // Load variations if they exist
       variationsData = item.variations || [];
+      console.log('[Edit] Loaded variations:', variationsData);
+      console.log('[Edit] Calling renderVariationsList with', variationsData.length, 'variations');
       renderVariationsList();
       
       openAddItemModal();
@@ -433,8 +435,13 @@
   // Render variations list UI
   function renderVariationsList() {
     const container = document.getElementById('variationsList');
-    if (!container) return;
+    if (!container) {
+      console.log('[RenderVariations] Container not found');
+      return;
+    }
 
+    console.log('[RenderVariations] variationsData:', variationsData);
+    
     if (variationsData.length === 0) {
       container.innerHTML = '<p style="color: #999; font-size: 0.9rem; margin: 8px 0;">No variations added yet</p>';
       return;
