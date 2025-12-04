@@ -483,6 +483,7 @@
       </div>
     `).join('');
 
+    console.log('[RenderVariations] Set container.innerHTML to:', container.innerHTML);
     // Attach event listeners
     container.querySelectorAll('[data-delete-variation]').forEach(btn => {
       btn.addEventListener('click', (e) => {
