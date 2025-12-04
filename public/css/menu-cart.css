@@ -1,35 +1,50 @@
-/* Order Cart Styling - Inline Cart Display */
+/* Order Cart Styling - Fixed Right Sidebar */
+
+#menu-cart-container {
+    position: fixed;
+    right: 0;
+    top: 100px;
+    width: 380px;
+    max-height: calc(100vh - 100px);
+    padding: 20px;
+    background: white;
+    box-shadow: -2px 0 15px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    z-index: 999;
+}
 
 /* Cart Panel */
 .order-cart-panel {
     background: white;
-    border: 1px solid #e0e0e0;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
-    height: fit-content;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 /* Cart Header */
 .order-cart-header {
     padding: 15px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 2px solid #f0f0f0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 10px;
 }
 
 .order-cart-header h2 {
     margin: 0;
     font-size: 1.3rem;
     color: white;
+    font-weight: 700;
 }
 
 /* Cart Body */
 .order-cart-body {
     flex: 1;
     overflow-y: auto;
-    max-height: 400px;
-    padding: 10px;
+    padding: 10px 0;
+    margin-bottom: 10px;
 }
 
 .order-cart-items {
@@ -163,9 +178,11 @@
 
 /* Cart Footer */
 .order-cart-footer {
-    padding: 12px;
-    border-top: 1px solid #e0e0e0;
+    padding: 15px;
+    border-top: 2px solid #f0f0f0;
     background: #f9f9f9;
+    border-radius: 0 0 8px 8px;
+    margin-top: auto;
 }
 
 .order-cart-total {
@@ -304,14 +321,36 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+    #menu-cart-container {
+        width: 320px;
+        padding: 15px;
+    }
+}
+
 @media (max-width: 1024px) {
-    .order-cart-panel {
+    #menu-cart-container {
+        position: relative;
         width: 100%;
-        max-width: 100%;
+        max-height: none;
+        top: 0;
+        right: 0;
+        margin-top: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-cart-body {
+        max-height: 400px;
     }
 }
 
 @media (max-width: 768px) {
+    #menu-cart-container {
+        width: 100%;
+        padding: 10px;
+    }
+
     .order-cart-body {
         max-height: 300px;
     }

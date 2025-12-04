@@ -130,6 +130,19 @@ body {
     margin: 0 auto;
     padding: 2rem;
     padding-top: 100px;
+    padding-right: calc(2rem + 380px);
+}
+
+@media (max-width: 1200px) {
+    .container {
+        padding-right: calc(2rem + 320px);
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        padding-right: 2rem;
+    }
 }
 
 /* Hero Banner */

@@ -64,15 +64,13 @@
 
         <!-- Form -->
         <form action="orderedList.html">
-            <div style="display: flex; gap: 20px; align-items: flex-start;">
-                <!-- Dynamic Menu Content Will Be Inserted Here by menu.js -->
-                <div id="dynamic-menu-container" style="flex: 1;"></div>
-                
-                <!-- Order Cart Sidebar - Always Visible -->
-                <div id="menu-cart-container" style="width: 350px; position: sticky; top: 100px;"></div>
-            </div>
+            <!-- Dynamic Menu Content Will Be Inserted Here by menu.js -->
+            <div id="dynamic-menu-container"></div>
         </form>
     </div>
+
+    <!-- Order Cart Panel - Fixed Sidebar -->
+    <div id="menu-cart-container"></div>
 
     <!-- Modals -->
     <div id="aboutModal" class="modal">
