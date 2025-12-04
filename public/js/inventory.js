@@ -375,6 +375,10 @@
       const result = await response.json();
       console.log('[Delete] Item deleted successfully:', result);
       
+      // Log activity
+      const page = document.body.id === 'adminPage' ? 'ADMIN' : 'OWNER';
+      await logActivity('DELETE_ITEM', page, `Deleted item: ${id}`, { itemId: id });
+      
       // Re-render inventory after successful deletion
       await renderInventoryShared('inventoryRows');
       alert('Item deleted successfully.');
@@ -656,6 +660,17 @@
       const result = await response.json();
       if (response.ok) {
         console.log('[Inventory] Item saved successfully:', result);
+        
+        // Log activity
+        const action = editId ? 'UPDATE_ITEM' : 'CREATE_ITEM';
+        const page = document.body.id === 'adminPage' ? 'ADMIN' : 'OWNER';
+        await logActivity(action, page, `${action === 'CREATE_ITEM' ? 'Created' : 'Updated'} item: ${name}`, {
+          itemId: result._id,
+          itemName: name,
+          category: category,
+          price: price
+        });
+        
         // Clear edit index for next operation
         const idxField = document.getElementById('itemEditIndex');
         if (idxField) idxField.value = '';

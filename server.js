@@ -12,6 +12,7 @@ const uploadRoutes = require('./src/routes/upload');
 const inventoryRoutes = require('./src/routes/inventory');
 const healthRoutes = require('./src/routes/health');
 const reportsRoutes = require('./src/routes/reports');
+const activityLogRoutes = require('./src/routes/activityLog');
 const errorHandler = require('./src/middleware/errorHandler');
 const emailService = require('./src/services/email.service');
 const User = require('./src/models/user');
@@ -93,6 +94,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/activity-logs', activityLogRoutes);
 
 // Error handling middleware (should be last)
 errorHandler(app);
