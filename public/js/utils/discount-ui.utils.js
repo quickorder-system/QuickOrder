@@ -1,0 +1,329 @@
+/**
+ * Discount UI Utilities
+ * Reusable UI components and helpers for discount features
+ */
+
+const discountUIUtils = {
+    /**
+     * Create discount input HTML section
+     * @returns {string} HTML for discount input section
+     */
+    createDiscountInputSection() {
+        return `
+            <div class="discount-section" id="discountSection">
+                <div class="discount-input-container">
+                    <h4 class="discount-label">💰 Have a Discount Code?</h4>
+                    <div class="discount-input-group">
+                        <input 
+                            type="text" 
+                            id="discountCode" 
+                            class="discount-input" 
+                            placeholder="Enter discount code"
+                            maxlength="20"
+                        >
+                        <button 
+                            type="button" 
+                            class="btn-apply-discount"
+                            id="applyDiscountBtn"
+                        >
+                            Apply
+                        </button>
+                    </div>
+                    <div id="discountMessage" class="discount-message" style="display: none;"></div>
+                </div>
+
+                <!-- Applied Discount Display -->
+                <div id="appliedDiscountDisplay" class="applied-discount" style="display: none;">
+                    <div class="discount-badge">
+                        <span class="discount-code" id="appliedCode"></span>
+                        <span class="discount-amount" id="discountAmount"></span>
+                        <button 
+                            type="button" 
+                            class="btn-remove-discount" 
+                            id="removeDiscountBtn"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    /**
+     * Create discount admin panel HTML
+     * @returns {string} HTML for discount management panel
+     */
+    createDiscountAdminPanel() {
+        return `
+            <div id="discountPanel" class="admin-panel discount-panel" style="display: none;">
+                <div class="panel-header">
+                    <h3>💰 Discount Management</h3>
+                    <button class="btn-new-discount" id="newDiscountBtn">+ New Discount</button>
+                </div>
+
+                <div class="panel-content">
+                    <!-- Filters -->
+                    <div class="filter-section">
+                        <input 
+                            type="text" 
+                            id="discountSearch" 
+                            placeholder="Search discounts..." 
+                            class="search-input"
+                        >
+                        <select id="discountStatusFilter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+
+                    <!-- Discount List -->
+                    <div id="discountListContainer" class="discount-list">
+                        <div class="loading">Loading discounts...</div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div id="discountPagination" class="pagination"></div>
+                </div>
+            </div>
+
+            <!-- Create/Edit Discount Modal -->
+            <div id="discountFormModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" id="closeDiscountForm">&times;</span>
+                    <h2 id="formTitle">Create New Discount</h2>
+                    <form id="discountForm">
+                        <div class="form-group">
+                            <label for="code">Discount Code *</label>
+                            <input 
+                                type="text" 
+                                id="code" 
+                                required 
+                                placeholder="e.g., WELCOME10"
+                                maxlength="20"
+                            >
+                            <small>Uppercase letters and numbers only</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea 
+                                id="description" 
+                                placeholder="e.g., Welcome bonus for new customers"
+                                rows="2"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="discountType">Type *</label>
+                                <select id="discountType" required>
+                                    <option value="">Select Type</option>
+                                    <option value="percentage">Percentage (%)</option>
+                                    <option value="fixed">Fixed Amount (₱)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="discountValue">Value *</label>
+                                <input 
+                                    type="number" 
+                                    id="discountValue" 
+                                    required 
+                                    min="1" 
+                                    placeholder="e.g., 10"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="minOrderAmount">Minimum Order Amount (₱)</label>
+                            <input 
+                                type="number" 
+                                id="minOrderAmount" 
+                                min="0" 
+                                placeholder="0 for no minimum"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="maxDiscountAmount">Max Discount Amount (₱)</label>
+                            <input 
+                                type="number" 
+                                id="maxDiscountAmount" 
+                                min="0" 
+                                placeholder="Leave empty for no limit"
+                            >
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="maxUsagePerCustomer">Uses Per Customer</label>
+                                <input 
+                                    type="number" 
+                                    id="maxUsagePerCustomer" 
+                                    min="1" 
+                                    placeholder="e.g., 1"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="maxTotalUsage">Total Uses Limit</label>
+                                <input 
+                                    type="number" 
+                                    id="maxTotalUsage" 
+                                    min="1" 
+                                    placeholder="e.g., 100"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="startDate">Start Date *</label>
+                                <input type="datetime-local" id="startDate" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="endDate">End Date *</label>
+                                <input type="datetime-local" id="endDate" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="isActive" checked>
+                                Active
+                            </label>
+                        </div>
+
+                        <div id="formError" class="error-message" style="display: none;"></div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Discount</button>
+                            <button type="button" class="btn-secondary" id="cancelDiscountForm">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    },
+
+    /**
+     * Create discount list item HTML
+     * @param {object} discount - Discount object
+     * @returns {string} HTML for discount list item
+     */
+    createDiscountListItem(discount) {
+        const startDate = new Date(discount.startDate).toLocaleDateString();
+        const endDate = new Date(discount.endDate).toLocaleDateString();
+        const status = discount.isActive ? '✓ Active' : '✗ Inactive';
+        const usageInfo = discount.maxTotalUsage 
+            ? `${discount.currentUsage}/${discount.maxTotalUsage}` 
+            : `${discount.currentUsage}`;
+
+        return `
+            <div class="discount-item" data-id="${discount._id}">
+                <div class="discount-info">
+                    <div class="discount-code-badge">${discount.code}</div>
+                    <div class="discount-details">
+                        <p class="description">${discount.description || 'No description'}</p>
+                        <div class="meta">
+                            <span class="type">${discount.discountType === 'percentage' ? `${discount.discountValue}%` : `₱${discount.discountValue}`}</span>
+                            <span class="dates">${startDate} to ${endDate}</span>
+                            <span class="usage">Uses: ${usageInfo}</span>
+                            <span class="status ${discount.isActive ? 'active' : 'inactive'}">${status}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="discount-actions">
+                    <button class="btn-edit-discount" data-id="${discount._id}">Edit</button>
+                    <button class="btn-delete-discount" data-id="${discount._id}">Delete</button>
+                </div>
+            </div>
+        `;
+    },
+
+    /**
+     * Show discount message (success or error)
+     * @param {string} message - Message to display
+     * @param {string} type - 'success' or 'error'
+     * @param {HTMLElement} container - Where to show the message
+     */
+    showMessage(message, type, container) {
+        if (!container) return;
+
+        container.textContent = message;
+        container.className = `discount-message ${type}`;
+        container.style.display = 'block';
+
+        // Auto-hide error after 5 seconds
+        if (type === 'error') {
+            setTimeout(() => {
+                container.style.display = 'none';
+            }, 5000);
+        }
+    },
+
+    /**
+     * Display applied discount in order summary
+     * @param {object} discount - Applied discount data
+     * @param {object} orderTotal - Order total details
+     */
+    displayAppliedDiscount(discount, orderTotal) {
+        const display = document.getElementById('appliedDiscountDisplay');
+        const codeEl = document.getElementById('appliedCode');
+        const amountEl = document.getElementById('discountAmount');
+
+        if (!display || !codeEl || !amountEl) return;
+
+        codeEl.textContent = discount.code;
+        amountEl.textContent = `-₱${orderTotal.discountAmount}`;
+
+        display.style.display = 'block';
+    },
+
+    /**
+     * Hide applied discount display
+     */
+    hideAppliedDiscount() {
+        const display = document.getElementById('appliedDiscountDisplay');
+        if (display) {
+            display.style.display = 'none';
+        }
+    },
+
+    /**
+     * Clear discount input
+     */
+    clearDiscountInput() {
+        const input = document.getElementById('discountCode');
+        const message = document.getElementById('discountMessage');
+
+        if (input) input.value = '';
+        if (message) message.style.display = 'none';
+
+        this.hideAppliedDiscount();
+    },
+
+    /**
+     * Disable discount input (during processing)
+     * @param {boolean} disable - True to disable, false to enable
+     */
+    setDiscountInputDisabled(disable) {
+        const input = document.getElementById('discountCode');
+        const btn = document.getElementById('applyDiscountBtn');
+
+        if (input) input.disabled = disable;
+        if (btn) {
+            btn.disabled = disable;
+            btn.textContent = disable ? 'Validating...' : 'Apply';
+        }
+    }
+};
+
+// Export for use in modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = discountUIUtils;
+}

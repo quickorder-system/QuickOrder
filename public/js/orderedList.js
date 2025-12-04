@@ -1,6 +1,7 @@
 import { stateService } from './services/state.service.js';
 
 let quantityButtonsListener = null; // Store reference to event listener
+let appliedDiscount = null; // Store applied discount
 
 // Function to remove item from cart
 function removeItem(itemIndex) {
@@ -18,12 +19,43 @@ function removeItem(itemIndex) {
     }
 }
 
+// Calculate total with discount
+function calculateTotal() {
+    const cart = stateService.cart;
+    let subtotal = 0;
+    
+    cart.forEach(item => {
+        subtotal += item.price * item.quantity;
+    });
+    
+    let total = subtotal;
+    let discountAmount = 0;
+    
+    if (appliedDiscount) {
+        if (appliedDiscount.discountType === 'percentage') {
+            discountAmount = (subtotal * appliedDiscount.discountValue) / 100;
+        } else if (appliedDiscount.discountType === 'fixed') {
+            discountAmount = appliedDiscount.discountValue;
+        }
+        
+        // Apply max discount cap if set
+        if (appliedDiscount.maxDiscountAmount && discountAmount > appliedDiscount.maxDiscountAmount) {
+            discountAmount = appliedDiscount.maxDiscountAmount;
+        }
+        
+        total = subtotal - discountAmount;
+    }
+    
+    return { subtotal, discountAmount, total };
+}
+
 // Dynamically read stateService for any items and render order
 function checkItem() {
     const cart = stateService.cart;
     console.log('Cart on orderedList.html load:', cart);
     console.log('stateService.cart content:', stateService.cart);
-    var total = 0;
+    
+    const { subtotal, discountAmount, total } = calculateTotal();
     var orderItemsContainer = document.getElementById('orderItems');
 
     if (!cart || cart.length === 0) {
@@ -35,7 +67,6 @@ function checkItem() {
     var html = '';
     cart.forEach(function(item, index) {
         var itemTotal = item.price * item.quantity;
-        total += itemTotal;
         
         // Display variants if they exist
         const variantsHTML = item.selectedVariations && item.selectedVariations.length > 0 
@@ -67,7 +98,28 @@ function checkItem() {
     });
 
     orderItemsContainer.innerHTML = html;
-    document.getElementById('totalAmount').textContent = '₱' + total;
+    
+    // Update total display
+    if (appliedDiscount) {
+        document.getElementById('totalAmount').innerHTML = `
+            <div class="price-breakdown">
+                <div class="price-line">
+                    <span>Subtotal</span>
+                    <span>₱${subtotal}</span>
+                </div>
+                <div class="price-line discount">
+                    <span>Discount (${appliedDiscount.code})</span>
+                    <span>-₱${discountAmount.toFixed(2)}</span>
+                </div>
+                <div class="price-line total">
+                    <span>TOTAL</span>
+                    <span>₱${total.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        document.getElementById('totalAmount').textContent = '₱' + total;
+    }
     
     // Rebind event listeners after re-rendering
     bindQuantityButtons();
@@ -119,15 +171,78 @@ function bindQuantityButtons() {
     orderItemsContainer.addEventListener('click', quantityButtonsListener);
 }
 
+// Initialize discount UI
+function initializeDiscountUI() {
+    const discountSection = document.getElementById('discountSection');
+    if (!discountSection) return;
+    
+    const html = discountUIUtils.createDiscountInputSection(
+        'Apply Discount Code',
+        'Enter your discount code to get savings on your order',
+        handleApplyDiscount,
+        () => {
+            appliedDiscount = null;
+            checkItem();
+        }
+    );
+    
+    discountSection.innerHTML = html;
+    
+    // Bind apply button
+    const applyBtn = document.getElementById('applyDiscountBtn');
+    if (applyBtn) {
+        applyBtn.addEventListener('click', handleApplyDiscount);
+    }
+}
+
+// Handle discount application
+async function handleApplyDiscount() {
+    const codeInput = document.getElementById('discountCode');
+    const code = codeInput?.value?.trim();
+    
+    if (!code) {
+        discountUIUtils.showMessage('Please enter a discount code', 'error');
+        return;
+    }
+    
+    try {
+        const { subtotal } = calculateTotal();
+        const response = await discountService.validateCode(code, subtotal);
+        
+        if (response.discountAmount === undefined) {
+            response.discountAmount = response.code ? 
+                (response.discountType === 'percentage' 
+                    ? (subtotal * response.discountValue) / 100 
+                    : response.discountValue) 
+                : 0;
+        }
+        
+        appliedDiscount = response;
+        codeInput.disabled = true;
+        document.getElementById('applyDiscountBtn').style.display = 'none';
+        document.getElementById('removeDiscountBtn').style.display = 'inline-block';
+        
+        const discountAmount = appliedDiscount.discountAmount || 0;
+        discountUIUtils.showMessage(`✓ Discount applied! Saving ₱${discountAmount.toFixed(2)}`, 'success');
+        checkItem();
+    } catch (error) {
+        console.error('Discount error:', error);
+        discountUIUtils.showMessage(error.message || 'Invalid discount code', 'error');
+        appliedDiscount = null;
+    }
+}
+
 // Initialize on DOMContentLoaded, not load (prevents duplicate execution)
 document.addEventListener('DOMContentLoaded', function() {
     checkItem();
+    initializeDiscountUI();
     
     const backBtn = document.getElementById('backBtn');
     if (backBtn) {
         backBtn.addEventListener('click', function() {
             // Clear cart before navigating back to prevent duplicate items
             stateService.clearCart();
+            appliedDiscount = null;
             window.location.href = 'menu.html';
         });
     }

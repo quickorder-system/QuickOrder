@@ -75,6 +75,37 @@ const orderSchema = new mongoose.Schema({
             }
         }]
     }],
+    subtotal: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    // Discount fields
+    discount: {
+        code: {
+            type: String,
+            default: null
+        },
+        discountId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Discount',
+            default: null
+        },
+        discountType: {
+            type: String,
+            enum: ['percentage', 'fixed', null],
+            default: null
+        },
+        discountValue: {
+            type: Number,
+            default: 0
+        },
+        discountAmount: {
+            type: Number,
+            default: 0,
+            min: 0
+        }
+    },
     total: {
         type: Number,
         required: true,

@@ -6,6 +6,7 @@
     <title>Ordered List</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/orderedList.css">
+    <link rel="stylesheet" href="css/discount.css">
     <link rel="stylesheet" href="css/dark-mode.css">
     <link rel="stylesheet" href="css/animations.css">
     <script src="js/dark-mode.js"></script>
@@ -36,6 +37,9 @@
             <div id="orderItems">
                 <!-- Order items will be dynamically rendered here -->
             </div>
+
+            <!-- Discount Code Section -->
+            <div id="discountSection"></div>
             
             <div class="total-section">
                 <span>TOTAL</span>
@@ -123,6 +127,9 @@
         (function(){ const s = document.createElement('script'); s.src='js/animations.js'; s.defer=true; document.body.appendChild(s); })();
     </script>
 
+    <!-- Discount Services -->
+    <script src="js/services/discount.service.js"></script>
+    <script src="js/utils/discount-ui.utils.js"></script>
     <script src="js/orderedList.js" type="module"></script>
 </body>
 </html>

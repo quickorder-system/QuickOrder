@@ -32,7 +32,7 @@ router.get('/profile', auth, async (req, res, next) => {
  */
 router.put('/profile', auth, async (req, res, next) => {
     try {
-        const { name, address, preferences } = req.body;
+        const { name, phone, address, preferences } = req.body;
         
         const user = await User.findById(req.user.id);
         
@@ -42,6 +42,7 @@ router.put('/profile', auth, async (req, res, next) => {
 
         // Update allowed fields
         if (name) user.name = name;
+        if (phone) user.phone = phone;
         
         if (address) {
             user.address = {
@@ -70,6 +71,7 @@ router.put('/profile', auth, async (req, res, next) => {
                 id: user._id,
                 email: user.email,
                 name: user.name,
+                phone: user.phone,
                 address: user.address,
                 preferences: user.preferences
             }

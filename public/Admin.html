@@ -7,6 +7,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="css/admin.css" rel="stylesheet">
   <link href="css/category-management.css" rel="stylesheet">
+  <link href="css/discount.css" rel="stylesheet">
 </head>
 <body>
   <!-- Header -->
@@ -51,6 +52,10 @@
     <button class="tab-btn" data-tab="activityLogsTab">
       <i class="fas fa-history"></i>
       Activity Logs
+    </button>
+    <button class="tab-btn" data-tab="discountsTab">
+      <i class="fas fa-tag"></i>
+      Discounts
     </button>
   </nav>
 
@@ -319,6 +324,12 @@
     <div id="activityLogsTab" class="tab-content">
       <div id="activityLogsContainer"></div>
     </div>
+
+    <!-- Discounts Tab -->
+    <div id="discountsTab" class="tab-content">
+      <!-- Discount Panel will be inserted here by JavaScript -->
+      <div id="discountPanelContainer"></div>
+    </div>
   </main>
 
   <!-- Add/Edit Item Modal -->
@@ -423,10 +434,13 @@
   <script src="js/services/order.service.js"></script>
   <script src="js/services/activityLogger.js"></script>
   <script src="js/services/category.service.js"></script>
+  <script src="js/services/discount.service.js"></script>
   <script src="js/components/order-card.component.js"></script>
   <script src="js/components/activityLogs.component.js"></script>
   <script src="js/components/order-management.js"></script>
   <script src="js/components/category-manager.js"></script>
+  <script src="js/components/discount-manager.js"></script>
+  <script src="js/utils/discount-ui.utils.js"></script>
   <script src="js/orders.js"></script>
   <script src="js/inventory.js"></script>
   <script src="js/admin.js"></script>

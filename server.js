@@ -6,6 +6,18 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const bcrypt = require('bcrypt');
+
+// Global error handlers
+process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+});
+
 const orderRoutes = require('./src/routes/orders');
 const authRoutes = require('./src/routes/auth');
 const uploadRoutes = require('./src/routes/upload');
@@ -112,14 +124,27 @@ mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
-.then(() => {
+.then(async () => {
     console.log('MongoDB Connected...');
-    seedTestUsers(); // Create test users on startup
-    seedCategories(); // Create default categories on startup
-    seedInventory(); // Create test inventory items on startup
-    emailService.verifyEmailConfig(); // Verify email service on startup
+    try {
+        // Fix indexes for User model (handle sparse unique indexes)
+        const User = require('./src/models/user');
+        await User.collection.dropIndex('username_1').catch(() => {}); // Drop old index if exists
+        await User.collection.createIndex({ username: 1 }, { unique: true, sparse: true }); // Recreate with sparse
+        
+        await seedTestUsers(); // Create test users on startup
+        console.log('✓ Seed test users completed');
+        await seedCategories(); // Create default categories on startup
+        console.log('✓ Seed categories completed');
+        await seedInventory(); // Create test inventory items on startup
+        console.log('✓ Seed inventory completed');
+        emailService.verifyEmailConfig(); // Verify email service on startup
+        console.log('✓ Email config verified');
+    } catch (seedErr) {
+        console.error('Error in seeding process:', seedErr);
+    }
 })
-.catch(err => console.error(err));
+.catch(err => console.error('MongoDB connection error:', err));
 
 // Seed function to create test users
 async function seedTestUsers() {
@@ -314,4 +339,22 @@ async function seedCategories() {
 
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Only start listening if this is the main module (not imported by tests)
+if (require.main === module) {
+    console.log(`About to start listening on port ${PORT}...`);
+    try {
+        const server = app.listen(PORT, () => {
+            console.log(`✓ Server successfully listening on port ${PORT}`);
+        });
+        server.on('error', (err) => {
+            console.error(`Server error on port ${PORT}:`, err);
+            process.exit(1);
+        });
+    } catch (err) {
+        console.error('Error starting server:', err);
+        process.exit(1);
+    }
+}
+
+// Export app for testing
+module.exports = app;

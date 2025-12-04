@@ -323,12 +323,18 @@ router.post('/customer/login', async (req, res, next) => {
             throw new UnauthorizedError('Invalid credentials');
         }
 
-        // Check if email is verified
-        if (!user.emailVerified) {
+        // Check if email is verified (skip in development)
+        if (!user.emailVerified && process.env.NODE_ENV === 'production') {
             return res.status(400).json({
                 message: 'Email not verified. Please check your email for verification link.',
                 requiresEmailVerification: true
             });
+        }
+
+        // Auto-verify in development for testing
+        if (!user.emailVerified && process.env.NODE_ENV !== 'production') {
+            user.emailVerified = true;
+            await user.save();
         }
 
         // Update last login
