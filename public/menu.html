@@ -64,18 +64,14 @@
 
         <!-- Form -->
         <form action="orderedList.html">
-            <!-- Dynamic Menu Content Will Be Inserted Here by menu.js -->
-            <div id="dynamic-menu-container"></div>
+            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                <!-- Dynamic Menu Content Will Be Inserted Here by menu.js -->
+                <div id="dynamic-menu-container" style="flex: 1;"></div>
+                
+                <!-- Order Cart Sidebar - Always Visible -->
+                <div id="menu-cart-container" style="width: 350px; position: sticky; top: 100px;"></div>
+            </div>
         </form>
-    </div>
-
-    <!-- Floating Cart Button - Fixed Position -->
-    <div class="order-section">
-        <button type="button" class="order-btn" id="cartButton">
-            <i class="fas fa-shopping-cart"></i>
-            View Cart
-            <span class="order-count" id="cartCount">0</span>
-        </button>
     </div>
 
     <!-- Modals -->

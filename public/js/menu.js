@@ -254,7 +254,9 @@ import MenuCartComponent from './components/menu-cart.component.js';
                                         <span class="qty-label">Qty:</span>
                                         <input type="number" data-qty-id="${itemId}" min="1" value="1" max="10" class="qty-input" ${disabledAttr}>
                                     </div>
-                                    <input type="checkbox" data-item-checkbox="${itemId}" class="custom-checkbox" title="Add to order" ${disabledAttr}>
+                                    <button type="button" data-item-add-btn="${itemId}" class="add-to-cart-btn" title="Add to cart" ${disabledAttr}>
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -316,7 +318,9 @@ import MenuCartComponent from './components/menu-cart.component.js';
                                         <span class="qty-label">Qty:</span>
                                         <input type="number" data-qty-id="${itemId}" min="1" value="1" max="10" class="qty-input" ${disabledAttr}>
                                     </div>
-                                    <input type="checkbox" data-item-checkbox="${itemId}" class="custom-checkbox" title="Add to order" ${disabledAttr}>
+                                    <button type="button" data-item-add-btn="${itemId}" class="add-to-cart-btn" title="Add to cart" ${disabledAttr}>
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -331,7 +335,7 @@ import MenuCartComponent from './components/menu-cart.component.js';
         menuContainer.innerHTML = menuHTML;
 
         // Rebind event listeners
-        bindCheckboxListeners();
+        bindAddButtonListeners();
     }
 
     // Category filter function (works with dynamic elements)
@@ -375,118 +379,93 @@ import MenuCartComponent from './components/menu-cart.component.js';
         });
     }
 
-    // Bind checkbox listeners (works with dynamic elements)
-    function bindCheckboxListeners() {
-        const checkboxes = document.querySelectorAll('[data-item-checkbox]');
-        checkboxes.forEach(cb => {
-            cb.removeEventListener('change', handleCheckboxChange);
-            cb.addEventListener('change', handleCheckboxChange);
+    // Bind add button listeners (works with dynamic elements)
+    function bindAddButtonListeners() {
+        const addButtons = document.querySelectorAll('[data-item-add-btn]');
+        addButtons.forEach(btn => {
+            btn.removeEventListener('click', handleAddButtonClick);
+            btn.addEventListener('click', handleAddButtonClick);
         });
     }
 
-    // Handle checkbox change event - add/remove items from cart
-    function handleCheckboxChange(event) {
-        const checkbox = event.target;
-        const itemId = checkbox.getAttribute('data-item-checkbox');
-        const card = checkbox.closest('.food-card');
+    // Handle add button click event - add items from cart
+    function handleAddButtonClick(event) {
+        event.preventDefault();
+        const button = event.target.closest('[data-item-add-btn]');
+        if (!button) return;
+        
+        const itemId = button.getAttribute('data-item-add-btn');
+        const card = button.closest('.food-card');
         
         if (!card) return;
 
-        if (checkbox.checked) {
-            // Add item to cart
-            const nameElem = card.querySelector('.food-name');
-            const priceElem = card.querySelector('.food-price');
-            const qtyInput = card.querySelector('[data-qty-id]');
-            
-            const name = nameElem ? nameElem.textContent.trim() : 'Unknown Item';
-            const basePriceText = priceElem ? priceElem.textContent : '0';
-            let price = parseFloat(basePriceText.replace(/[^0-9\.]/g, '')) || 0;
-            const qty = qtyInput ? parseInt(qtyInput.value) : 1;
-            
-            // Capture selected variations
-            const selectedVariations = [];
-            const variationSelects = card.querySelectorAll('.variation-select');
-            let hasInvalidVariations = false;
-            
-            variationSelects.forEach(select => {
-                if (select.value === '') {
-                    const allEmpty = Array.from(variationSelects).every(s => s.value === '');
-                    if (!allEmpty) {
-                        console.warn('[Menu] Variation not selected:', select.getAttribute('data-variation-index'));
-                        hasInvalidVariations = true;
-                    }
-                } else {
-                    const variationIndex = select.getAttribute('data-variation-index');
-                    const optionIndex = select.value;
-                    const selectedOption = select.options[select.selectedIndex];
-                    const optionName = selectedOption.getAttribute('data-option-name');
-                    const priceModifier = parseFloat(selectedOption.getAttribute('data-price-modifier')) || 0;
-                    const variationName = select.options[select.selectedIndex].parentElement?.label || 
-                                          allItems.find(item => String(item._id) === String(itemId))?.variations?.[variationIndex]?.variationName || '';
-                    
-                    selectedVariations.push({
-                        variationName,
-                        selectedOption: optionName,
-                        priceModifier
-                    });
-                    
-                    price += priceModifier;
-                    console.log('[Menu] Variation selected:', { variationName, selectedOption: optionName, priceModifier });
+        const nameElem = card.querySelector('.food-name');
+        const priceElem = card.querySelector('.food-price');
+        const qtyInput = card.querySelector('[data-qty-id]');
+        
+        const name = nameElem ? nameElem.textContent.trim() : 'Unknown Item';
+        const basePriceText = priceElem ? priceElem.textContent : '0';
+        let price = parseFloat(basePriceText.replace(/[^0-9\.]/g, '')) || 0;
+        const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+        
+        // Capture selected variations
+        const selectedVariations = [];
+        const variationSelects = card.querySelectorAll('.variation-select');
+        let hasInvalidVariations = false;
+        
+        variationSelects.forEach(select => {
+            if (select.value === '') {
+                const allEmpty = Array.from(variationSelects).every(s => s.value === '');
+                if (!allEmpty) {
+                    console.warn('[Menu] Variation not selected:', select.getAttribute('data-variation-index'));
+                    hasInvalidVariations = true;
                 }
-            });
-            
-            if (variationSelects.length > 0 && hasInvalidVariations) {
-                alert(`Please select all options for "${name}" before adding to cart.`);
-                checkbox.checked = false;
-                return;
+            } else {
+                const variationIndex = select.getAttribute('data-variation-index');
+                const optionIndex = select.value;
+                const selectedOption = select.options[select.selectedIndex];
+                const optionName = selectedOption.getAttribute('data-option-name');
+                const priceModifier = parseFloat(selectedOption.getAttribute('data-price-modifier')) || 0;
+                const variationName = select.options[select.selectedIndex].parentElement?.label || 
+                                      allItems.find(item => String(item._id) === String(itemId))?.variations?.[variationIndex]?.variationName || '';
+                
+                selectedVariations.push({
+                    variationName,
+                    selectedOption: optionName,
+                    priceModifier
+                });
+                
+                price += priceModifier;
+                console.log('[Menu] Variation selected:', { variationName, selectedOption: optionName, priceModifier });
             }
-            
-            // Generate unique cart item ID
-            const variantHash = selectedVariations.length > 0 
-                ? '_' + selectedVariations.map(v => v.selectedOption.replace(/\s+/g, '_')).join('_')
-                : '';
-            const cartItemId = itemId + variantHash;
-            
-            const cartItem = { 
-                id: cartItemId,
-                itemId: itemId,
-                name, 
-                quantity: qty, 
-                price,
-                selectedVariations: selectedVariations.length > 0 ? selectedVariations : undefined
-            };
-            
-            stateService.addToCart(cartItem);
-            console.log('[Menu] Item added to cart:', cartItem);
-        } else {
-            // Remove item from cart
-            // If item has variations, we need to find the right cart entry
-            const variationSelects = card.querySelectorAll('.variation-select');
-            const selectedVariations = [];
-            
-            variationSelects.forEach(select => {
-                if (select.value !== '') {
-                    const selectedOption = select.options[select.selectedIndex];
-                    const optionName = selectedOption.getAttribute('data-option-name');
-                    selectedVariations.push({
-                        selectedOption: optionName
-                    });
-                }
-            });
-            
-            const variantHash = selectedVariations.length > 0 
-                ? '_' + selectedVariations.map(v => v.selectedOption.replace(/\s+/g, '_')).join('_')
-                : '';
-            const cartItemId = itemId + variantHash;
-            
-            stateService.removeFromCart(cartItemId);
-            console.log('[Menu] Item removed from cart:', cartItemId);
+        });
+        
+        if (variationSelects.length > 0 && hasInvalidVariations) {
+            alert(`Please select all options for "${name}" before adding to cart.`);
+            return;
         }
-
-        // Update cart count
-        const cartCountElem = document.getElementById('cartCount');
-        if (cartCountElem) {
-            cartCountElem.textContent = stateService.cart.length;
+        
+        // Generate unique cart item ID
+        const variantHash = selectedVariations.length > 0 
+            ? '_' + selectedVariations.map(v => v.selectedOption.replace(/\s+/g, '_')).join('_')
+            : '';
+        const cartItemId = itemId + variantHash;
+        
+        const cartItem = { 
+            id: cartItemId,
+            itemId: itemId,
+            name, 
+            quantity: qty, 
+            price,
+            selectedVariations: selectedVariations.length > 0 ? selectedVariations : undefined
+        };
+        
+        stateService.addToCart(cartItem);
+        console.log('[Menu] Item added to cart:', cartItem);
+        
+        // Show success message
+        if (window.uiUtils) {
+            window.uiUtils.showAlert(`${name} added to cart!`, 'success');
         }
     }
 
@@ -519,28 +498,11 @@ import MenuCartComponent from './components/menu-cart.component.js';
         console.log('[Menu] DOMContentLoaded event fired');
         
         // Initialize the menu cart component
-        menuCart = new MenuCartComponent('menu-cart-modal');
+        menuCart = new MenuCartComponent('menu-cart-container');
         console.log('[Menu] Menu cart component initialized');
-        
-        // Subscribe to cart changes to update count badge
-        stateService.subscribe('cart', () => {
-            const cartCountElem = document.getElementById('cartCount');
-            if (cartCountElem) {
-                cartCountElem.textContent = stateService.cart.length;
-            }
-        });
         
         // Render menu from inventory
         await renderMenu();
-
-        // Set up event listeners
-        const cartButton = document.getElementById('cartButton');
-        if (cartButton) {
-            cartButton.addEventListener('click', function(event) {
-                event.preventDefault();
-                menuCart.openCart();
-            });
-        }
 
         const backBtn = document.getElementById('backBtn');
         if (backBtn) {
@@ -551,11 +513,5 @@ import MenuCartComponent from './components/menu-cart.component.js';
 
         // Trigger initial category filter to organize display
         filterCategory();
-        
-        // Update initial cart count
-        const cartCountElem = document.getElementById('cartCount');
-        if (cartCountElem) {
-            cartCountElem.textContent = stateService.cart.length;
-        }
     });
 })();
