@@ -356,5 +356,7 @@ if (require.main === module) {
     }
 }
 
-// Export app for testing
+// Export app and mongoose for testing
 module.exports = app;
+module.exports.app = app;
+module.exports.mongoose = mongoose;
