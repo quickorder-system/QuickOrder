@@ -459,6 +459,12 @@
     }
 
     console.log('[RenderVariations] Rendering', variationsData.length, 'variations');
+    // Log each variation for debugging
+    variationsData.forEach((v, idx) => {
+      console.log(`[RenderVariations] Variation ${idx}:`, v);
+      console.log(`[RenderVariations] Variation ${idx} name:`, v.variationName, 'options count:', (v.options || []).length);
+    });
+    
     container.innerHTML = variationsData.map((variation, varIndex) => `
       <div class="variation-group-card">
         <div class="variation-group-header">
