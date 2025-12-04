@@ -298,6 +298,7 @@
       }
       const item = await response.json();
       console.log('[Edit] Item loaded successfully with variations:', item.variations);
+      console.log('[Edit] Full item object:', JSON.stringify(item, null, 2));
 
       document.getElementById('itemName').value = item.itemName || '';
       
