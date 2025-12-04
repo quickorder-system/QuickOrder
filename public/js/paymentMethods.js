@@ -42,8 +42,20 @@ function displayOrderReview() {
 
     orderItemsDiv.innerHTML = cart.map(item => `
         <div class="order-item">
-            <span>${item.name} x ${item.quantity}</span>
-            <span>₱${(item.price * item.quantity).toFixed(2)}</span>
+            <div class="order-item-header">
+                <span class="order-item-name">${item.name} x ${item.quantity}</span>
+                <span class="order-item-price">₱${(item.price * item.quantity).toFixed(2)}</span>
+            </div>
+            ${item.selectedVariations && item.selectedVariations.length > 0 ? `
+                <div class="order-item-variations">
+                    ${item.selectedVariations.map(v => `
+                        <div class="variation-detail">
+                            <span class="variation-name">${v.variationName}:</span>
+                            <span class="variation-value">${v.selectedOption}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
         </div>
     `).join('');
 
