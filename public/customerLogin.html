@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login - QuickOrder</title>
+    <link rel="stylesheet" href="css/authentication.css">
+</head>
+<body>
+    <div class="auth-container">
+        <a href="QuickOrder.html" class="back-link">Back to home</a>
+
+        <div class="auth-header">
+            <h1>Welcome Back</h1>
+            <p>Login to your QuickOrder account</p>
+        </div>
+
+        <div id="alertMessage" class="alert"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="rememberMe" name="rememberMe">
+                    Remember me on this device
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
+        </form>
+
+        <div class="form-divider">
+            <span>Need help?</span>
+        </div>
+
+        <div class="form-links">
+            <a href="resetPassword.html?mode=forgot">Forgot password?</a>
+            <span>•</span>
+            <a href="register.html">Create an account</a>
+        </div>
+    </div>
+
+    <script src="js/services/auth.service.js"></script>
+    <script src="js/utils/auth-ui.utils.js"></script>
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const alertMessage = document.getElementById('alertMessage');
+        const emailInput = document.getElementById('email');
+        const rememberMe = document.getElementById('rememberMe');
+
+        // Load remembered email if exists
+        window.addEventListener('load', () => {
+            const rememberedEmail = localStorage.getItem('rememberedEmail');
+            if (rememberedEmail) {
+                emailInput.value = rememberedEmail;
+                rememberMe.checked = true;
+            }
+        });
+
+        // Form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Clear previous messages
+            authUIUtils.clearMessages(alertMessage.parentElement);
+
+            // Get form data
+            const formData = authUIUtils.getFormData(loginForm);
+
+            // Validation rules
+            const rules = {
+                email: {
+                    required: true,
+                    type: 'email'
+                },
+                password: {
+                    required: true,
+                    minLength: 6
+                }
+            };
+
+            // Validate form
+            const validation = authUIUtils.validateForm(formData, rules);
+            if (!validation.isValid) {
+                authUIUtils.displayFormErrors(loginForm, validation.errors);
+                authUIUtils.showError('Please check your credentials', alertMessage);
+                return;
+            }
+
+            // Disable button
+            authUIUtils.disableButton(loginBtn, 'Logging in...');
+
+            try {
+                const response = await authService.login(
+                    formData.email,
+                    formData.password
+                );
+
+                // Handle remember me
+                if (rememberMe.checked) {
+                    localStorage.setItem('rememberedEmail', formData.email);
+                } else {
+                    localStorage.removeItem('rememberedEmail');
+                }
+
+                authUIUtils.showSuccess('Login successful! Redirecting...', alertMessage);
+
+                // Redirect to menu page after 1 second
+                setTimeout(() => {
+                    window.location.href = 'menu.html';
+                }, 1000);
+            } catch (error) {
+                // Check if email needs verification
+                if (error.message.includes('Email not verified')) {
+                    authUIUtils.showWarning(
+                        'Your email is not verified yet. Check your inbox for the verification link.',
+                        alertMessage
+                    );
+                    
+                    // Show option to resend
+                    const resendOption = document.createElement('div');
+                    resendOption.style.marginTop = '10px';
+                    resendOption.style.textAlign = 'center';
+                    resendOption.innerHTML = `
+                        <button type="button" class="btn-link" onclick="window.location.href='verifyEmail.html?email=${encodeURIComponent(formData.email)}'">
+                            Verify email now
+                        </button>
+                    `;
+                    loginForm.appendChild(resendOption);
+                } else {
+                    authUIUtils.showError(error.message, alertMessage);
+                }
+                authUIUtils.enableButton(loginBtn);
+            }
+        });
+    </script>
+</body>
+</html>

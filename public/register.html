@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - QuickOrder</title>
+    <link rel="stylesheet" href="css/authentication.css">
+</head>
+<body>
+    <div class="auth-container">
+        <a href="QuickOrder.html" class="back-link">Back to home</a>
+
+        <div class="auth-header">
+            <h1>Create Account</h1>
+            <p>Join QuickOrder and start ordering today</p>
+        </div>
+
+        <div id="alertMessage" class="alert"></div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+                <div id="passwordStrengthBar" class="password-strength">
+                    <div id="passwordStrengthBarFill" class="password-strength-bar"></div>
+                </div>
+                <div id="passwordStrengthText" class="password-strength-text"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+            </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" name="agreeTerms" required>
+                    I agree to the Terms of Service and Privacy Policy
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="registerBtn">Create Account</button>
+        </form>
+
+        <div class="form-divider">
+            <span>Already have an account?</span>
+        </div>
+
+        <div class="form-links">
+            <a href="customerLogin.html">Login here</a>
+        </div>
+    </div>
+
+    <script src="js/services/auth.service.js"></script>
+    <script src="js/utils/auth-ui.utils.js"></script>
+    <script>
+        const registerForm = document.getElementById('registerForm');
+        const registerBtn = document.getElementById('registerBtn');
+        const alertMessage = document.getElementById('alertMessage');
+        const passwordInput = document.getElementById('password');
+        const passwordStrengthBar = document.getElementById('passwordStrengthBarFill');
+        const passwordStrengthText = document.getElementById('passwordStrengthText');
+
+        // Password strength indicator
+        passwordInput.addEventListener('input', () => {
+            authUIUtils.updatePasswordStrength(
+                passwordInput,
+                passwordStrengthBar,
+                passwordStrengthText
+            );
+        });
+
+        // Form submission
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Clear previous messages
+            authUIUtils.clearMessages(alertMessage.parentElement);
+
+            // Get form data
+            const formData = authUIUtils.getFormData(registerForm);
+
+            // Validation rules
+            const rules = {
+                name: {
+                    required: true,
+                    minLength: 2,
+                    maxLength: 50
+                },
+                email: {
+                    required: true,
+                    type: 'email'
+                },
+                password: {
+                    required: true,
+                    minLength: 6,
+                    minLengthMessage: 'Password must be at least 6 characters'
+                },
+                confirmPassword: {
+                    required: true,
+                    matchField: 'password',
+                    matchMessage: 'Passwords do not match'
+                },
+                agreeTerms: {
+                    required: true,
+                    validator: (value) => {
+                        return registerForm.querySelector('[name="agreeTerms"]').checked || 'You must agree to the terms';
+                    }
+                }
+            };
+
+            // Validate form
+            const validation = authUIUtils.validateForm(formData, rules);
+            if (!validation.isValid) {
+                authUIUtils.displayFormErrors(registerForm, validation.errors);
+                authUIUtils.showError('Please fix the errors above', alertMessage);
+                return;
+            }
+
+            // Disable button
+            authUIUtils.disableButton(registerBtn, 'Creating account...');
+
+            try {
+                const response = await authService.register(
+                    formData.email,
+                    formData.password,
+                    formData.name
+                );
+
+                authUIUtils.showSuccess('Registration successful! Check your email to verify your account.', alertMessage);
+
+                // Redirect to verification page after 2 seconds
+                setTimeout(() => {
+                    window.location.href = `verifyEmail.html?email=${encodeURIComponent(formData.email)}`;
+                }, 2000);
+            } catch (error) {
+                authUIUtils.showError(error.message, alertMessage);
+                authUIUtils.enableButton(registerBtn);
+            }
+        });
+
+        // Prevent form submission with Enter key on password field
+        registerForm.addEventListener('keypress', (e) => {
+            if (e.target.name === 'confirmPassword' && e.key === 'Enter') {
+                registerForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

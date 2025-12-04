@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - QuickOrder</title>
+    <link rel="stylesheet" href="css/authentication.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>Verify Email</h1>
+            <p>Enter the verification code sent to your email</p>
+        </div>
+
+        <div id="alertMessage" class="alert"></div>
+
+        <form id="verifyForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Verification Token</label>
+                <textarea id="token" name="token" placeholder="Paste the verification link or token from your email" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="verifyBtn">Verify Email</button>
+
+            <div class="form-divider">
+                <span>or</span>
+            </div>
+
+            <button type="button" class="btn btn-secondary" id="resendBtn">Resend Verification Email</button>
+
+            <div id="timer" class="timer" style="display: none;"></div>
+        </form>
+
+        <div class="form-links">
+            <a href="customerLogin.html">Back to login</a>
+            <span>•</span>
+            <a href="QuickOrder.html">Home</a>
+        </div>
+    </div>
+
+    <script src="js/services/auth.service.js"></script>
+    <script src="js/utils/auth-ui.utils.js"></script>
+    <script>
+        const verifyForm = document.getElementById('verifyForm');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const resendBtn = document.getElementById('resendBtn');
+        const alertMessage = document.getElementById('alertMessage');
+        const emailInput = document.getElementById('email');
+        const tokenInput = document.getElementById('token');
+        const timerElement = document.getElementById('timer');
+
+        // Extract email from URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailFromUrl = urlParams.get('email');
+        if (emailFromUrl) {
+            emailInput.value = decodeURIComponent(emailFromUrl);
+        }
+
+        // Extract token from URL params (if in verification link)
+        const tokenFromUrl = urlParams.get('token');
+        if (tokenFromUrl) {
+            tokenInput.value = tokenFromUrl;
+            // Auto-verify if token is in URL
+            setTimeout(() => {
+                verifyForm.dispatchEvent(new Event('submit'));
+            }, 500);
+        }
+
+        // Form submission
+        verifyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Clear previous messages
+            authUIUtils.clearMessages(alertMessage.parentElement);
+
+            const email = emailInput.value.trim();
+            const token = tokenInput.value.trim();
+
+            if (!email || !authUIUtils.isValidEmail(email)) {
+                authUIUtils.showError('Please enter a valid email address', alertMessage);
+                return;
+            }
+
+            if (!token) {
+                authUIUtils.showError('Please enter or paste the verification token', alertMessage);
+                return;
+            }
+
+            // Disable button
+            authUIUtils.disableButton(verifyBtn, 'Verifying...');
+
+            try {
+                const response = await authService.verifyEmail(token);
+
+                authUIUtils.showSuccess('Email verified successfully! Redirecting to login...', alertMessage);
+
+                // Redirect to login page after 2 seconds
+                setTimeout(() => {
+                    window.location.href = `customerLogin.html?email=${encodeURIComponent(email)}`;
+                }, 2000);
+            } catch (error) {
+                authUIUtils.showError(error.message, alertMessage);
+                authUIUtils.enableButton(verifyBtn);
+            }
+        });
+
+        // Resend verification email
+        resendBtn.addEventListener('click', async () => {
+            authUIUtils.clearMessages(alertMessage.parentElement);
+
+            const email = emailInput.value.trim();
+
+            if (!email || !authUIUtils.isValidEmail(email)) {
+                authUIUtils.showError('Please enter a valid email address', alertMessage);
+                return;
+            }
+
+            authUIUtils.disableButton(resendBtn, 'Sending...');
+
+            try {
+                const response = await authService.resendVerification(email);
+
+                authUIUtils.showSuccess(
+                    'Verification email sent! Check your inbox for the verification link.',
+                    alertMessage
+                );
+
+                // Disable resend button for 60 seconds
+                let resendTimeout = 60;
+                resendBtn.disabled = true;
+                timerElement.style.display = 'block';
+
+                const interval = setInterval(() => {
+                    resendTimeout--;
+
+                    if (resendTimeout <= 0) {
+                        clearInterval(interval);
+                        authUIUtils.enableButton(resendBtn);
+                        timerElement.style.display = 'none';
+                        return;
+                    }
+
+                    timerElement.textContent = `Resend available in: ${resendTimeout}s`;
+                }, 1000);
+            } catch (error) {
+                authUIUtils.showError(error.message, alertMessage);
+                authUIUtils.enableButton(resendBtn);
+            }
+        });
+
+        // Clear token field on focus to paste
+        tokenInput.addEventListener('focus', () => {
+            if (tokenInput.value === '' || tokenInput.value === 'Paste token here...') {
+                tokenInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
