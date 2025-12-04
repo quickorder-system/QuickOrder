@@ -12,6 +12,9 @@ async function showTab(tabId) {
   
   if (tabId === 'inventoryTab') {
     await renderInventory();
+    if (categoryManager && typeof categoryManager.init === 'function') {
+      await categoryManager.init();
+    }
   }
 }
 

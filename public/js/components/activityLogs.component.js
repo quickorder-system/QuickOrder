@@ -42,6 +42,9 @@ class ActivityLogsComponent {
               <option value="CREATE_ITEM">Create Item</option>
               <option value="UPDATE_ITEM">Update Item</option>
               <option value="DELETE_ITEM">Delete Item</option>
+              <option value="CREATE_CATEGORY">Create Category</option>
+              <option value="UPDATE_CATEGORY">Update Category</option>
+              <option value="DELETE_CATEGORY">Delete Category</option>
               <option value="VERIFY_PAYMENT">Verify Payment</option>
               <option value="REJECT_PAYMENT">Reject Payment</option>
               <option value="UPDATE_ORDER_STATUS">Update Order Status</option>
