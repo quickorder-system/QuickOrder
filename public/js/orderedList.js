@@ -36,10 +36,17 @@ function checkItem() {
     cart.forEach(function(item, index) {
         var itemTotal = item.price * item.quantity;
         total += itemTotal;
+        
+        // Display variants if they exist
+        const variantsHTML = item.selectedVariations && item.selectedVariations.length > 0 
+            ? `<div class="item-variants">${item.selectedVariations.map(v => `<span class="variant-badge">${v.variationName}: ${v.selectedOption}</span>`).join('')}</div>`
+            : '';
+        
         html += `
             <div class="order-item-card">
                 <div class="item-info">
                     <span class="item-name">${item.name}</span>
+                    ${variantsHTML}
                     <span class="item-unit-price">₱${item.price} each</span>
                 </div>
                 <div class="item-controls">

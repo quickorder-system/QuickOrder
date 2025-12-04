@@ -1,7 +1,9 @@
 import { stateService } from './services/state.service.js';
+import MenuCartComponent from './components/menu-cart.component.js';
 
 (() => {
     let allItems = []; // Store all fetched items globally
+    let menuCart = null; // Global reference to menu cart component
     const categoryIcons = {
         burger: '',
         pizza: '',
@@ -374,129 +376,133 @@ import { stateService } from './services/state.service.js';
         });
     }
 
-    // Update order count dynamically
-    function updateOrderCount() {
-        const checkboxes = document.querySelectorAll('[data-item-checkbox]');
-        let count = 0;
-        checkboxes.forEach(cb => {
-            if (cb.checked) count++;
-        });
-        const orderCountElem = document.getElementById('orderCount');
-        if (orderCountElem) orderCountElem.textContent = count;
-    }
-
     // Bind checkbox listeners (works with dynamic elements)
     function bindCheckboxListeners() {
         const checkboxes = document.querySelectorAll('[data-item-checkbox]');
         checkboxes.forEach(cb => {
-            cb.removeEventListener('change', updateOrderCount);
-            cb.addEventListener('change', updateOrderCount);
+            cb.removeEventListener('change', handleCheckboxChange);
+            cb.addEventListener('change', handleCheckboxChange);
         });
     }
 
-    // Prepare order data with MongoDB IDs and variations
-    function orderedList() {
-        console.log('[Menu] orderedList function called');
-        const checkboxes = document.querySelectorAll('[data-item-checkbox]');
-        let itemsChecked = false;
+    // Handle checkbox change event - add/remove items from cart
+    function handleCheckboxChange(event) {
+        const checkbox = event.target;
+        const itemId = checkbox.getAttribute('data-item-checkbox');
+        const card = checkbox.closest('.food-card');
         
-        checkboxes.forEach(cb => {
-            if (cb.checked) itemsChecked = true;
-        });
+        if (!card) return;
 
-        if (!itemsChecked) {
-            alert('Please select at least one item to proceed!');
-            return false;
-        }
-
-        // Clear cart first to prevent duplication
-        stateService.clearCart();
-
-        // Add items to cart using MongoDB _id
-        checkboxes.forEach(cb => {
-            if (cb.checked) {
-                const itemId = cb.getAttribute('data-item-checkbox');
-                const card = cb.closest('.food-card');
-                
-                if (card) {
-                    const nameElem = card.querySelector('.food-name');
-                    const priceElem = card.querySelector('.food-price');
-                    const qtyInput = card.querySelector('[data-qty-id]');
+        if (checkbox.checked) {
+            // Add item to cart
+            const nameElem = card.querySelector('.food-name');
+            const priceElem = card.querySelector('.food-price');
+            const qtyInput = card.querySelector('[data-qty-id]');
+            
+            const name = nameElem ? nameElem.textContent.trim() : 'Unknown Item';
+            const basePriceText = priceElem ? priceElem.textContent : '0';
+            let price = parseFloat(basePriceText.replace(/[^0-9\.]/g, '')) || 0;
+            const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+            
+            // Capture selected variations
+            const selectedVariations = [];
+            const variationSelects = card.querySelectorAll('.variation-select');
+            let hasInvalidVariations = false;
+            
+            variationSelects.forEach(select => {
+                if (select.value === '') {
+                    const allEmpty = Array.from(variationSelects).every(s => s.value === '');
+                    if (!allEmpty) {
+                        console.warn('[Menu] Variation not selected:', select.getAttribute('data-variation-index'));
+                        hasInvalidVariations = true;
+                    }
+                } else {
+                    const variationIndex = select.getAttribute('data-variation-index');
+                    const optionIndex = select.value;
+                    const selectedOption = select.options[select.selectedIndex];
+                    const optionName = selectedOption.getAttribute('data-option-name');
+                    const priceModifier = parseFloat(selectedOption.getAttribute('data-price-modifier')) || 0;
+                    const variationName = select.options[select.selectedIndex].parentElement?.label || 
+                                          allItems.find(item => String(item._id) === String(itemId))?.variations?.[variationIndex]?.variationName || '';
                     
-                    const name = nameElem ? nameElem.textContent.trim() : 'Unknown Item';
-                    const basePriceText = priceElem ? priceElem.textContent : '0';
-                    let price = parseFloat(basePriceText.replace(/[^0-9\.]/g, '')) || 0;
-                    const qty = qtyInput ? parseInt(qtyInput.value) : 1;
-                    
-                    // Capture selected variations
-                    const selectedVariations = [];
-                    const variationSelects = card.querySelectorAll('.variation-select');
-                    let hasInvalidVariations = false;
-                    
-                    variationSelects.forEach(select => {
-                        // Only validate if a variation has been started to be selected
-                        // If all variations are empty, the item can be added without variants
-                        if (select.value === '') {
-                            // Check if other variations in this group have selections
-                            // If ANY variation is selected, all must be selected
-                            const allEmpty = Array.from(variationSelects).every(s => s.value === '');
-                            if (!allEmpty) {
-                                // Some variations are selected, so all must be selected
-                                console.warn('[Menu] Variation not selected:', select.getAttribute('data-variation-index'));
-                                hasInvalidVariations = true;
-                            }
-                        } else {
-                            const variationIndex = select.getAttribute('data-variation-index');
-                            const optionIndex = select.value;
-                            const selectedOption = select.options[select.selectedIndex];
-                            const optionName = selectedOption.getAttribute('data-option-name');
-                            const priceModifier = parseFloat(selectedOption.getAttribute('data-price-modifier')) || 0;
-                            const variationName = select.options[select.selectedIndex].parentElement?.label || 
-                                                  allItems.find(item => String(item._id) === String(itemId))?.variations?.[variationIndex]?.variationName || '';
-                            
-                            selectedVariations.push({
-                                variationName,
-                                selectedOption: optionName,
-                                priceModifier
-                            });
-                            
-                            // Add price modifier to total price
-                            price += priceModifier;
-                            
-                            console.log('[Menu] Variation selected:', { variationName, selectedOption: optionName, priceModifier });
-                        }
+                    selectedVariations.push({
+                        variationName,
+                        selectedOption: optionName,
+                        priceModifier
                     });
                     
-                    // If there are variation selects but some are invalid, don't add to cart
-                    if (variationSelects.length > 0 && hasInvalidVariations) {
-                        alert(`Please select all options for "${name}" before adding to cart.`);
-                        return false;
-                    }
-                    
-                    // Generate unique cart item ID: combine item ID with variant selections
-                    // This allows same item with different variants to be separate cart entries
-                    const variantHash = selectedVariations.length > 0 
-                        ? '_' + selectedVariations.map(v => v.selectedOption.replace(/\s+/g, '_')).join('_')
-                        : '';
-                    const cartItemId = itemId + variantHash;
-                    
-                    // Use MongoDB _id for cart item ID
-                    const cartItem = { 
-                        id: cartItemId,  // Unique ID including variant selection
-                        itemId: itemId,  // Store original MongoDB _id
-                        name, 
-                        quantity: qty, 
-                        price,
-                        selectedVariations: selectedVariations.length > 0 ? selectedVariations : undefined
-                    };
-                    
-                    stateService.addToCart(cartItem);
-                    console.log('[Menu] Item added to cart:', cartItem);
+                    price += priceModifier;
+                    console.log('[Menu] Variation selected:', { variationName, selectedOption: optionName, priceModifier });
                 }
+            });
+            
+            if (variationSelects.length > 0 && hasInvalidVariations) {
+                alert(`Please select all options for "${name}" before adding to cart.`);
+                checkbox.checked = false;
+                return;
             }
-        });
+            
+            // Generate unique cart item ID
+            const variantHash = selectedVariations.length > 0 
+                ? '_' + selectedVariations.map(v => v.selectedOption.replace(/\s+/g, '_')).join('_')
+                : '';
+            const cartItemId = itemId + variantHash;
+            
+            const cartItem = { 
+                id: cartItemId,
+                itemId: itemId,
+                name, 
+                quantity: qty, 
+                price,
+                selectedVariations: selectedVariations.length > 0 ? selectedVariations : undefined
+            };
+            
+            stateService.addToCart(cartItem);
+            console.log('[Menu] Item added to cart:', cartItem);
+        } else {
+            // Remove item from cart
+            // If item has variations, we need to find the right cart entry
+            const variationSelects = card.querySelectorAll('.variation-select');
+            const selectedVariations = [];
+            
+            variationSelects.forEach(select => {
+                if (select.value !== '') {
+                    const selectedOption = select.options[select.selectedIndex];
+                    const optionName = selectedOption.getAttribute('data-option-name');
+                    selectedVariations.push({
+                        selectedOption: optionName
+                    });
+                }
+            });
+            
+            const variantHash = selectedVariations.length > 0 
+                ? '_' + selectedVariations.map(v => v.selectedOption.replace(/\s+/g, '_')).join('_')
+                : '';
+            const cartItemId = itemId + variantHash;
+            
+            stateService.removeFromCart(cartItemId);
+            console.log('[Menu] Item removed from cart:', cartItemId);
+        }
 
-        console.log('[Menu] Cart after adding items:', stateService.cart);
+        // Update cart count
+        const cartCountElem = document.getElementById('cartCount');
+        if (cartCountElem) {
+            cartCountElem.textContent = stateService.cart.length;
+        }
+    }
+
+    // Prepare order data with MongoDB IDs and variations (for backward compatibility if needed)
+    function orderedList() {
+        console.log('[Menu] orderedList function called');
+        const cart = stateService.cart;
+        
+        if (cart.length === 0) {
+            alert('Please add at least one item to your cart!');
+            return false;
+        }
+        
+        // Navigate to ordered list page
+        window.location.href = 'orderedList.html';
         return true;
     }
 
@@ -513,17 +519,27 @@ import { stateService } from './services/state.service.js';
     document.addEventListener('DOMContentLoaded', async function() {
         console.log('[Menu] DOMContentLoaded event fired');
         
+        // Initialize the menu cart component
+        menuCart = new MenuCartComponent('menu-cart-modal');
+        console.log('[Menu] Menu cart component initialized');
+        
+        // Subscribe to cart changes to update count badge
+        stateService.subscribe('cart', () => {
+            const cartCountElem = document.getElementById('cartCount');
+            if (cartCountElem) {
+                cartCountElem.textContent = stateService.cart.length;
+            }
+        });
+        
         // Render menu from inventory
         await renderMenu();
 
         // Set up event listeners
-        const orderButton = document.getElementById('orderButton');
-        if (orderButton) {
-            orderButton.addEventListener('click', function(event) {
+        const cartButton = document.getElementById('cartButton');
+        if (cartButton) {
+            cartButton.addEventListener('click', function(event) {
                 event.preventDefault();
-                if (orderedList()) {
-                    window.location.href = 'orderedList.html';
-                }
+                menuCart.openCart();
             });
         }
 
@@ -536,5 +552,11 @@ import { stateService } from './services/state.service.js';
 
         // Trigger initial category filter to organize display
         filterCategory();
+        
+        // Update initial cart count
+        const cartCountElem = document.getElementById('cartCount');
+        if (cartCountElem) {
+            cartCountElem.textContent = stateService.cart.length;
+        }
     });
 })();
