@@ -1025,13 +1025,13 @@ router.get('/export-pdf', async (req, res) => {
             if (method._id === 'Cash') cashTotal = method.totalSales;
         });
 
-        const totalRevenue = gcashTotal + mayaTotal + cashTotal;
+        const methodTotalRevenue = gcashTotal + mayaTotal + cashTotal;
         
-        doc.text(`GCash: ₱${gcashTotal.toFixed(2)} (${((gcashTotal/totalRevenue)*100).toFixed(2)}%)`);
-        doc.text(`Maya: ₱${mayaTotal.toFixed(2)} (${((mayaTotal/totalRevenue)*100).toFixed(2)}%)`);
-        doc.text(`Cash: ₱${cashTotal.toFixed(2)} (${((cashTotal/totalRevenue)*100).toFixed(2)}%)`);
+        doc.text(`GCash: ₱${gcashTotal.toFixed(2)} (${((gcashTotal/methodTotalRevenue)*100).toFixed(2)}%)`);
+        doc.text(`Maya: ₱${mayaTotal.toFixed(2)} (${((mayaTotal/methodTotalRevenue)*100).toFixed(2)}%)`);
+        doc.text(`Cash: ₱${cashTotal.toFixed(2)} (${((cashTotal/methodTotalRevenue)*100).toFixed(2)}%)`);
         doc.moveDown(1);
-        doc.fontSize(11).font('Helvetica-Bold').text(`Total: ₱${totalRevenue.toFixed(2)}`);
+        doc.fontSize(11).font('Helvetica-Bold').text(`Total: ₱${methodTotalRevenue.toFixed(2)}`);
 
         // Weekly Summary
         if (weeklyData.length > 0) {
