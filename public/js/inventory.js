@@ -334,7 +334,10 @@
       
       // Load variations if they exist
       variationsData = item.variations || [];
+      console.log('[Edit] Loaded variations into variationsData:', variationsData);
+      console.log('[Edit] variationsData.length:', variationsData.length);
       renderVariationsList();
+      console.log('[Edit] After renderVariationsList, container innerHTML:', document.getElementById('variationsList')?.innerHTML);
       
       openAddItemModal();
     } catch (error) {
@@ -440,18 +443,22 @@
       return;
     }
 
+    console.log('[RenderVariations] Called. variationsData =', variationsData);
     // Ensure variationsData is an array
     if (!Array.isArray(variationsData)) {
       console.warn('[RenderVariations] variationsData is not an array, converting to empty array');
       variationsData = [];
     }
     
+    console.log('[RenderVariations] variationsData.length =', variationsData.length);
+    
     if (variationsData.length === 0) {
       container.innerHTML = '<p style="color: #999; font-size: 0.9rem; margin: 8px 0;">No variations added yet</p>';
+      console.log('[RenderVariations] No variations, showing empty message');
       return;
     }
 
-    container.innerHTML = variationsData.map((variation, varIndex) => `
+    console.log('[RenderVariations] Rendering', variationsData.length, 'variations');
       <div class="variation-group-card">
         <div class="variation-group-header">
           <h4>${variation.variationName || 'Unknown'}</h4>
