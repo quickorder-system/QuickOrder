@@ -13,12 +13,10 @@ const inventoryRoutes = require('./src/routes/inventory');
 const healthRoutes = require('./src/routes/health');
 const reportsRoutes = require('./src/routes/reports');
 const activityLogRoutes = require('./src/routes/activityLog');
-const categoryRoutes = require('./src/routes/categories');
 const errorHandler = require('./src/middleware/errorHandler');
 const emailService = require('./src/services/email.service');
 const User = require('./src/models/user');
 const InventoryItem = require('./src/models/inventory');
-const Category = require('./src/models/category');
 
 // Initialize Express app
 const app = express();
@@ -97,7 +95,6 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
-app.use('/api/categories', categoryRoutes);
 
 // Error handling middleware (should be last)
 errorHandler(app);
@@ -110,7 +107,6 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => {
     console.log('MongoDB Connected...');
     seedTestUsers(); // Create test users on startup
-    seedCategories(); // Create default categories on startup
     seedInventory(); // Create test inventory items on startup
     emailService.verifyEmailConfig(); // Verify email service on startup
 })
@@ -164,33 +160,6 @@ async function seedTestUsers() {
         }
     } catch (error) {
         console.error('Error seeding test users:', error.message);
-    }
-}
-
-// Seed function to create default categories
-async function seedCategories() {
-    try {
-        const existingCount = await Category.countDocuments();
-        if (existingCount > 0) {
-            console.log(`✓ Categories already exist (${existingCount} categories), skipping seed`);
-            return;
-        }
-
-        const defaultCategories = [
-            { name: 'burger', displayName: 'Burgers', icon: 'fa-hamburger', color: '#ff6b6b', order: 0 },
-            { name: 'pizza', displayName: 'Pizza', icon: 'fa-pizza-slice', color: '#feca57', order: 1 },
-            { name: 'rice', displayName: 'Rice Meals', icon: 'fa-bowl-rice', color: '#48dbfb', order: 2 },
-            { name: 'pasta', displayName: 'Pasta', icon: 'fa-utensils', color: '#ff9ff3', order: 3 },
-            { name: 'drinks', displayName: 'Drinks', icon: 'fa-glass-water', color: '#74b9ff', order: 4 },
-            { name: 'coffee', displayName: 'Coffee', icon: 'fa-mug-hot', color: '#a29bfe', order: 5 },
-            { name: 'others', displayName: 'Others', icon: 'fa-folder', color: '#667eea', order: 6 },
-            { name: 'bundle', displayName: 'Bundles', icon: 'fa-gift', color: '#fd79a8', order: 7 }
-        ];
-
-        await Category.insertMany(defaultCategories);
-        console.log(`✓ Created ${defaultCategories.length} default categories`);
-    } catch (error) {
-        console.error('Error seeding categories:', error.message);
     }
 }
 

@@ -6,7 +6,6 @@
   <title>Admin Panel - Quick Order</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="css/admin.css" rel="stylesheet">
-  <link href="css/category-management.css" rel="stylesheet">
 </head>
 <body>
   <!-- Header -->
@@ -47,10 +46,6 @@
     <button class="tab-btn" data-tab="inventoryTab">
       <i class="fas fa-boxes"></i>
       Inventory
-    </button>
-    <button class="tab-btn" data-tab="categoriesTab">
-      <i class="fas fa-tag"></i>
-      Categories
     </button>
     <button class="tab-btn" data-tab="activityLogsTab">
       <i class="fas fa-history"></i>
@@ -319,11 +314,6 @@
       </div>
     </div>
 
-    <!-- Categories Tab -->
-    <div id="categoriesTab" class="tab-content">
-      <div id="categoryListContainer"></div>
-    </div>
-
     <!-- Activity Logs Tab -->
     <div id="activityLogsTab" class="tab-content">
       <div id="activityLogsContainer"></div>
@@ -431,11 +421,9 @@
   <script type="module" src="js/services/api.service.js"></script>
   <script src="js/services/order.service.js"></script>
   <script src="js/services/activityLogger.js"></script>
-  <script src="js/services/category.service.js"></script>
   <script src="js/components/order-card.component.js"></script>
   <script src="js/components/activityLogs.component.js"></script>
   <script src="js/components/order-management.js"></script>
-  <script src="js/components/category-manager.js"></script>
   <script src="js/orders.js"></script>
   <script src="js/inventory.js"></script>
   <script src="js/admin.js"></script>
