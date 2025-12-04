@@ -14,11 +14,14 @@ const healthRoutes = require('./src/routes/health');
 const reportsRoutes = require('./src/routes/reports');
 const activityLogRoutes = require('./src/routes/activityLog');
 const categoryRoutes = require('./src/routes/categories');
+const customersRoutes = require('./src/routes/customers');
+const discountsRoutes = require('./src/routes/discounts');
 const errorHandler = require('./src/middleware/errorHandler');
 const emailService = require('./src/services/email.service');
 const User = require('./src/models/user');
 const InventoryItem = require('./src/models/inventory');
 const Category = require('./src/models/category');
+const Discount = require('./src/models/discount');
 
 // Initialize Express app
 const app = express();
@@ -92,6 +95,8 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/orders', orderRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/customers', customersRoutes);
+app.use('/api/discounts', discountsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/categories', categoryRoutes);

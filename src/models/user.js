@@ -4,17 +4,76 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
-        required: true,
-        unique: true
+        unique: true,
+        sparse: true
+    },
+    email: {
+        type: String,
+        unique: true,
+        sparse: true
     },
     password: {
         type: String,
         required: true
     },
+    name: {
+        type: String
+    },
     role: {
         type: String,
         enum: ['admin', 'owner', 'customer'],
         default: 'customer'
+    },
+    // Email verification fields
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: {
+        type: String,
+        default: null
+    },
+    emailVerificationTokenExpiry: {
+        type: Date,
+        default: null
+    },
+    // Password reset fields
+    passwordResetToken: {
+        type: String,
+        default: null
+    },
+    passwordResetTokenExpiry: {
+        type: Date,
+        default: null
+    },
+    // Customer profile fields
+    address: {
+        street: String,
+        city: String,
+        postalCode: String,
+        phone: String
+    },
+    preferences: {
+        notifications: {
+            type: Boolean,
+            default: true
+        },
+        smsNotifications: {
+            type: Boolean,
+            default: false
+        }
+    },
+    lastLogin: {
+        type: Date,
+        default: null
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
 });
 

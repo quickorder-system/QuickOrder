@@ -608,6 +608,98 @@ function getCancelledTemplate(order, reason = '') {
     `;
 }
 
+/**
+ * Authentication Email Functions
+ */
+
+async function sendVerificationEmail(user, verificationToken) {
+    const verificationLink = `${process.env.CLIENT_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+    
+    const htmlContent = `
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 30px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #333; margin: 0;">QuickOrder</h1>
+                </div>
+                
+                <h2 style="color: #333; text-align: center;">Verify Your Email Address</h2>
+                
+                <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                    Hello ${user.name || user.email},
+                </p>
+                
+                <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                    Thank you for registering with QuickOrder! Please verify your email address by clicking the button below:
+                </p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${verificationLink}" style="background-color: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">Verify Email Address</a>
+                </div>
+                
+                <p style="color: #999; font-size: 14px; text-align: center;">
+                    Or copy this link: ${verificationLink}
+                </p>
+                
+                <p style="color: #999; font-size: 14px; line-height: 1.6;">
+                    This link will expire in 24 hours. If you didn't create this account, please ignore this email.
+                </p>
+                
+                <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
+                    <p style="color: #999; font-size: 12px;">© QuickOrder - ${new Date().getFullYear()}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    return sendEmail(user.email, 'Verify Your QuickOrder Email Address', htmlContent);
+}
+
+async function sendPasswordResetEmail(user, resetToken) {
+    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    
+    const htmlContent = `
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 30px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #333; margin: 0;">QuickOrder</h1>
+                </div>
+                
+                <h2 style="color: #333; text-align: center;">Reset Your Password</h2>
+                
+                <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                    Hello ${user.name || user.email},
+                </p>
+                
+                <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                    We received a request to reset your QuickOrder password. Click the button below to create a new password:
+                </p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${resetLink}" style="background-color: #008CBA; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">Reset Password</a>
+                </div>
+                
+                <p style="color: #999; font-size: 14px; text-align: center;">
+                    Or copy this link: ${resetLink}
+                </p>
+                
+                <p style="color: #999; font-size: 14px; line-height: 1.6;">
+                    This link will expire in 1 hour. If you didn't request a password reset, please ignore this email.
+                </p>
+                
+                <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
+                    <p style="color: #999; font-size: 12px;">© QuickOrder - ${new Date().getFullYear()}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    return sendEmail(user.email, 'Reset Your QuickOrder Password', htmlContent);
+}
+
 // Export functions
 module.exports = {
     verifyEmailConfig,
@@ -616,5 +708,7 @@ module.exports = {
     sendPreparingEmail,
     sendReadyEmail,
     sendCompletedEmail,
-    sendCancelledEmail
+    sendCancelledEmail,
+    sendVerificationEmail,
+    sendPasswordResetEmail
 };
