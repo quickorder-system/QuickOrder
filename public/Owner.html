@@ -53,6 +53,10 @@
       <i class="fas fa-chart-line"></i>
       Reports
     </button>
+    <button class="tab-btn" data-tab="activityLogsTab">
+      <i class="fas fa-history"></i>
+      Activity Logs
+    </button>
   </nav>
 
   <!-- Main Content -->
@@ -480,6 +484,11 @@
       </div>
     </div>
 
+    <!-- Activity Logs Tab -->
+    <div id="activityLogsTab" class="tab-content">
+      <div id="activityLogsContainer"></div>
+    </div>
+
   </main>
 
   <!-- Add/Edit Item Modal -->
@@ -584,6 +593,7 @@
   <script src="js/services/order.service.js"></script>
   <script src="js/services/activityLogger.js"></script>
   <script src="js/components/order-card.component.js"></script>
+  <script src="js/components/activityLogs.component.js"></script>
   <script src="js/components/order-management.js"></script>
   <script src="js/orders.js"></script>
   <script src="js/inventory.js"></script>
