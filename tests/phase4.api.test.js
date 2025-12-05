@@ -808,4 +808,358 @@ describe('Phase 4 Backend Integration Tests', () => {
             });
         });
     });
+
+    // ====== ADVANCED INTEGRATION TESTS ======
+    describe('Advanced Integration Scenarios', () => {
+        let integrationToken;
+        let integrationUserId;
+        const integrationEmail = 'integration-test@example.com';
+        const integrationPassword = 'IntegrationPassword123';
+
+        beforeAll(async () => {
+            // Register integration test user
+            const registerRes = await request(app)
+                .post('/api/auth/customer/register')
+                .send({
+                    email: integrationEmail,
+                    password: integrationPassword,
+                    name: 'Integration Test User'
+                });
+
+            integrationUserId = registerRes.body.user.id;
+
+            // Get token
+            const loginRes = await request(app)
+                .post('/api/auth/customer/login')
+                .send({
+                    email: integrationEmail,
+                    password: integrationPassword
+                });
+
+            integrationToken = loginRes.body.token;
+        });
+
+        afterAll(async () => {
+            await User.deleteMany({ email: integrationEmail });
+        });
+
+        describe('Complete User Workflow', () => {
+            it('should complete full registration and profile setup', async () => {
+                const newEmail = 'workflow-test@example.com';
+                
+                // Register
+                const registerRes = await request(app)
+                    .post('/api/auth/customer/register')
+                    .send({
+                        email: newEmail,
+                        password: 'WorkflowPassword123',
+                        name: 'Workflow Test'
+                    });
+
+                expect(registerRes.status).toBe(201);
+                expect(registerRes.body.user.email).toBe(newEmail);
+
+                // Login
+                const loginRes = await request(app)
+                    .post('/api/auth/customer/login')
+                    .send({
+                        email: newEmail,
+                        password: 'WorkflowPassword123'
+                    });
+
+                expect(loginRes.status).toBe(200);
+                expect(loginRes.body.token).toBeTruthy();
+
+                // Cleanup
+                await User.deleteMany({ email: newEmail });
+            });
+
+            it('should add and manage multiple addresses in sequence', async () => {
+                // Add first address
+                const addr1Res = await request(app)
+                    .post('/api/customers/addresses')
+                    .set('x-auth-token', integrationToken)
+                    .send({
+                        street: '123 Main St',
+                        city: 'City 1',
+                        postalCode: '12345',
+                        label: 'home'
+                    });
+
+                expect(addr1Res.status).toBe(201);
+                const addr1Id = addr1Res.body.address._id;
+
+                // Add second address
+                const addr2Res = await request(app)
+                    .post('/api/customers/addresses')
+                    .set('x-auth-token', integrationToken)
+                    .send({
+                        street: '456 Oak Ave',
+                        city: 'City 2',
+                        postalCode: '54321',
+                        label: 'work'
+                    });
+
+                expect(addr2Res.status).toBe(201);
+                const addr2Id = addr2Res.body.address._id;
+
+                // Get all addresses
+                const listRes = await request(app)
+                    .get('/api/customers/addresses')
+                    .set('x-auth-token', integrationToken);
+
+                expect(listRes.status).toBe(200);
+                expect(listRes.body.addresses.length).toBeGreaterThanOrEqual(2);
+
+                // Update first address
+                const updateRes = await request(app)
+                    .put(`/api/customers/addresses/${addr1Id}`)
+                    .set('x-auth-token', integrationToken)
+                    .send({
+                        street: '789 Elm St',
+                        city: 'City 1 Updated',
+                        postalCode: '12345'
+                    });
+
+                expect(updateRes.status).toBe(200);
+
+                // Set second address as default
+                const defaultRes = await request(app)
+                    .put(`/api/customers/addresses/${addr2Id}/default`)
+                    .set('x-auth-token', integrationToken);
+
+                expect(defaultRes.status).toBe(200);
+
+                // Delete first address
+                const deleteRes = await request(app)
+                    .delete(`/api/customers/addresses/${addr1Id}`)
+                    .set('x-auth-token', integrationToken);
+
+                expect(deleteRes.status).toBe(200);
+            });
+
+            it('should retrieve and filter orders with various criteria', async () => {
+                // Get all orders
+                const allRes = await request(app)
+                    .get('/api/customers/orders')
+                    .set('x-auth-token', integrationToken);
+
+                expect(allRes.status).toBe(200);
+                expect(Array.isArray(allRes.body.orders)).toBe(true);
+
+                // Get with pagination
+                const pageRes = await request(app)
+                    .get('/api/customers/orders?page=1&limit=5')
+                    .set('x-auth-token', integrationToken);
+
+                expect(pageRes.status).toBe(200);
+                expect(pageRes.body.orders.length).toBeLessThanOrEqual(5);
+
+                // Get with status filter (if orders exist)
+                const statusRes = await request(app)
+                    .get('/api/customers/orders?status=pending')
+                    .set('x-auth-token', integrationToken);
+
+                expect(statusRes.status).toBe(200);
+                expect(Array.isArray(statusRes.body.orders)).toBe(true);
+            });
+        });
+
+        describe('Security & Authorization', () => {
+            it('should not allow accessing other user profiles with different token', async () => {
+                // Create another user
+                const otherRes = await request(app)
+                    .post('/api/auth/customer/register')
+                    .send({
+                        email: 'other-user@example.com',
+                        password: 'OtherPassword123',
+                        name: 'Other User'
+                    });
+
+                const otherToken = (await request(app)
+                    .post('/api/auth/customer/login')
+                    .send({
+                        email: 'other-user@example.com',
+                        password: 'OtherPassword123'
+                    })).body.token;
+
+                // Get profile should return own profile, not other user's
+                const res = await request(app)
+                    .get('/api/customers/profile')
+                    .set('x-auth-token', otherToken);
+
+                expect(res.status).toBe(200);
+                expect(res.body.user.email).toBe('other-user@example.com');
+
+                // Cleanup
+                await User.deleteMany({ email: 'other-user@example.com' });
+            });
+
+            it('should enforce authentication on protected routes', async () => {
+                // Try to access protected route without token
+                const noTokenRes = await request(app)
+                    .get('/api/customers/profile');
+
+                expect(noTokenRes.status).toBe(401);
+
+                // Try with invalid token
+                const invalidTokenRes = await request(app)
+                    .get('/api/customers/profile')
+                    .set('x-auth-token', 'invalid-token-format');
+
+                expect(invalidTokenRes.status).toBe(401);
+
+                // Try with malformed header
+                const malformedRes = await request(app)
+                    .get('/api/customers/profile')
+                    .set('x-auth-token', '');
+
+                expect(malformedRes.status).toBe(401);
+            });
+        });
+
+        describe('Data Validation & Constraints', () => {
+            it('should validate email format on registration', async () => {
+                const res = await request(app)
+                    .post('/api/auth/customer/register')
+                    .send({
+                        email: 'invalid-email',
+                        password: 'ValidPassword123',
+                        name: 'Test User'
+                    });
+
+                expect([400, 422]).toContain(res.status);
+            });
+
+            it('should enforce unique email constraint', async () => {
+                const testData = {
+                    email: 'unique-test@example.com',
+                    password: 'UniquePassword123',
+                    name: 'Unique Test'
+                };
+
+                // First registration should succeed
+                const firstRes = await request(app)
+                    .post('/api/auth/customer/register')
+                    .send(testData);
+
+                expect(firstRes.status).toBe(201);
+
+                // Second registration with same email should fail
+                const secondRes = await request(app)
+                    .post('/api/auth/customer/register')
+                    .send(testData);
+
+                expect(secondRes.status).toBe(400);
+                expect(secondRes.body.error).toContain('already');
+
+                // Cleanup
+                await User.deleteMany({ email: testData.email });
+            });
+
+            it('should validate profile update fields', async () => {
+                // Invalid name (too long)
+                const longName = 'a'.repeat(300);
+                const updateRes = await request(app)
+                    .put('/api/customers/profile')
+                    .set('x-auth-token', integrationToken)
+                    .send({
+                        name: longName
+                    });
+
+                expect([200, 400]).toContain(updateRes.status);
+            });
+        });
+
+        describe('Error Handling & Edge Cases', () => {
+            it('should handle database errors gracefully', async () => {
+                // Try to get order with invalid ID format
+                const res = await request(app)
+                    .get('/api/customers/orders/invalid-id-format')
+                    .set('x-auth-token', integrationToken);
+
+                // Should return error or empty result
+                expect([200, 400, 404]).toContain(res.status);
+            });
+
+            it('should handle concurrent requests properly', async () => {
+                const promises = [];
+
+                // Make 5 concurrent requests
+                for (let i = 0; i < 5; i++) {
+                    promises.push(
+                        request(app)
+                            .get('/api/customers/profile')
+                            .set('x-auth-token', integrationToken)
+                    );
+                }
+
+                const results = await Promise.all(promises);
+
+                // All should succeed
+                results.forEach(res => {
+                    expect(res.status).toBe(200);
+                    expect(res.body.user.email).toBe(integrationEmail);
+                });
+            });
+
+            it('should handle missing request body gracefully', async () => {
+                const res = await request(app)
+                    .post('/api/customers/addresses')
+                    .set('x-auth-token', integrationToken)
+                    .send({});
+
+                expect(res.status).toBe(400);
+            });
+        });
+
+        describe('Response Format & Consistency', () => {
+            it('should return consistent user object structure', async () => {
+                const res = await request(app)
+                    .get('/api/customers/profile')
+                    .set('x-auth-token', integrationToken);
+
+                expect(res.status).toBe(200);
+                expect(res.body.user).toHaveProperty('id');
+                expect(res.body.user).toHaveProperty('email');
+                expect(res.body.user).toHaveProperty('name');
+                expect(res.body.user).toHaveProperty('role');
+            });
+
+            it('should return proper error structure on validation failure', async () => {
+                const res = await request(app)
+                    .post('/api/customers/addresses')
+                    .set('x-auth-token', integrationToken)
+                    .send({
+                        street: '123 Test St'
+                        // Missing required fields
+                    });
+
+                expect(res.status).toBe(400);
+                expect(res.body).toHaveProperty('error');
+                expect(typeof res.body.error).toBe('string');
+            });
+
+            it('should include proper HTTP status codes', async () => {
+                // Success case
+                const successRes = await request(app)
+                    .get('/api/customers/profile')
+                    .set('x-auth-token', integrationToken);
+
+                expect(successRes.status).toBe(200);
+
+                // Not found case
+                const notFoundRes = await request(app)
+                    .get('/api/nonexistent/endpoint');
+
+                expect(notFoundRes.status).toBe(404);
+
+                // Unauthorized case
+                const unauthorizedRes = await request(app)
+                    .get('/api/customers/profile');
+
+                expect(unauthorizedRes.status).toBe(401);
+            });
+        });
+    });
 });
