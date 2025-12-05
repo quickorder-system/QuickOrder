@@ -21,15 +21,28 @@ router.get('/validate/:code', async (req, res, next) => {
             throw new BadRequestError('Discount code is required');
         }
 
-        // Find discount
+        // Find discount - use more flexible date checking
+        const now = new Date();
+        logger.info(`Validating discount ${code} at ${now.toISOString()}`);
+        
         const discount = await Discount.findOne({
             code: code.toUpperCase(),
             isActive: true,
-            startDate: { $lte: new Date() },
-            endDate: { $gte: new Date() }
+            startDate: { $lte: now },
+            endDate: { $gte: now }
         });
 
         if (!discount) {
+            logger.warn(`Discount ${code} not found or inactive. Searching for debugging info...`);
+            // Debug: Find the discount to see what's wrong
+            const debugDiscount = await Discount.findOne({
+                code: code.toUpperCase()
+            });
+            
+            if (debugDiscount) {
+                logger.info(`Debug - Discount found: active=${debugDiscount.isActive}, startDate=${debugDiscount.startDate}, endDate=${debugDiscount.endDate}, now=${now}`);
+            }
+            
             throw new BadRequestError('Invalid or expired discount code');
         }
 
@@ -241,10 +254,19 @@ router.put('/:id', [auth, authorize(['admin', 'owner'])], async (req, res, next)
         if (maxDiscountAmount !== undefined) discount.maxDiscountAmount = maxDiscountAmount;
         if (maxUsagePerCustomer !== undefined) discount.maxUsagePerCustomer = maxUsagePerCustomer;
         if (maxTotalUsage !== undefined) discount.maxTotalUsage = maxTotalUsage;
-        if (startDate !== undefined) discount.startDate = new Date(startDate);
-        if (endDate !== undefined) discount.endDate = new Date(endDate);
+        if (startDate !== undefined) {
+            discount.startDate = new Date(startDate);
+            logger.info(`Updated startDate to ${discount.startDate.toISOString()}`);
+        }
+        if (endDate !== undefined) {
+            discount.endDate = new Date(endDate);
+            logger.info(`Updated endDate to ${discount.endDate.toISOString()}`);
+        }
         if (applicableCategories !== undefined) discount.applicableCategories = applicableCategories;
-        if (isActive !== undefined) discount.isActive = isActive;
+        if (isActive !== undefined) {
+            discount.isActive = isActive;
+            logger.info(`Updated isActive to ${discount.isActive}`);
+        }
 
         discount.updatedAt = new Date();
         await discount.save();
