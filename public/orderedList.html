@@ -21,9 +21,33 @@
         <div class="nav-links">
             <a href="#" id="aboutLink">About</a>
             <a href="#" id="contactsLink">Contact</a>
-            <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
+            <button id="burgerMenu" class="burger-menu" title="Open menu">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- Burger Menu Dropdown -->
+    <div id="burgerMenuDropdown" class="burger-menu-dropdown">
+        <div class="menu-item">
+            <button id="darkModeToggle" class="menu-button dark-mode-option">
+                <i class="fas fa-moon"></i>
+                <span>Dark Mode</span>
+            </button>
+        </div>
+        <div class="menu-item">
+            <a href="customerDashboard.html" class="menu-button">
+                <i class="fas fa-user"></i>
+                <span>Account Profile</span>
+            </a>
+        </div>
+        <div class="menu-item">
+            <button id="creditsBtn" class="menu-button">
+                <i class="fas fa-info-circle"></i>
+                <span>Credits</span>
+            </button>
+        </div>
+    </div>
 
     <div class="container">
         <div class="header">
@@ -91,6 +115,34 @@
         </div>
     </div>
 
+    <div id="creditsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Credits</h2>
+                <button class="close-btn" onclick="closeModal('creditsModal')" title="Close credits">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body credits-content">
+                <h3>QuickOrder</h3>
+                
+                <h4>Developers:</h4>
+                <ul>
+                    <li>Bernaldez, John Cedric D.</li>
+                    <li>Brisenio, Sean Andrei R.</li>
+                    <li>Sibug, Dan John Martin E.</li>
+                </ul>
+                
+                <h4>Panelist:</h4>
+                <ul>
+                    <li>Dr. Frederic D. Yulo, MM, DIT</li>
+                    <li>Engr. Cerleo De Perio</li>
+                    <li>Mr. Ar-jay Agbayani</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <script>
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
@@ -99,13 +151,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             const aboutLink = document.getElementById('aboutLink');
             const contactsLink = document.getElementById('contactsLink');
+            const creditsBtn = document.getElementById('creditsBtn');
+            const burgerMenuBtn = document.getElementById('burgerMenu');
+            const burgerMenuDropdown = document.getElementById('burgerMenuDropdown');
             const aboutModal = document.getElementById('aboutModal');
             const contactsModal = document.getElementById('contactsModal');
+            const creditsModal = document.getElementById('creditsModal');
 
             if (aboutLink) {
                 aboutLink.addEventListener('click', function(e) {
                     e.preventDefault();
                     aboutModal.style.display = 'flex';
+                    burgerMenuDropdown.style.display = 'none';
                 });
             }
 
@@ -113,13 +170,35 @@
                 contactsLink.addEventListener('click', function(e) {
                     e.preventDefault();
                     contactsModal.style.display = 'flex';
+                    burgerMenuDropdown.style.display = 'none';
                 });
             }
+
+            // Burger menu toggle
+            burgerMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                burgerMenuDropdown.style.display = burgerMenuDropdown.style.display === 'flex' ? 'none' : 'flex';
+            });
+
+            // Close burger menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!burgerMenuBtn.contains(e.target) && !burgerMenuDropdown.contains(e.target)) {
+                    burgerMenuDropdown.style.display = 'none';
+                }
+            });
+
+            // Credits button
+            creditsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                creditsModal.style.display = 'flex';
+                burgerMenuDropdown.style.display = 'none';
+            });
 
             // Close modal when clicking outside
             window.addEventListener('click', function(e) {
                 if (e.target === aboutModal) aboutModal.style.display = 'none';
                 if (e.target === contactsModal) contactsModal.style.display = 'none';
+                if (e.target === creditsModal) creditsModal.style.display = 'none';
             });
         });
 
