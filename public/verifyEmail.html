@@ -66,10 +66,35 @@
         const tokenFromUrl = urlParams.get('token');
         if (tokenFromUrl) {
             tokenInput.value = tokenFromUrl;
-            // Auto-verify if token is in URL
+            // Auto-verify if token is in URL - use GET endpoint
             setTimeout(() => {
-                verifyForm.dispatchEvent(new Event('submit'));
+                verifyViaGetEndpoint(tokenFromUrl);
             }, 500);
+        }
+
+        // Verify using GET endpoint (for direct links)
+        async function verifyViaGetEndpoint(token) {
+            authUIUtils.disableButton(verifyBtn, 'Verifying...');
+            
+            try {
+                const response = await fetch(`/api/auth/customer/verify-email?token=${encodeURIComponent(token)}`, {
+                    method: 'GET'
+                });
+
+                if (response.ok) {
+                    authUIUtils.showSuccess('Email verified successfully! Redirecting to login...', alertMessage);
+                    setTimeout(() => {
+                        window.location.href = `customerLogin.html?email=${encodeURIComponent(emailInput.value)}&verified=true`;
+                    }, 2000);
+                } else {
+                    const data = await response.json();
+                    authUIUtils.showError(data.message || 'Verification failed', alertMessage);
+                    authUIUtils.enableButton(verifyBtn);
+                }
+            } catch (error) {
+                authUIUtils.showError('Verification failed: ' + error.message, alertMessage);
+                authUIUtils.enableButton(verifyBtn);
+            }
         }
 
         // Form submission

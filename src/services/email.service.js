@@ -613,7 +613,8 @@ function getCancelledTemplate(order, reason = '') {
  */
 
 async function sendVerificationEmail(user, verificationToken) {
-    const verificationLink = `${process.env.CLIENT_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+    const baseUrl = process.env.CLIENT_URL || 'https://quickorder-production-145f.up.railway.app';
+    const verificationLink = `${baseUrl}/verifyEmail.html?token=${verificationToken}&email=${encodeURIComponent(user.email)}`;
     
     const htmlContent = `
         <html>
@@ -638,7 +639,7 @@ async function sendVerificationEmail(user, verificationToken) {
                 </div>
                 
                 <p style="color: #999; font-size: 14px; text-align: center;">
-                    Or copy this link: ${verificationLink}
+                    Or copy this link: <br><span style="word-break: break-all;">${verificationLink}</span>
                 </p>
                 
                 <p style="color: #999; font-size: 14px; line-height: 1.6;">

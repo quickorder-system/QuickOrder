@@ -460,10 +460,10 @@ router.get('/customer/verify-email', async (req, res, next) => {
             });
         }
 
-        // Clean the token
+        // Clean the token - remove whitespace
         const cleanToken = token.trim();
 
-        logger.info(`Attempting GET verify with token: ${cleanToken.substring(0, 20)}...`);
+        logger.info(`[VerifyEmail] GET request - Token: ${cleanToken.substring(0, 20)}...`);
 
         // Find user with matching token
         const user = await User.findOne({
@@ -472,7 +472,7 @@ router.get('/customer/verify-email', async (req, res, next) => {
         });
 
         if (!user) {
-            logger.error(`GET Token verification failed. Token: ${cleanToken.substring(0, 20)}...`);
+            logger.error(`[VerifyEmail] Token not found. Token: ${cleanToken.substring(0, 20)}...`);
             
             // Check if token exists but is expired
             const expiredUser = await User.findOne({
@@ -480,6 +480,7 @@ router.get('/customer/verify-email', async (req, res, next) => {
             });
             
             if (expiredUser) {
+                logger.warn(`[VerifyEmail] Token expired for: ${expiredUser.email}`);
                 return res.status(400).json({ 
                     message: 'Verification token has expired. Please request a new one.',
                     error: 'TOKEN_EXPIRED',
@@ -487,6 +488,7 @@ router.get('/customer/verify-email', async (req, res, next) => {
                 });
             }
             
+            logger.error(`[VerifyEmail] Invalid token provided`);
             return res.status(400).json({ 
                 message: 'Invalid verification token',
                 error: 'INVALID_TOKEN'
@@ -499,11 +501,20 @@ router.get('/customer/verify-email', async (req, res, next) => {
         user.emailVerificationTokenExpiry = null;
         await user.save();
 
-        logger.info(`Email verified successfully via GET: ${user.email}`);
+        logger.info(`[VerifyEmail] Email verified successfully: ${user.email}`);
 
-        // Redirect to login page with success message
-        res.redirect(`/customerLogin.html?verified=true&email=${encodeURIComponent(user.email)}`);
+        // Return JSON response (frontend will handle redirect)
+        res.json({
+            message: 'Email verified successfully',
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                role: user.role
+            }
+        });
     } catch (error) {
+        logger.error(`[VerifyEmail] Error: ${error.message}`);
         next(error);
     }
 });
