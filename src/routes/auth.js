@@ -374,14 +374,30 @@ router.post('/customer/verify-email', async (req, res, next) => {
             throw new BadRequestError('Verification token is required');
         }
 
+        // Clean the token (remove whitespace)
+        const cleanToken = token.trim();
+
+        logger.info(`Attempting to verify with token: ${cleanToken.substring(0, 20)}...`);
+
         // Find user with matching token
         const user = await User.findOne({
-            emailVerificationToken: token,
+            emailVerificationToken: cleanToken,
             emailVerificationTokenExpiry: { $gt: new Date() }
         });
 
         if (!user) {
-            throw new BadRequestError('Invalid or expired verification token');
+            logger.error(`Token verification failed. Token: ${cleanToken.substring(0, 20)}...`);
+            
+            // Check if token exists but is expired
+            const expiredUser = await User.findOne({
+                emailVerificationToken: cleanToken
+            });
+            
+            if (expiredUser) {
+                throw new BadRequestError('Verification token has expired. Please request a new one.');
+            }
+            
+            throw new BadRequestError('Invalid verification token');
         }
 
         // Mark email as verified
@@ -390,7 +406,7 @@ router.post('/customer/verify-email', async (req, res, next) => {
         user.emailVerificationTokenExpiry = null;
         await user.save();
 
-        logger.info(`Email verified: ${user.email}`);
+        logger.info(`Email verified successfully: ${user.email}`);
 
         res.json({
             message: 'Email verified successfully',
@@ -401,6 +417,70 @@ router.post('/customer/verify-email', async (req, res, next) => {
                 role: user.role
             }
         });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route GET /api/auth/customer/verify-email
+ * @description Verify email with token via GET (for email links)
+ * @access Public
+ */
+router.get('/customer/verify-email', async (req, res, next) => {
+    try {
+        const { token } = req.query;
+
+        if (!token) {
+            return res.status(400).json({ 
+                message: 'Verification token is required',
+                error: 'NO_TOKEN'
+            });
+        }
+
+        // Clean the token
+        const cleanToken = token.trim();
+
+        logger.info(`Attempting GET verify with token: ${cleanToken.substring(0, 20)}...`);
+
+        // Find user with matching token
+        const user = await User.findOne({
+            emailVerificationToken: cleanToken,
+            emailVerificationTokenExpiry: { $gt: new Date() }
+        });
+
+        if (!user) {
+            logger.error(`GET Token verification failed. Token: ${cleanToken.substring(0, 20)}...`);
+            
+            // Check if token exists but is expired
+            const expiredUser = await User.findOne({
+                emailVerificationToken: cleanToken
+            });
+            
+            if (expiredUser) {
+                return res.status(400).json({ 
+                    message: 'Verification token has expired. Please request a new one.',
+                    error: 'TOKEN_EXPIRED',
+                    email: expiredUser.email
+                });
+            }
+            
+            return res.status(400).json({ 
+                message: 'Invalid verification token',
+                error: 'INVALID_TOKEN'
+            });
+        }
+
+        // Mark email as verified
+        user.emailVerified = true;
+        user.emailVerificationToken = null;
+        user.emailVerificationTokenExpiry = null;
+        await user.save();
+
+        logger.info(`Email verified successfully via GET: ${user.email}`);
+
+        // Redirect to login page with success message
+        res.redirect(`/customerLogin.html?verified=true&email=${encodeURIComponent(user.email)}`);
     } catch (error) {
         next(error);
     }
