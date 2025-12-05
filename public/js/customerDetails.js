@@ -62,6 +62,13 @@ function submitCustomerDetails(event) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Auto-populate email from user account
+    const emailInput = document.getElementById('email');
+    const savedEmail = localStorage.getItem('userEmail');
+    if (savedEmail && emailInput) {
+        emailInput.value = savedEmail;
+    }
+
     // Setup delivery type toggle
     setupDeliveryTypeToggle();
 
