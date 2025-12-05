@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/order');
+const ActivityLog = require('../models/activityLog');
 const logger = require('../utils/logger');
 const auth = require('../middleware/auth');
 const emailService = require('../services/email.service');
@@ -220,6 +221,27 @@ router.put('/:id/status', auth, async (req, res) => { // Temporarily commented o
             }
         } else {
             console.log(`[Orders] Duplicate status update detected, skipping email`);
+        }
+        
+        // Log activity
+        try {
+            await ActivityLog.create({
+                userId: req.user?.id || 'system',
+                username: req.user?.name || 'System',
+                action: 'UPDATE_ORDER_STATUS',
+                page: req.user?.role === 'owner' ? 'OWNER' : 'ADMIN',
+                description: `Updated order ${order.orderId} status from ${order.status} to ${status}`,
+                details: {
+                    orderId: order.orderId,
+                    previousStatus: order.status,
+                    newStatus: status,
+                    customerName: order.customerName,
+                    paymentStatus: order.paymentStatus
+                },
+                ipAddress: req.ip
+            });
+        } catch (logError) {
+            logger.warn('Failed to log activity:', logError.message);
         }
         
         res.json(order);

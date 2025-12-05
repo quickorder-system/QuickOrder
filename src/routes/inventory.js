@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const InventoryItem = require('../models/inventory');
+const ActivityLog = require('../models/activityLog');
 const auth = require('../middleware/auth');
 
 // Get all inventory items
@@ -40,6 +41,28 @@ router.post('/', auth, async (req, res) => {
 
     try {
         const newItem = await item.save();
+        
+        // Log activity
+        try {
+            await ActivityLog.create({
+                userId: req.user?.id || 'unknown',
+                username: req.user?.name || 'Unknown User',
+                action: 'CREATE_ITEM',
+                page: req.user?.role === 'owner' ? 'OWNER' : 'ADMIN',
+                description: `Created item: ${newItem.itemName}`,
+                details: {
+                    itemId: newItem._id,
+                    itemName: newItem.itemName,
+                    category: newItem.category,
+                    price: newItem.price,
+                    quantity: newItem.quantity
+                },
+                ipAddress: req.ip
+            });
+        } catch (logError) {
+            console.warn('Failed to log activity:', logError.message);
+        }
+        
         res.status(201).json(newItem);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -64,6 +87,28 @@ router.put('/:id', auth, async (req, res) => {
         if (req.body.variations !== undefined) item.variations = req.body.variations;
 
         const updatedItem = await item.save();
+        
+        // Log activity
+        try {
+            await ActivityLog.create({
+                userId: req.user?.id || 'unknown',
+                username: req.user?.name || 'Unknown User',
+                action: 'UPDATE_ITEM',
+                page: req.user?.role === 'owner' ? 'OWNER' : 'ADMIN',
+                description: `Updated item: ${updatedItem.itemName}`,
+                details: {
+                    itemId: updatedItem._id,
+                    itemName: updatedItem.itemName,
+                    category: updatedItem.category,
+                    price: updatedItem.price,
+                    quantity: updatedItem.quantity
+                },
+                ipAddress: req.ip
+            });
+        } catch (logError) {
+            console.warn('Failed to log activity:', logError.message);
+        }
+        
         res.json(updatedItem);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -98,7 +143,30 @@ router.delete('/:id', auth, async (req, res) => {
         const item = await InventoryItem.findById(req.params.id);
         if (!item) return res.status(404).json({ message: 'Inventory item not found' });
 
+        const deletedItemName = item.itemName;
+        
         await InventoryItem.deleteOne({ _id: req.params.id });
+        
+        // Log activity
+        try {
+            await ActivityLog.create({
+                userId: req.user?.id || 'unknown',
+                username: req.user?.name || 'Unknown User',
+                action: 'DELETE_ITEM',
+                page: req.user?.role === 'owner' ? 'OWNER' : 'ADMIN',
+                description: `Deleted item: ${deletedItemName}`,
+                details: {
+                    itemId: item._id,
+                    itemName: deletedItemName,
+                    category: item.category,
+                    price: item.price
+                },
+                ipAddress: req.ip
+            });
+        } catch (logError) {
+            console.warn('Failed to log activity:', logError.message);
+        }
+        
         res.json({ message: 'Inventory item deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });
