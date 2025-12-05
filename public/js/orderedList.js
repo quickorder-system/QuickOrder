@@ -209,17 +209,12 @@ async function handleApplyDiscount() {
         const { subtotal } = calculateTotal();
         const response = await discountService.validateCode(code, subtotal);
         
-        if (response.discountAmount === undefined) {
-            response.discountAmount = response.code ? 
-                (response.discountType === 'percentage' 
-                    ? (subtotal * response.discountValue) / 100 
-                    : response.discountValue) 
-                : 0;
-        }
+        // Extract discount data from response (response format: { message, discount: {...} })
+        const discountData = response.discount || response;
         
-        appliedDiscount = response;
+        appliedDiscount = discountData;
         // Save discount to state service
-        stateService.setAppliedDiscount(response);
+        stateService.setAppliedDiscount(discountData);
         
         codeInput.disabled = true;
         document.getElementById('applyDiscountBtn').style.display = 'none';
