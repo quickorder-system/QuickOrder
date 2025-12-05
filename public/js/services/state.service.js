@@ -14,6 +14,7 @@ const state = {
   user: null,
   orders: [],
   currentOrder: getInitialState('currentOrder', null),
+  appliedDiscount: getInitialState('appliedDiscount', null),
 };
 
 const listeners = new Map();
@@ -99,6 +100,24 @@ function addOrder(order) {
   notifyListeners('orders');
 }
 
+// --- Discount Functions ---
+
+function setAppliedDiscount(discount) {
+  state.appliedDiscount = discount;
+  if (discount) {
+    sessionStorage.setItem('appliedDiscount', JSON.stringify(discount));
+  } else {
+    sessionStorage.removeItem('appliedDiscount');
+  }
+  notifyListeners('appliedDiscount');
+}
+
+function clearAppliedDiscount() {
+  state.appliedDiscount = null;
+  sessionStorage.removeItem('appliedDiscount');
+  notifyListeners('appliedDiscount');
+}
+
 export const stateService = {
   get cart() {
     return [...state.cart];
@@ -112,6 +131,9 @@ export const stateService = {
   get currentOrder() {
     return state.currentOrder;
   },
+  get appliedDiscount() {
+    return state.appliedDiscount;
+  },
   subscribe,
   addToCart,
   removeFromCart,
@@ -122,4 +144,6 @@ export const stateService = {
   setOrders,
   addOrder,
   setCurrentOrder,
+  setAppliedDiscount,
+  clearAppliedDiscount,
 };

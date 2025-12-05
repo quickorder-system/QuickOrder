@@ -136,6 +136,11 @@ async function handleOrderSubmit(event) {
             progressText.textContent = 'Ready to proceed!';
         }
 
+        const subtotal = stateService.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const appliedDiscount = stateService.appliedDiscount;
+        const discountAmount = appliedDiscount?.discountAmount || 0;
+        const total = subtotal - discountAmount;
+
         const orderData = {
             ...stateService.currentOrder,
             items: stateService.cart.map(item => ({
@@ -144,16 +149,26 @@ async function handleOrderSubmit(event) {
                 quantity: item.quantity,
                 price: item.price
             })),
-            subtotal: stateService.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-            total: stateService.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+            subtotal: subtotal,
+            total: total,
             paymentMethod: paymentMethod,
             paymentScreenshot: uploadResponse.fileUrl || 'N/A (Cash Payment)',
-            status: 'pending'
+            status: 'pending',
+            // Include discount information
+            ...(appliedDiscount && {
+                discount: {
+                    code: appliedDiscount.code,
+                    discountType: appliedDiscount.discountType,
+                    discountValue: appliedDiscount.discountValue,
+                    discountAmount: discountAmount
+                }
+            })
         };
 
         const newOrder = await ApiService.createOrder(orderData);
         stateService.clearCart();
         stateService.setCurrentOrder(null);
+        stateService.clearAppliedDiscount();
         showToast('Order placed successfully!', 'success');
         setTimeout(() => {
             window.location.href = `/receipt.html?orderId=${newOrder.orderId}`;

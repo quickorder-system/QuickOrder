@@ -218,6 +218,9 @@ async function handleApplyDiscount() {
         }
         
         appliedDiscount = response;
+        // Save discount to state service
+        stateService.setAppliedDiscount(response);
+        
         codeInput.disabled = true;
         document.getElementById('applyDiscountBtn').style.display = 'none';
         document.getElementById('removeDiscountBtn').style.display = 'inline-block';
