@@ -215,6 +215,14 @@ function showTab(tabId, clickedButton) {
     if (categoryManager && typeof categoryManager.init === 'function') {
       categoryManager.init();
     }
+  } else if (tabId === 'discountsTab') {
+    // Initialize discount manager for the discounts tab
+    if (typeof DiscountManager !== 'undefined') {
+      if (!window.discountManager) {
+        window.discountManager = new DiscountManager();
+      }
+      window.discountManager.init();
+    }
   }
 }
 
