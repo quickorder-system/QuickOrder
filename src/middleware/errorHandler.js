@@ -6,7 +6,10 @@ module.exports = (app) => {
       console.error('Error:', err);
 
       if (err instanceof CustomError) {
-        return res.status(err.statusCode).json({ error: err.message });
+        return res.status(err.statusCode).json({ 
+          error: err.message,
+          message: err.message 
+        });
       }
 
       res.status(500).json({

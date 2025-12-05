@@ -245,18 +245,30 @@ router.post('/customer/register', async (req, res, next) => {
     try {
         const { email, password, name } = req.body;
 
+        logger.info(`[Register] Request received - Email: ${email}, Name: ${name}`);
+
         // Validate input
         if (!email || !password || !name) {
+            logger.error('[Register] Missing required fields');
             throw new BadRequestError('Email, password, and name are required');
         }
 
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            logger.error(`[Register] Invalid email format: ${email}`);
+            throw new BadRequestError('Please enter a valid email address');
+        }
+
         if (password.length < 6) {
+            logger.error('[Register] Password too short');
             throw new BadRequestError('Password must be at least 6 characters');
         }
 
         // Check if user already exists
         let user = await User.findOne({ email });
         if (user) {
+            logger.error(`[Register] Email already registered: ${email}`);
             throw new BadRequestError('Email already registered');
         }
 
@@ -275,13 +287,23 @@ router.post('/customer/register', async (req, res, next) => {
             emailVerified: false
         });
 
+        logger.info(`[Register] Creating new user: ${email}`);
+
         // Save user (password will be hashed by pre-save hook)
         await user.save();
 
-        // Send verification email
-        await emailService.sendVerificationEmail(user, verificationToken);
+        logger.info(`[Register] User saved successfully: ${email}`);
 
-        logger.info(`Customer registered: ${email}`);
+        // Send verification email
+        try {
+            await emailService.sendVerificationEmail(user, verificationToken);
+            logger.info(`[Register] Verification email sent: ${email}`);
+        } catch (emailError) {
+            logger.warn(`[Register] Failed to send verification email: ${email}`, emailError);
+            // Don't throw - let user know account created even if email fails
+        }
+
+        logger.info(`[Register] Customer registered successfully: ${email}`);
 
         res.status(201).json({
             message: 'Registration successful. Please check your email to verify your account.',
