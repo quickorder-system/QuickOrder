@@ -617,7 +617,7 @@ async function sendVerificationEmail(user, verificationToken) {
     let baseUrl = process.env.CLIENT_URL;
     if (!baseUrl) {
         if (process.env.NODE_ENV === 'production') {
-            baseUrl = 'https://quickorder-production.up.railway.app';
+            baseUrl = 'https://quickorder-production-145f.up.railway.app';
         } else {
             baseUrl = 'http://localhost:3000';
         }
@@ -670,7 +670,7 @@ async function sendPasswordResetEmail(user, resetToken) {
     let clientUrl = process.env.CLIENT_URL;
     if (!clientUrl) {
         if (process.env.NODE_ENV === 'production') {
-            clientUrl = 'https://quickorder-production.up.railway.app';
+            clientUrl = 'https://quickorder-production-145f.up.railway.app';
         } else {
             clientUrl = 'http://localhost:3000';
         }
