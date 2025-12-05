@@ -658,7 +658,7 @@ async function sendVerificationEmail(user, verificationToken) {
 }
 
 async function sendPasswordResetEmail(user, resetToken) {
-    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:3000'}/resetPassword.html?token=${resetToken}`;
     
     const htmlContent = `
         <html>
