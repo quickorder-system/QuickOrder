@@ -144,6 +144,7 @@ async function handleOrderSubmit(event) {
                 quantity: item.quantity,
                 price: item.price
             })),
+            subtotal: stateService.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
             total: stateService.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
             paymentMethod: paymentMethod,
             paymentScreenshot: uploadResponse.fileUrl || 'N/A (Cash Payment)',

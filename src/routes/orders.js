@@ -86,13 +86,54 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', /*validateOrder,*/ async (req, res) => {
     try {
-        console.log('Received order data:', req.body);
+        console.log('[Orders POST] Received order data:', req.body);
+
+        // Validate required fields
+        const requiredFields = ['customerName', 'customerPhone', 'email', 'address', 'paymentMethod', 'subtotal', 'total', 'items'];
+        const missingFields = requiredFields.filter(field => !req.body[field]);
+
+        if (missingFields.length > 0) {
+            console.error('[Orders POST] Missing required fields:', missingFields);
+            return res.status(400).json({ 
+                message: 'Missing required fields',
+                missingFields: missingFields
+            });
+        }
+
+        // Validate items array
+        if (!Array.isArray(req.body.items) || req.body.items.length === 0) {
+            console.error('[Orders POST] Items array is invalid or empty');
+            return res.status(400).json({ 
+                message: 'Order must contain at least one item'
+            });
+        }
+
+        // Validate numeric fields
+        if (isNaN(req.body.subtotal) || isNaN(req.body.total)) {
+            console.error('[Orders POST] Invalid subtotal or total values');
+            return res.status(400).json({ 
+                message: 'Subtotal and total must be valid numbers'
+            });
+        }
+
+        console.log('[Orders POST] Validation passed, creating order...');
+
         const order = new Order(req.body);
         await order.save();
+
+        console.log('[Orders POST] Order created successfully:', order._id);
+
         res.status(201).json(order);
     } catch (error) {
+        console.error('[Orders POST] Error creating order:', error.message);
+        console.error('[Orders POST] Error details:', error);
+        
         logger.error('Error creating order:', error);
-        res.status(500).json({ message: 'Error creating order' });
+        
+        res.status(500).json({ 
+            message: 'Error creating order',
+            error: error.message
+        });
     }
 });
 
