@@ -1,6 +1,3 @@
-import { stateService } from './services/state.service.js';
-import { ApiService } from './services/api.service.js';
-
 const uploadAreaClick = document.getElementById('uploadAreaClick');
 const screenshotInput = document.getElementById('paymentScreenshot');
 const screenshotPreview = document.getElementById('screenshotPreview');

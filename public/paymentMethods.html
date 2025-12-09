@@ -10,6 +10,8 @@
         <link rel="stylesheet" href="css/payment-methods.css">
         <link rel="stylesheet" href="css/dark-mode.css">
         <link rel="stylesheet" href="css/animations.css">
+        <script src="js/services/state.service.js"></script>
+        <script src="js/services/api.service.js"></script>
         <script src="js/dark-mode.js"></script>
     </head>
     <body>
@@ -324,6 +326,6 @@
             (function(){ const s = document.createElement('script'); s.src='js/animations.js'; s.defer=true; document.body.appendChild(s); })();
         </script>
 
-        <script src="js/paymentMethods.js" type="module"></script>
+        <script src="js/paymentMethods.js" defer></script>
     </body>
     </html>
