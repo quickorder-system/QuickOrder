@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - QuickOrder</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <style>
+        .wishlist-header {
+            margin-bottom: 30px;
+        }
+
+        .wishlist-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .wishlist-actions .btn {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+
+        .wishlist-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .stat-box {
+            background: #2d3436;
+            color: #f5f5f5;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        body.dark-mode .stat-label {
+            color: #b0b0b0;
+        }
+
+        .wishlist-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .wishlist-item {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        body.dark-mode .wishlist-item {
+            background: #2d3436;
+        }
+
+        .wishlist-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .wishlist-item-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: #f5f5f5;
+        }
+
+        .wishlist-item-content {
+            padding: 12px;
+        }
+
+        .wishlist-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        body.dark-mode .wishlist-item-name {
+            color: #f5f5f5;
+        }
+
+        .wishlist-item-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .wishlist-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .wishlist-item-actions button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-to-cart-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #5568d3;
+        }
+
+        .remove-btn {
+            background: #f5f5f5;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        body.dark-mode .remove-btn {
+            background: #3d3d54;
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        .remove-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .wishlist-remove-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .wishlist-remove-badge:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .empty-wishlist {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-wishlist-icon {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-wishlist-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode .empty-wishlist-title {
+            color: #f5f5f5;
+        }
+
+        .empty-wishlist-message {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .empty-wishlist-message {
+            color: #b0b0b0;
+        }
+
+        @media (max-width: 768px) {
+            .wishlist-actions {
+                flex-direction: column;
+            }
+
+            .wishlist-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .wishlist-items {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wishlist-items {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .wishlist-item-image {
+                height: 120px;
+            }
+
+            .wishlist-item-content {
+                padding: 10px;
+            }
+
+            .stat-box {
+                padding: 12px;
+            }
+
+            .stat-number {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="QuickOrder.html" class="logo" style="cursor: pointer; text-decoration: none; color: inherit;">
+            <i class="fas fa-utensils"></i>
+            Quick Order
+        </a>
+        <div class="nav-links">
+            <a href="menu.html">Menu</a>
+            <a href="#" id="aboutLink">About</a>
+            <a href="#" id="contactsLink">Contact</a>
+            <button id="burgerMenu" class="burger-menu" title="Open menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Burger Menu Dropdown -->
+    <div id="burgerMenuDropdown" class="burger-menu-dropdown">
+        <div class="menu-item">
+            <button id="darkModeToggle" class="menu-button dark-mode-option">
+                <i class="fas fa-moon"></i>
+                <span>Dark Mode</span>
+            </button>
+        </div>
+        <div class="menu-item">
+            <a href="customerDashboard.html" class="menu-button">
+                <i class="fas fa-user"></i>
+                <span>Account Profile</span>
+            </a>
+        </div>
+        <div class="menu-item">
+            <button id="creditsBtn" class="menu-button">
+                <i class="fas fa-info-circle"></i>
+                <span>Credits</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Credits Modal -->
+    <div id="creditsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Credits</h2>
+                <button class="close-btn" onclick="closeModal('creditsModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body credits-content">
+                <h3>QuickOrder</h3>
+                <h4>Developers:</h4>
+                <ul>
+                    <li>Bernaldez, John Cedric D.</li>
+                    <li>Brisenio, Sean Andrei R.</li>
+                    <li>Sibug, Dan John Martin E.</li>
+                </ul>
+                <h4>Panelist:</h4>
+                <ul>
+                    <li>Dr. Frederic D. Yulo, MM, DIT</li>
+                    <li>Engr. Cerleo De Perio</li>
+                    <li>Mr. Ar-jay Agbayani</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="wishlist-header">
+            <h1>❤️ My Wishlist</h1>
+            <p>Your favorite items saved for later</p>
+        </div>
+
+        <div id="alertMessage" class="alert"></div>
+
+        <!-- Statistics -->
+        <div class="wishlist-stats">
+            <div class="stat-box">
+                <div class="stat-number" id="totalItems">0</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="totalValue">₱0</div>
+                <div class="stat-label">Total Value</div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="wishlist-actions">
+            <a href="menu.html" class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i> Browse Menu
+            </a>
+            <button id="clearWishlistBtn" class="btn btn-secondary" style="display: none;">
+                <i class="fas fa-trash"></i> Clear Wishlist
+            </button>
+        </div>
+
+        <!-- Wishlist Items -->
+        <div id="wishlistContainer">
+            <div class="empty-wishlist">
+                <div class="empty-wishlist-icon">💔</div>
+                <div class="empty-wishlist-title">Your Wishlist is Empty</div>
+                <div class="empty-wishlist-message">Add your favorite items to your wishlist for quick access later</div>
+                <a href="menu.html" class="btn btn-primary">
+                    <i class="fas fa-heart"></i> Start Adding Items
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/services/wishlist.service.js"></script>
+    <script src="js/services/state.service.js"></script>
+    <script src="js/dark-mode.js"></script>
+    <script>
+        const alertMessage = document.getElementById('alertMessage');
+        const burgerMenuBtn = document.getElementById('burgerMenu');
+        const burgerMenuDropdown = document.getElementById('burgerMenuDropdown');
+        const creditsBtn = document.getElementById('creditsBtn');
+        const creditsModal = document.getElementById('creditsModal');
+        const wishlistContainer = document.getElementById('wishlistContainer');
+        const clearWishlistBtn = document.getElementById('clearWishlistBtn');
+
+        // Burger menu toggle
+        burgerMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            burgerMenuDropdown.style.display = burgerMenuDropdown.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        // Close burger menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!burgerMenuBtn.contains(e.target) && !burgerMenuDropdown.contains(e.target)) {
+                burgerMenuDropdown.style.display = 'none';
+            }
+        });
+
+        // Credits button
+        creditsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            creditsModal.style.display = 'flex';
+            burgerMenuDropdown.style.display = 'none';
+        });
+
+        // Close modal
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        };
+
+        window.addEventListener('click', function(e) {
+            if (e.target === creditsModal) creditsModal.style.display = 'none';
+        });
+
+        // Load and display wishlist
+        function loadWishlist() {
+            const wishlist = wishlistService.getWishlist();
+            const totalItems = document.getElementById('totalItems');
+            const totalValue = document.getElementById('totalValue');
+
+            totalItems.textContent = wishlist.length;
+
+            if (wishlist.length === 0) {
+                clearWishlistBtn.style.display = 'none';
+                wishlistContainer.innerHTML = `
+                    <div class="empty-wishlist">
+                        <div class="empty-wishlist-icon">💔</div>
+                        <div class="empty-wishlist-title">Your Wishlist is Empty</div>
+                        <div class="empty-wishlist-message">Add your favorite items to your wishlist for quick access later</div>
+                        <a href="menu.html" class="btn btn-primary">
+                            <i class="fas fa-heart"></i> Start Adding Items
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            clearWishlistBtn.style.display = 'inline-block';
+
+            // Calculate total value
+            let total = wishlist.reduce((sum, item) => sum + (item.price || 0), 0);
+            totalValue.textContent = `₱${total.toLocaleString()}`;
+
+            // Display items
+            wishlistContainer.innerHTML = `<div class="wishlist-items">${wishlist.map(item => `
+                <div class="wishlist-item">
+                    <img src="${item.image || 'https://via.placeholder.com/160x140?text=No+Image'}" alt="${item.name}" class="wishlist-item-image">
+                    <button class="wishlist-remove-badge" onclick="removeFromWishlist('${item._id}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="wishlist-item-content">
+                        <div class="wishlist-item-name">${item.name}</div>
+                        <div class="wishlist-item-price">₱${(item.price || 0).toLocaleString()}</div>
+                        <div class="wishlist-item-actions">
+                            <button class="add-to-cart-btn" onclick="addToCart('${item._id}', '${item.name}', ${item.price})">
+                                <i class="fas fa-shopping-cart"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}</div>`;
+        }
+
+        function removeFromWishlist(itemId) {
+            if (wishlistService.removeFromWishlist(itemId)) {
+                showAlert('Item removed from wishlist', 'success');
+                loadWishlist();
+            }
+        }
+
+        function addToCart(itemId, itemName, price) {
+            // Add to cart using state service
+            const cart = stateService.cart || [];
+            const existingItem = cart.find(i => i._id === itemId);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    _id: itemId,
+                    name: itemName,
+                    price: price,
+                    quantity: 1
+                });
+            }
+
+            stateService.setCart(cart);
+            showAlert('Item added to cart!', 'success');
+        }
+
+        function showAlert(message, type = 'info') {
+            alertMessage.textContent = message;
+            alertMessage.className = `alert alert-${type}`;
+            alertMessage.style.display = 'block';
+
+            setTimeout(() => {
+                alertMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Clear wishlist
+        clearWishlistBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear your entire wishlist?')) {
+                wishlistService.clearWishlist();
+                showAlert('Wishlist cleared', 'success');
+                loadWishlist();
+            }
+        });
+
+        // Initial load
+        loadWishlist();
+    </script>
+</body>
+</html>

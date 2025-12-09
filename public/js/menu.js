@@ -1,5 +1,6 @@
 import { stateService } from './services/state.service.js';
 import MenuCartComponent from './components/menu-cart.component.js';
+import { wishlistService } from './services/wishlist.service.js';
 
 (() => {
     let allItems = []; // Store all fetched items globally
@@ -241,6 +242,9 @@ import MenuCartComponent from './components/menu-cart.component.js';
                         <div class="food-card ${unavailableClass}" data-item-id="${itemId}" data-item-name="${name}" data-item-price="${price}" data-available="${isAvailable}">
                             ${availabilityBadge}
                             <span class="popularity-badge">${orderCount} orders</span>
+                            <button type="button" class="wishlist-btn" data-item-id="${itemId}" title="Add to wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
                             ${image ? `<img src="${image}" alt="${name}" class="food-image">` : ''}
                             <div class="food-details">
                                 <div class="food-header">
@@ -305,6 +309,9 @@ import MenuCartComponent from './components/menu-cart.component.js';
                     menuHTML += `
                         <div class="food-card ${unavailableClass}" data-item-id="${itemId}" data-item-name="${name}" data-item-price="${price}" data-available="${isAvailable}">
                             ${availabilityBadge}
+                            <button type="button" class="wishlist-btn" data-item-id="${itemId}" title="Add to wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
                             ${image ? `<img src="${image}" alt="${name}" class="food-image">` : ''}
                             <div class="food-details">
                                 <div class="food-header">
@@ -336,6 +343,7 @@ import MenuCartComponent from './components/menu-cart.component.js';
 
         // Rebind event listeners
         bindAddButtonListeners();
+        bindWishlistListeners();
     }
 
     // Category filter function (works with dynamic elements)
@@ -386,6 +394,72 @@ import MenuCartComponent from './components/menu-cart.component.js';
             btn.removeEventListener('click', handleAddButtonClick);
             btn.addEventListener('click', handleAddButtonClick);
         });
+    }
+
+    // Bind wishlist button listeners
+    function bindWishlistListeners() {
+        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+        wishlistButtons.forEach(btn => {
+            btn.removeEventListener('click', handleWishlistButtonClick);
+            btn.addEventListener('click', handleWishlistButtonClick);
+            
+            // Update button state if item is already in wishlist
+            const itemId = btn.getAttribute('data-item-id');
+            const card = btn.closest('.food-card');
+            if (card && wishlistService.isInWishlist(itemId)) {
+                btn.classList.add('in-wishlist');
+            }
+        });
+    }
+
+    // Handle wishlist button click
+    function handleWishlistButtonClick(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const button = event.target.closest('.wishlist-btn');
+        if (!button) return;
+        
+        const itemId = button.getAttribute('data-item-id');
+        const card = button.closest('.food-card');
+        
+        if (!card) return;
+        
+        const nameElem = card.querySelector('.food-name');
+        const priceElem = card.querySelector('.food-price');
+        
+        const name = nameElem ? nameElem.textContent.trim() : 'Unknown Item';
+        const basePriceText = priceElem ? priceElem.textContent : '0';
+        const price = parseFloat(basePriceText.replace(/[^0-9\.]/g, '')) || 0;
+        const imageElem = card.querySelector('.food-image');
+        const image = imageElem ? imageElem.src : null;
+        
+        // Check if item is already in wishlist
+        const isInWishlist = wishlistService.isInWishlist(itemId);
+        
+        if (isInWishlist) {
+            // Remove from wishlist
+            wishlistService.removeFromWishlist(itemId);
+            button.classList.remove('in-wishlist');
+            if (window.uiUtils) {
+                window.uiUtils.showAlert(`${name} removed from wishlist!`, 'info');
+            }
+        } else {
+            // Add to wishlist
+            const item = {
+                id: itemId,
+                name,
+                price,
+                image
+            };
+            wishlistService.addToWishlist(item);
+            button.classList.add('in-wishlist');
+            if (window.uiUtils) {
+                window.uiUtils.showAlert(`${name} added to wishlist!`, 'success');
+            }
+        }
+        
+        console.log('[Menu] Wishlist updated:', itemId);
     }
 
     // Handle add button click event - add items from cart

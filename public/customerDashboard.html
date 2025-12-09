@@ -30,6 +30,12 @@
     <!-- Burger Menu Dropdown -->
     <div id="burgerMenuDropdown" class="burger-menu-dropdown">
         <div class="menu-item">
+            <a href="wishlist.html" class="menu-button">
+                <i class="fas fa-heart"></i>
+                <span>My Wishlist</span>
+            </a>
+        </div>
+        <div class="menu-item">
             <button id="darkModeToggle" class="menu-button dark-mode-option">
                 <i class="fas fa-moon"></i>
                 <span>Dark Mode</span>
@@ -80,6 +86,12 @@
                 <div class="stat-card-label">Pending Orders</div>
                 <div class="stat-card-value" id="pendingOrders">0</div>
                 <div class="stat-card-unit">waiting</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-label">Wishlist Items</div>
+                <div class="stat-card-value" id="wishlistCount">0</div>
+                <div class="stat-card-unit">saved</div>
             </div>
 
             <div class="stat-card">
@@ -156,6 +168,7 @@
 
     <script src="js/services/auth.service.js"></script>
     <script src="js/services/customer.service.js"></script>
+    <script src="js/services/wishlist.service.js"></script>
     <script src="js/utils/auth-ui.utils.js"></script>
     <script src="js/dark-mode.js"></script>
     <script>
@@ -262,6 +275,10 @@
             document.getElementById('totalOrders').textContent = allOrders.length;
             document.getElementById('totalSpent').textContent = `₱${totalSpent.toLocaleString()}`;
             document.getElementById('pendingOrders').textContent = pendingCount;
+            
+            // Update wishlist count
+            const wishlistCount = wishlistService.getWishlistCount();
+            document.getElementById('wishlistCount').textContent = wishlistCount;
         }
 
         function displayRecentOrders(orders) {
