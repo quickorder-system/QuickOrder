@@ -235,7 +235,6 @@
             try {
                 // Load profile
                 const profile = await customerService.getProfile();
-                document.getElementById('userEmail').textContent = profile.email;
                 document.getElementById('displayName').textContent = profile.name || profile.email;
 
                 // Format member since date
