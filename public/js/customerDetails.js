@@ -1,5 +1,3 @@
-import { stateService } from './services/state.service.js';
-
 // Validation functions
 function validateFullName(value) {
     if (!value || value.trim().length === 0) {

@@ -36,6 +36,11 @@ body {
     box-shadow: 0 2px 30px rgba(0,0,0,0.1);
 }
 
+/* Burger Menu Dropdown */
+.burger-menu-dropdown {
+    z-index: 2001 !important;
+}
+
 .logo {
     font-size: 1.75rem;
     font-weight: 800;
