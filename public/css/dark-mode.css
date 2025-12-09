@@ -431,6 +431,32 @@ body.dark-mode .nav-links a::after {
   background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
 }
 
+/* Dark mode burger menu dropdown */
+body.dark-mode .burger-menu-dropdown {
+  background: #2d3748;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .menu-item {
+  border-bottom-color: #4a5568;
+}
+
+body.dark-mode .menu-button,
+body.dark-mode .menu-item a {
+  color: #e2e8f0;
+}
+
+body.dark-mode .menu-button:hover,
+body.dark-mode .menu-item a:hover {
+  background: #4a5568;
+  color: #4299e1;
+}
+
+body.dark-mode .menu-button i,
+body.dark-mode .menu-item a i {
+  color: #4299e1;
+}
+
 body.dark-mode .container {
   background: #1a202c;
 }
@@ -494,6 +520,22 @@ body.dark-mode .food-card {
 body.dark-mode .food-card:hover {
   background: linear-gradient(135deg, #4a5568 0%, #5a6b7d 100%);
   box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+}
+
+body.dark-mode .wishlist-btn {
+  background: rgba(45, 62, 80, 0.95);
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+body.dark-mode .wishlist-btn:hover {
+  background: #ff6b6b;
+  color: white;
+}
+
+body.dark-mode .wishlist-btn.in-wishlist {
+  background: #ff6b6b;
+  color: white;
 }
 
 body.dark-mode .difficulty-badge {
