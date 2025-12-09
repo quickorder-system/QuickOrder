@@ -481,16 +481,9 @@
         // Capture selected variations
         const selectedVariations = [];
         const variationSelects = card.querySelectorAll('.variation-select');
-        let hasInvalidVariations = false;
         
         variationSelects.forEach(select => {
-            if (select.value === '') {
-                const allEmpty = Array.from(variationSelects).every(s => s.value === '');
-                if (!allEmpty) {
-                    console.warn('[Menu] Variation not selected:', select.getAttribute('data-variation-index'));
-                    hasInvalidVariations = true;
-                }
-            } else {
+            if (select.value !== '') {
                 const variationIndex = select.getAttribute('data-variation-index');
                 const optionIndex = select.value;
                 const selectedOption = select.options[select.selectedIndex];
@@ -510,10 +503,7 @@
             }
         });
         
-        if (variationSelects.length > 0 && hasInvalidVariations) {
-            alert(`Please select all options for "${name}" before adding to cart.`);
-            return;
-        }
+        // Allow adding to cart with or without variations selected
         
         // Generate unique cart item ID
         const variantHash = selectedVariations.length > 0 

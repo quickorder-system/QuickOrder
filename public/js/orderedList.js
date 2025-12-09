@@ -1,5 +1,3 @@
-import { stateService } from './services/state.service.js';
-
 let quantityButtonsListener = null; // Store reference to event listener
 let appliedDiscount = null; // Store applied discount
 
