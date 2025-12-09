@@ -82,6 +82,68 @@ body {
     width: 100%;
 }
 
+/* Burger Menu Dropdown */
+.burger-menu-dropdown {
+    position: fixed;
+    top: 70px;
+    right: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    z-index: 2001;
+    animation: slideDown 0.3s ease-out;
+    min-width: 220px;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.burger-menu-dropdown .menu-item {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.burger-menu-dropdown .menu-item:last-child {
+    border-bottom: none;
+}
+
+.burger-menu-dropdown .menu-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    color: #2d3436;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-align: left;
+    text-decoration: none;
+}
+
+.burger-menu-dropdown .menu-button:hover {
+    background: #f5f5f5;
+    color: #667eea;
+}
+
+.burger-menu-dropdown .menu-button i {
+    color: #667eea;
+    width: 20px;
+    text-align: center;
+}
+
 .receipt-container {
     background: white;
     padding: 50px 40px;
@@ -213,4 +275,111 @@ body {
 
 .social-link:hover {
     text-decoration: underline;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+body.dark-mode .navbar {
+    background: rgba(26, 26, 46, 0.98);
+}
+
+body.dark-mode .logo {
+    color: #667eea;
+}
+
+body.dark-mode .nav-links a {
+    color: #e2e8f0;
+}
+
+body.dark-mode .receipt-container {
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+body.dark-mode .receipt-header h2 {
+    color: #e2e8f0;
+}
+
+body.dark-mode .receipt-header p {
+    color: #cbd5e1;
+}
+
+body.dark-mode .order-info {
+    background: #1a202c;
+    border-color: #4a5568;
+    color: #cbd5e1;
+}
+
+body.dark-mode .order-number {
+    color: #667eea;
+}
+
+body.dark-mode .info-item {
+    color: #cbd5e1;
+}
+
+body.dark-mode .info-item strong {
+    color: #e2e8f0;
+}
+
+body.dark-mode .thank-you-message {
+    background: rgba(16, 185, 129, 0.1);
+    color: #86efac;
+}
+
+body.dark-mode .contact-info {
+    background: rgba(217, 119, 6, 0.1);
+    color: #fcd34d;
+}
+
+body.dark-mode .contact-info a {
+    color: #667eea;
+}
+
+body.dark-mode .modal-content {
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+body.dark-mode .modal-header h2 {
+    color: #e2e8f0;
+}
+
+body.dark-mode .close-btn {
+    background: #4a5568;
+    color: #e2e8f0;
+}
+
+body.dark-mode .close-btn:hover {
+    background: #667eea;
+}
+
+body.dark-mode .modal-body {
+    color: #cbd5e1;
+}
+
+/* Dark Mode - Burger Menu Dropdown */
+body.dark-mode .burger-menu-dropdown {
+    background: #2d3748;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .burger-menu-dropdown .menu-item {
+    border-bottom-color: #4a5568;
+}
+
+body.dark-mode .burger-menu-dropdown .menu-button {
+    color: #e2e8f0;
+}
+
+body.dark-mode .burger-menu-dropdown .menu-button:hover {
+    background: #4a5568;
+    color: #667eea;
+}
+
+body.dark-mode .burger-menu-dropdown .menu-button i {
+    color: #667eea;
 }

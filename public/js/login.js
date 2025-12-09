@@ -1,5 +1,3 @@
-import { stateService } from './services/state.service.js';
-
 // Forgot Password Variables
 let forgotPasswordUsername = '';
 
