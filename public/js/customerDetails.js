@@ -1,5 +1,69 @@
 import { stateService } from './services/state.service.js';
 
+// Validation functions
+function validateFullName(value) {
+    if (!value || value.trim().length === 0) {
+        return 'Full name is required';
+    }
+    if (value.trim().length < 2) {
+        return 'Full name must be at least 2 characters';
+    }
+    if (!/^[a-zA-Z\s.'-]+$/.test(value)) {
+        return 'Full name can only contain letters, spaces, and hyphens';
+    }
+    return '';
+}
+
+function validatePhoneNumber(value) {
+    if (!value || value.length === 0) {
+        return 'Phone number is required';
+    }
+    if (!/^09\d{9}$/.test(value)) {
+        return 'Phone number must be 11 digits starting with 09 (e.g., 09123456789)';
+    }
+    return '';
+}
+
+function validateEmail(value) {
+    if (!value || value.length === 0) {
+        return 'Email is required';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+        return 'Please enter a valid email address';
+    }
+    return '';
+}
+
+function validateAddress(value) {
+    if (!value || value.trim().length === 0) {
+        return 'Delivery address is required';
+    }
+    if (value.trim().length < 10) {
+        return 'Please provide a more detailed address';
+    }
+    return '';
+}
+
+function displayError(fieldId, errorMessage) {
+    const input = document.getElementById(fieldId);
+    const errorSpan = document.getElementById(fieldId + 'Error');
+    
+    if (errorMessage) {
+        input.classList.add('input-error');
+        if (errorSpan) {
+            errorSpan.textContent = errorMessage;
+            errorSpan.style.display = 'block';
+        }
+    } else {
+        input.classList.remove('input-error');
+        if (errorSpan) {
+            errorSpan.textContent = '';
+            errorSpan.style.display = 'none';
+        }
+    }
+}
+
 // Handle delivery type toggle
 function setupDeliveryTypeToggle() {
     const pickupOption = document.getElementById('pickupOption');
@@ -31,17 +95,27 @@ function setupDeliveryTypeToggle() {
 function submitCustomerDetails(event) {
     event.preventDefault();
 
-    // Validate phone number
-    const phoneNumber = document.getElementById('customerPhone').value;
-    const phoneRegex = /^09\d{9}$/;
+    // Validate all fields
+    const fullNameError = validateFullName(document.getElementById('fullName').value);
+    const phoneError = validatePhoneNumber(document.getElementById('customerPhone').value);
+    const emailError = validateEmail(document.getElementById('email').value);
     
-    if (!phoneRegex.test(phoneNumber)) {
-        alert('⚠️ Warning!\nPhone number must be 11 digits and start with 09\n(e.g., 09123456789)');
-        document.getElementById('customerPhone').focus();
+    displayError('fullName', fullNameError);
+    displayError('customerPhone', phoneError);
+    displayError('email', emailError);
+
+    const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
+    let addressError = '';
+    if (deliveryType === 'delivery') {
+        addressError = validateAddress(document.getElementById('address').value);
+        displayError('address', addressError);
+    }
+
+    // If there are any errors, don't submit
+    if (fullNameError || phoneError || emailError || addressError) {
         return;
     }
 
-    const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
     const address = deliveryType === 'delivery' ? document.getElementById('address').value : 'Pick Up';
 
     const customerDetails = {
@@ -71,6 +145,68 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Setup delivery type toggle
     setupDeliveryTypeToggle();
+
+    // Setup real-time validation
+    const fullNameInput = document.getElementById('fullName');
+    const phoneInput = document.getElementById('customerPhone');
+    const emailInputField = document.getElementById('email');
+    const addressInput = document.getElementById('address');
+
+    // Full Name validation
+    if (fullNameInput) {
+        fullNameInput.addEventListener('input', function() {
+            const error = validateFullName(this.value);
+            displayError('fullName', error);
+        });
+        fullNameInput.addEventListener('blur', function() {
+            const error = validateFullName(this.value);
+            displayError('fullName', error);
+        });
+    }
+
+    // Phone Number validation
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            // Allow only digits
+            this.value = this.value.replace(/[^0-9]/g, '');
+            const error = validatePhoneNumber(this.value);
+            displayError('customerPhone', error);
+        });
+        phoneInput.addEventListener('blur', function() {
+            const error = validatePhoneNumber(this.value);
+            displayError('customerPhone', error);
+        });
+    }
+
+    // Email validation
+    if (emailInputField) {
+        emailInputField.addEventListener('input', function() {
+            const error = validateEmail(this.value);
+            displayError('email', error);
+        });
+        emailInputField.addEventListener('blur', function() {
+            const error = validateEmail(this.value);
+            displayError('email', error);
+        });
+    }
+
+    // Address validation
+    if (addressInput) {
+        addressInput.addEventListener('input', function() {
+            const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
+            if (deliveryType === 'delivery') {
+                const error = validateAddress(this.value);
+                displayError('address', error);
+            }
+        });
+        addressInput.addEventListener('blur', function() {
+            const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
+            if (deliveryType === 'delivery') {
+                const error = validateAddress(this.value);
+                displayError('address', error);
+            }
+        });
+    }
 
     // Form submission listener
     const form = document.querySelector('form');
