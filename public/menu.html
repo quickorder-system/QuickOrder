@@ -12,6 +12,7 @@
     <script src="js/services/state.service.js"></script>
     <script src="js/services/wishlist.service.js"></script>
     <script src="js/components/menu-cart.component.js"></script>
+    <script src="js/utils/logout.utils.js"></script>
     <script src="js/menu.js" type="module" defer></script>
     <script src="js/dark-mode.js"></script>
 </head>
@@ -55,6 +56,12 @@
             <button id="creditsBtn" class="menu-button">
                 <i class="fas fa-info-circle"></i>
                 <span>Credits</span>
+            </button>
+        </div>
+        <div class="menu-item">
+            <button id="logoutBtn" class="menu-button">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
             </button>
         </div>
     </div>
@@ -212,6 +219,15 @@
           e.preventDefault();
           openModal('creditsModal');
         });
+
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await logoutUtils.logout();
+          });
+        }
 
         // Close modal when clicking outside
         window.addEventListener('click', function(e) {

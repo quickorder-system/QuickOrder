@@ -170,6 +170,7 @@
     <script src="js/services/customer.service.js"></script>
     <script src="js/services/wishlist.service.js"></script>
     <script src="js/utils/auth-ui.utils.js"></script>
+    <script src="js/utils/logout.utils.js"></script>
     <script src="js/dark-mode.js"></script>
     <script>
         const alertMessage = document.getElementById('alertMessage');
@@ -222,13 +223,8 @@
 
         // Logout
         logoutBtn.addEventListener('click', async () => {
-            try {
-                await authService.logout();
-                window.location.href = 'customerLogin.html';
-            } catch (error) {
-                console.error('Logout error:', error);
-                window.location.href = 'customerLogin.html';
-            }
+            e.preventDefault();
+            await logoutUtils.logout();
         });
 
         async function loadDashboard() {

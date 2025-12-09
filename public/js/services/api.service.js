@@ -1,7 +1,7 @@
-export class ApiService {
-    static baseUrl = window.location.origin;
+const ApiService = {
+    baseUrl: window.location.origin,
 
-    static async request(endpoint, method = 'GET', body = null) {
+    async request(endpoint, method = 'GET', body = null) {
         const options = {
             method,
             headers: {
@@ -21,17 +21,17 @@ export class ApiService {
             console.error(`ApiService ${method} request to ${endpoint} failed:`, error);
             throw error;
         }
-    }
+    },
 
-    static async get(endpoint) {
+    async get(endpoint) {
         return this.request(endpoint);
-    }
+    },
 
-    static async post(endpoint, body) {
+    async post(endpoint, body) {
         return this.request(endpoint, 'POST', body);
-    }
+    },
 
-    static async uploadImage(file) {
+    async uploadImage(file) {
         const formData = new FormData();
         formData.append('paymentScreenshot', file);
 
@@ -51,17 +51,17 @@ export class ApiService {
             console.error('ApiService uploadImage request failed:', error);
             throw error;
         }
-    }
+    },
 
-    static async createOrder(orderData) {
+    async createOrder(orderData) {
         return this.post('/api/orders', orderData);
-    }
+    },
 
-    static async getInventory() {
+    async getInventory() {
         return this.get('/api/inventory');
-    }
+    },
 
-    static async checkApiHealth() {
+    async checkApiHealth() {
         try {
             await this.get('/api/health');
             console.log('API connection OK!');
@@ -69,4 +69,4 @@ export class ApiService {
             console.error('API connection FAILED!');
         }
     }
-}
+};

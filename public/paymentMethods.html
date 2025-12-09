@@ -12,6 +12,7 @@
         <link rel="stylesheet" href="css/animations.css">
         <script src="js/services/state.service.js"></script>
         <script src="js/services/api.service.js"></script>
+        <script src="js/utils/logout.utils.js"></script>
         <script src="js/dark-mode.js"></script>
     </head>
     <body>
@@ -54,6 +55,12 @@
             <button id="creditsBtn" class="menu-button">
                 <i class="fas fa-info-circle"></i>
                 <span>Credits</span>
+            </button>
+        </div>
+        <div class="menu-item">
+            <button id="logoutBtn" class="menu-button">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
             </button>
         </div>
     </div>
@@ -313,6 +320,15 @@
                     creditsModal.style.display = 'flex';
                     burgerMenuDropdown.style.display = 'none';
                 });
+
+                // Logout button
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        await logoutUtils.logout();
+                    });
+                }
 
                 // Close modal when clicking outside
                 window.addEventListener('click', function(e) {

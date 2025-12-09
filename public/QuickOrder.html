@@ -52,6 +52,12 @@
                 <span>Credits</span>
             </button>
         </div>
+        <div class="menu-item">
+            <button id="logoutBtn" class="menu-button">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
     </div>
 
     <!-- Credits Modal -->
@@ -323,6 +329,7 @@
     </div>-->
 
     <script src="js/QuickOrder.js"></script>
+    <script src="js/utils/logout.utils.js"></script>
     <script src="js/dark-mode.js"></script>
     <script src="js/animations.js" defer></script>
     <script>
@@ -402,6 +409,15 @@
           creditsModal.style.display = 'flex';
           burgerMenuDropdown.style.display = 'none';
         });
+
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await logoutUtils.logout();
+          });
+        }
 
         // Close credits modal when clicking outside
         creditsModal.addEventListener('click', (e) => {
