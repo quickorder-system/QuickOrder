@@ -24,8 +24,11 @@ const wishlistService = {
         try {
             const wishlist = wishlistService.getWishlist();
             
+            // Use 'id' if available, otherwise '_id'
+            const itemId = item.id || item._id;
+            
             // Check if item already exists
-            const exists = wishlist.some(w => w._id === item._id);
+            const exists = wishlist.some(w => (w.id || w._id) === itemId);
             if (exists) {
                 return false;
             }
@@ -50,7 +53,7 @@ const wishlistService = {
     removeFromWishlist: (itemId) => {
         try {
             let wishlist = wishlistService.getWishlist();
-            wishlist = wishlist.filter(item => item._id !== itemId);
+            wishlist = wishlist.filter(item => (item.id || item._id) !== itemId);
             localStorage.setItem('wishlist', JSON.stringify(wishlist));
             return true;
         } catch (error) {
@@ -65,7 +68,7 @@ const wishlistService = {
     isInWishlist: (itemId) => {
         try {
             const wishlist = wishlistService.getWishlist();
-            return wishlist.some(item => item._id === itemId);
+            return wishlist.some(item => (item.id || item._id) === itemId);
         } catch (error) {
             console.error('Error checking wishlist:', error);
             return false;
