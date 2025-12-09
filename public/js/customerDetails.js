@@ -117,6 +117,7 @@ function submitCustomerDetails(event) {
     const address = deliveryType === 'delivery' ? document.getElementById('address').value : 'Pick Up';
 
     const customerDetails = {
+        customerId: stateService.user?.id || localStorage.getItem('userId'),
         customerName: document.getElementById('fullName').value,
         customerPhone: document.getElementById('customerPhone').value,
         address: address,

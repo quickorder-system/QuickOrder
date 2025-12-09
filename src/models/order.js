@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 const { generateOrderId } = require('../utils/order');
 
 const orderSchema = new mongoose.Schema({
+    customerId: {
+        type: String,
+        required: false,
+        index: true
+    },
     orderId: {
         type: String,
         unique: true,
