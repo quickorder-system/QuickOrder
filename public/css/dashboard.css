@@ -986,6 +986,14 @@ body.dark-mode .credits-content li {
 
 /* Responsive design */
 @media (max-width: 768px) {
+    .dashboard-header-content {
+        padding: 12px 16px;
+    }
+
+    .dashboard-logo {
+        font-size: 1.25rem;
+    }
+
     .dashboard-nav {
         gap: 10px;
     }
@@ -1005,5 +1013,174 @@ body.dark-mode .credits-content li {
     .burger-menu-dropdown {
         right: 1rem;
         min-width: 220px;
+        top: 60px;
+    }
+
+    .main-content {
+        padding: 20px 10px;
+        margin-top: 15px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+    }
+
+    .header p {
+        font-size: 13px;
+    }
+
+    /* Dashboard cards */
+    .dashboard-card {
+        padding: 16px;
+    }
+
+    .dashboard-card h3 {
+        font-size: 14px;
+    }
+
+    .dashboard-card .number {
+        font-size: 28px;
+    }
+
+    /* Grid layouts */
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    /* Tables */
+    .table-container {
+        overflow-x: auto;
+        border-radius: 8px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    table th,
+    table td {
+        padding: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .btn-lg {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header-content {
+        padding: 10px 12px;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .dashboard-logo {
+        font-size: 1rem;
+    }
+
+    .dashboard-nav {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .burger-menu-dropdown {
+        right: 0.5rem;
+        left: 0.5rem;
+        min-width: auto;
+        width: auto;
+    }
+
+    .main-content {
+        padding: 16px 10px;
+    }
+
+    .header {
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .header p {
+        font-size: 12px;
+    }
+
+    /* Dashboard cards */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .dashboard-card {
+        padding: 14px;
+    }
+
+    .dashboard-card h3 {
+        font-size: 13px;
+    }
+
+    .dashboard-card .number {
+        font-size: 24px;
+    }
+
+    /* Tables */
+    table {
+        font-size: 11px;
+    }
+
+    table th,
+    table td {
+        padding: 8px;
+    }
+
+    .table-container {
+        border-radius: 6px;
+    }
+
+    /* Modal */
+    .modal-content {
+        max-width: 95vw;
+        padding: 16px;
+    }
+
+    .modal-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .credits-content h3 {
+        font-size: 13px;
+    }
+
+    .credits-content h4 {
+        font-size: 12px;
+    }
+
+    .credits-content li {
+        font-size: 11px;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 8px 10px;
+        font-size: 11px;
+        border-radius: 6px;
+    }
+
+    .btn-lg {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .btn-block {
+        width: 100%;
     }
 }

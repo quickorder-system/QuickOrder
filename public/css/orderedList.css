@@ -609,3 +609,274 @@ body.dark-mode .credits-content h4 {
 body.dark-mode .credits-content li {
     color: #b0b0b0;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    /* Navigation */
+    .navbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .navbar.scrolled {
+        padding: 0.75rem 1rem;
+    }
+
+    .logo {
+        font-size: 1.25rem;
+    }
+
+    .nav-links {
+        gap: 1rem;
+    }
+
+    /* Body */
+    body {
+        padding: 20px 10px;
+        padding-top: 90px;
+    }
+
+    /* Container */
+    .container {
+        padding: 20px 12px;
+        border-radius: 12px;
+        max-width: 100%;
+    }
+
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .header p {
+        font-size: 13px;
+    }
+
+    /* Order items */
+    .order-item {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .order-item-image {
+        width: 60px;
+        height: 60px;
+    }
+
+    .order-item-name {
+        font-size: 13px;
+    }
+
+    .order-item-details {
+        font-size: 12px;
+    }
+
+    .order-item-price {
+        font-size: 14px;
+    }
+
+    /* Order summary */
+    .order-summary {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .summary-row {
+        padding: 8px 0;
+        font-size: 13px;
+    }
+
+    .summary-total {
+        padding: 12px 0;
+        font-size: 16px;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 10px 14px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    .btn-continue {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    /* Modal */
+    .modal-content {
+        max-width: 90vw;
+        padding: 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Navigation */
+    .navbar {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .logo {
+        font-size: 1rem;
+    }
+
+    .nav-links {
+        gap: 0.5rem;
+    }
+
+    .nav-links a {
+        display: none;
+    }
+
+    .nav-links .burger-menu {
+        display: flex;
+    }
+
+    /* Body */
+    body {
+        padding: 15px 8px;
+        padding-top: 80px;
+    }
+
+    /* Container */
+    .container {
+        padding: 16px 12px;
+        border-radius: 10px;
+        max-width: 100%;
+    }
+
+    .header {
+        margin-bottom: 16px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .header p {
+        font-size: 12px;
+    }
+
+    /* Order items */
+    .orders-list {
+        gap: 10px;
+    }
+
+    .order-item {
+        padding: 10px;
+        gap: 10px;
+        border-radius: 8px;
+    }
+
+    .order-item-image {
+        width: 55px;
+        height: 55px;
+        border-radius: 6px;
+    }
+
+    .order-item-name {
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .order-item-details {
+        font-size: 11px;
+    }
+
+    .order-item-price {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    /* Quantity selector */
+    .quantity-selector {
+        gap: 4px;
+    }
+
+    .qty-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.85rem;
+        padding: 0;
+    }
+
+    .qty-input {
+        width: 30px;
+        font-size: 11px;
+        padding: 4px;
+    }
+
+    .remove-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    /* Order summary */
+    .order-summary {
+        padding: 14px;
+        gap: 10px;
+        border-radius: 8px;
+    }
+
+    .summary-row {
+        padding: 6px 0;
+        font-size: 12px;
+    }
+
+    .summary-label {
+        font-size: 11px;
+    }
+
+    .summary-total {
+        padding: 10px 0;
+        font-size: 15px;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 10px 12px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+
+    .btn-continue {
+        width: 100%;
+        font-size: 13px;
+        padding: 12px;
+    }
+
+    .btn-back {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    /* Modal */
+    .modal-content {
+        max-width: 95vw;
+        padding: 16px;
+        border-radius: 10px;
+    }
+
+    .modal-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .close-btn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .credits-content h3 {
+        font-size: 13px;
+    }
+
+    .credits-content h4 {
+        font-size: 12px;
+    }
+
+    .credits-content li {
+        font-size: 11px;
+    }
+}
