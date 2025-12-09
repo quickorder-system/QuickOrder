@@ -200,5 +200,3 @@ class MenuCartComponent {
         }
     }
 }
-
-export default MenuCartComponent;
