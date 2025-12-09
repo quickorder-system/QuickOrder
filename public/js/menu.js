@@ -1,6 +1,5 @@
 import { stateService } from './services/state.service.js';
 import MenuCartComponent from './components/menu-cart.component.js';
-import { wishlistService } from './services/wishlist.service.js';
 
 (() => {
     let allItems = []; // Store all fetched items globally
