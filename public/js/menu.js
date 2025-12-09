@@ -1,4 +1,3 @@
-import { stateService } from './services/state.service.js';
 import MenuCartComponent from './components/menu-cart.component.js';
 
 (() => {

@@ -118,7 +118,7 @@ function clearAppliedDiscount() {
   notifyListeners('appliedDiscount');
 }
 
-export const stateService = {
+const stateService = {
   get cart() {
     return [...state.cart];
   },
