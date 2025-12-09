@@ -1,5 +1,4 @@
 // Menu Cart Component - Shopping cart sidebar in the menu page
-import { stateService } from '../services/state.service.js';
 
 class MenuCartComponent {
     constructor(cartContainerId = 'menu-cart-container') {

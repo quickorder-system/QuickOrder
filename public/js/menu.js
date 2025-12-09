@@ -1,5 +1,3 @@
-import MenuCartComponent from './components/menu-cart.component.js';
-
 (() => {
     let allItems = []; // Store all fetched items globally
     let menuCart = null; // Global reference to menu cart component
