@@ -281,7 +281,7 @@
                                 </div>
                                 <div class="order-detail">
                                     <span class="order-detail-label">Total</span>
-                                    <span class="order-detail-value" style="color: var(--primary-color); font-weight: 600;">₱${(order.totalAmount || 0).toLocaleString()}</span>
+                                    <span class="order-detail-value" style="color: var(--primary-color); font-weight: 600;">₱${(order.total || 0).toLocaleString()}</span>
                                 </div>
                             </div>
 
@@ -290,7 +290,7 @@
                                 <div class="order-items-list">
                                     ${(order.items || []).slice(0, 2).map(item => `
                                         <div class="order-item-detail">
-                                            <span class="order-item-name">${item.itemId?.name || 'Item'}</span>
+                                            <span class="order-item-name">${item.name || 'Item'}</span>
                                             <span class="order-item-qty">x${item.quantity}</span>
                                             <span class="order-item-price">₱${(item.price * item.quantity).toLocaleString()}</span>
                                         </div>
@@ -387,7 +387,7 @@
                         ${(order.items || []).map(item => `
                             <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-gray);">
                                 <div>
-                                    <div style="font-weight: 500;">${item.itemId?.name || 'Item'}</div>
+                                    <div style="font-weight: 500;">${item.name || 'Item'}</div>
                                     <div style="color: var(--text-light); font-size: 13px;">Qty: ${item.quantity}</div>
                                 </div>
                                 <div style="text-align: right;">
@@ -401,7 +401,7 @@
                     <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border-gray);">
                         <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 600; color: var(--primary-color);">
                             <span>Total:</span>
-                            <span>₱${(order.totalAmount || 0).toLocaleString()}</span>
+                            <span>₱${(order.total || 0).toLocaleString()}</span>
                         </div>
                     </div>
 
