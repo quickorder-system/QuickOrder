@@ -47,20 +47,24 @@ function displayError(fieldId, errorMessage) {
     const input = document.getElementById(fieldId);
     const errorSpan = document.getElementById(fieldId + 'Error');
     
+    if (!input || !errorSpan) {
+        console.warn(`Missing input or error span for field: ${fieldId}`);
+        return;
+    }
+    
     if (errorMessage) {
         input.classList.add('input-error');
-        if (errorSpan) {
-            errorSpan.textContent = errorMessage;
-            errorSpan.style.display = 'block';
-            errorSpan.setAttribute('aria-live', 'polite');
-        }
+        errorSpan.textContent = errorMessage;
+        errorSpan.style.display = 'block';
+        errorSpan.style.visibility = 'visible';
+        errorSpan.setAttribute('aria-live', 'polite');
+        console.log(`Error displayed for ${fieldId}: ${errorMessage}`);
     } else {
         input.classList.remove('input-error');
-        if (errorSpan) {
-            errorSpan.textContent = '';
-            errorSpan.style.display = 'none';
-            errorSpan.removeAttribute('aria-live');
-        }
+        errorSpan.textContent = '';
+        errorSpan.style.display = 'block';
+        errorSpan.style.visibility = 'hidden';
+        errorSpan.removeAttribute('aria-live');
     }
 }
 

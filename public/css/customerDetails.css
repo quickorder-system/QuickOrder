@@ -249,11 +249,13 @@ body {
 }
 
 .error-message {
+    display: block;
     color: #ef4444;
     font-size: 12px;
     margin-top: 6px;
     font-weight: 500;
     animation: slideDown 0.2s ease;
+    min-height: 18px;
 }
 
 @keyframes slideDown {
