@@ -193,6 +193,7 @@ async function handleOrderSubmit(event) {
             // Include discount information
             ...(appliedDiscount && {
                 discount: {
+                    discountId: appliedDiscount.id,
                     code: appliedDiscount.code,
                     discountType: appliedDiscount.discountType,
                     discountValue: appliedDiscount.discountValue,
