@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const fullNameInput = document.getElementById('fullName');
     const phoneInput = document.getElementById('customerPhone');
     const emailInputField = document.getElementById('email');
-    const addressInput = document.getElementById('address');
+    // addressInput already declared above for auto-population
 
     // Full Name validation
     if (fullNameInput) {
