@@ -429,7 +429,9 @@
             e.preventDefault();
             alert('Please agree to the Terms of Service before proceeding.');
           } else {
-            window.location.href = 'customerLogin.html';
+            // Check if user is already logged in
+            const authToken = localStorage.getItem('authToken');
+            window.location.href = authToken ? 'menu.html' : 'customerLogin.html';
           }
         });
 
@@ -438,7 +440,9 @@
             e.preventDefault();
             alert('Please agree to the Terms of Service before proceeding.');
           } else {
-            window.location.href = 'customerLogin.html';
+            // Check if user is already logged in
+            const authToken = localStorage.getItem('authToken');
+            window.location.href = authToken ? 'menu.html' : 'customerLogin.html';
           }
         });
       });
