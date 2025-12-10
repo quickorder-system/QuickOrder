@@ -56,8 +56,47 @@ function displayOrderReview() {
         </div>
     `).join('');
 
-    let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    totalAmountSpan.textContent = `₱${total.toFixed(2)}`;
+    // Calculate totals with discount
+    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    let discountAmount = 0;
+    const appliedDiscount = stateService.appliedDiscount;
+    
+    if (appliedDiscount) {
+        if (appliedDiscount.discountType === 'percentage') {
+            discountAmount = (subtotal * appliedDiscount.discountValue) / 100;
+        } else if (appliedDiscount.discountType === 'fixed') {
+            discountAmount = appliedDiscount.discountValue;
+        }
+        
+        // Apply max discount cap if set
+        if (appliedDiscount.maxDiscountAmount && discountAmount > appliedDiscount.maxDiscountAmount) {
+            discountAmount = appliedDiscount.maxDiscountAmount;
+        }
+    }
+    
+    let total = subtotal - discountAmount;
+    
+    // Display total with discount breakdown if applicable
+    if (appliedDiscount) {
+        totalAmountSpan.innerHTML = `
+            <div class="price-breakdown">
+                <div class="price-line">
+                    <span>Subtotal</span>
+                    <span>₱${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="price-line discount">
+                    <span>Discount (${appliedDiscount.code})</span>
+                    <span>-₱${discountAmount.toFixed(2)}</span>
+                </div>
+                <div class="price-line total">
+                    <span>TOTAL</span>
+                    <span>₱${total.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        totalAmountSpan.textContent = `₱${total.toFixed(2)}`;
+    }
 
     if (currentOrder) {
         customerDetailsDiv.innerHTML = `

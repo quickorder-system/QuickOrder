@@ -226,7 +226,7 @@ body {
 .total-section {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-top: 15px;
     padding-top: 15px;
     border-top: 2px solid #667eea;
@@ -238,6 +238,40 @@ body {
 .total-price {
     color: #667eea;
     font-size: 18px;
+}
+
+/* Price Breakdown with Discount */
+.price-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.price-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 16px;
+    color: #475569;
+}
+
+.price-line.discount {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.price-line.discount span:last-child {
+    color: #16a34a;
+}
+
+.price-line.total {
+    font-size: 18px;
+    font-weight: 700;
+    color: #667eea;
+    border-top: 2px solid #e2e8f0;
+    padding-top: 12px;
+    margin-top: 4px;
 }
 
 .payment-container {
