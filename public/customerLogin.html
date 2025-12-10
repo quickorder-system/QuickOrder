@@ -311,6 +311,7 @@
     </div>
 
     <script src="js/dark-mode.js"></script>
+    <script src="js/services/state.service.js"></script>
     <script src="js/services/auth.service.js"></script>
     <script src="js/utils/auth-ui.utils.js"></script>
     <script>
@@ -404,6 +405,11 @@
                     formData.email,
                     formData.password
                 );
+
+                // Set user in state service
+                if (response.user) {
+                    stateService.setUser(response.user);
+                }
 
                 // Handle remember me
                 if (rememberMe.checked) {

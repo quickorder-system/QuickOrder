@@ -1,6 +1,16 @@
 (() => {
     let allItems = []; // Store all fetched items globally
     let menuCart = null; // Global reference to menu cart component
+    
+    // Initialize user from localStorage if not already in state
+    if (!stateService.user && localStorage.getItem('userId')) {
+        stateService.setUser({
+            id: localStorage.getItem('userId'),
+            email: localStorage.getItem('userEmail'),
+            name: localStorage.getItem('userName')
+        });
+    }
+    
     const categoryIcons = {
         burger: '',
         pizza: '',
