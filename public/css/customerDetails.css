@@ -249,7 +249,6 @@ body {
 }
 
 .error-message {
-    display: none;
     color: #ef4444;
     font-size: 12px;
     margin-top: 6px;

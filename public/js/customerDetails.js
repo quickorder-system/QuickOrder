@@ -52,12 +52,14 @@ function displayError(fieldId, errorMessage) {
         if (errorSpan) {
             errorSpan.textContent = errorMessage;
             errorSpan.style.display = 'block';
+            errorSpan.setAttribute('aria-live', 'polite');
         }
     } else {
         input.classList.remove('input-error');
         if (errorSpan) {
             errorSpan.textContent = '';
             errorSpan.style.display = 'none';
+            errorSpan.removeAttribute('aria-live');
         }
     }
 }

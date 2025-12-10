@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/order');
+const Discount = require('../models/discount');
+const DiscountUsage = require('../models/discountUsage');
 const ActivityLog = require('../models/activityLog');
 const logger = require('../utils/logger');
 const auth = require('../middleware/auth');
@@ -123,6 +125,30 @@ router.post('/', /*validateOrder,*/ async (req, res) => {
         await order.save();
 
         console.log('[Orders POST] Order created successfully:', order._id);
+
+        // Track discount usage if a discount was applied
+        if (order.discount && order.discount.discountId && order.customerId) {
+            try {
+                // Create discount usage record
+                await DiscountUsage.create({
+                    discountId: order.discount.discountId,
+                    customerId: order.customerId,
+                    orderId: order._id
+                });
+
+                // Increment discount usage count
+                await Discount.updateOne(
+                    { _id: order.discount.discountId },
+                    { $inc: { currentUsage: 1 } }
+                );
+
+                console.log('[Orders POST] Discount usage tracked for discount:', order.discount.discountId);
+            } catch (error) {
+                // Log error but don't fail the order creation
+                console.error('[Orders POST] Error tracking discount usage:', error);
+                logger.error('Error tracking discount usage:', error);
+            }
+        }
 
         res.status(201).json(order);
     } catch (error) {

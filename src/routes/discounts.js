@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const authorize = require('../middleware/authorization');
 const Discount = require('../models/discount');
+const DiscountUsage = require('../models/discountUsage');
 const ActivityLog = require('../models/activityLog');
 const logger = require('../utils/logger');
 const { BadRequestError, UnauthorizedError } = require('../utils/errors');
@@ -10,12 +11,13 @@ const { BadRequestError, UnauthorizedError } = require('../utils/errors');
 /**
  * @route GET /api/discounts/validate/:code
  * @description Validate discount code and return discount details
- * @access Public
+ * @access Private (requires authentication)
  */
-router.get('/validate/:code', async (req, res, next) => {
+router.get('/validate/:code', auth, async (req, res, next) => {
     try {
         const { code } = req.params;
         const { orderAmount } = req.query;
+        const customerId = req.user.id;
 
         if (!code) {
             throw new BadRequestError('Discount code is required');
@@ -49,6 +51,18 @@ router.get('/validate/:code', async (req, res, next) => {
         // Check if maximum usage reached
         if (discount.maxTotalUsage && discount.currentUsage >= discount.maxTotalUsage) {
             throw new BadRequestError('This discount code has expired');
+        }
+
+        // Check per-customer usage limit
+        if (discount.maxUsagePerCustomer) {
+            const customerUsageCount = await DiscountUsage.countDocuments({
+                discountId: discount._id,
+                customerId: customerId
+            });
+
+            if (customerUsageCount >= discount.maxUsagePerCustomer) {
+                throw new BadRequestError(`You have already used this discount code ${discount.maxUsagePerCustomer} time(s)`);
+            }
         }
 
         // Check minimum order amount
