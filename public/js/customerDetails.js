@@ -144,6 +144,13 @@ document.addEventListener('DOMContentLoaded', function() {
         emailInput.value = savedEmail;
     }
 
+    // Auto-populate address from user profile if delivery is selected
+    const addressInput = document.getElementById('address');
+    const savedAddress = localStorage.getItem('userAddress');
+    if (savedAddress && addressInput) {
+        addressInput.value = savedAddress;
+    }
+
     // Setup delivery type toggle
     setupDeliveryTypeToggle();
 

@@ -330,6 +330,10 @@
                 authUIUtils.showSuccess('Profile updated successfully!', alertMessage);
                 originalFormData = getFormData();
 
+                // Save address to localStorage for use in customer details page
+                const fullAddress = `${formData.address.street}, ${formData.address.city}, ${formData.address.postalCode}`;
+                localStorage.setItem('userAddress', fullAddress);
+
                 // Reload profile
                 setTimeout(() => {
                     loadProfile();

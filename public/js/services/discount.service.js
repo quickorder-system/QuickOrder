@@ -16,10 +16,12 @@ const discountService = {
                 throw new Error('Discount code is required');
             }
 
+            const token = localStorage.getItem('token');
             const response = await fetch(`/api/discounts/validate/${code}?orderAmount=${orderAmount}`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 }
             });
 
