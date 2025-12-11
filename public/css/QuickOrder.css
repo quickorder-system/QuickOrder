@@ -93,7 +93,6 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.3s;
-    display: none;
 }
 
 .burger-menu:hover {
