@@ -38,21 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Store the new status to track it
                     select.dataset.previousStatus = updatedOrder.status;
 
-                    // If order is completed or cancelled, remove it from the view after a delay
-                    if (updatedOrder.status === 'completed' || updatedOrder.status === 'cancelled') {
-                        setTimeout(() => {
-                            card.style.opacity = '0';
-                            setTimeout(() => {
-                                card.remove();
-                                // Refresh the list after removing
-                                refreshOrdersList();
-                            }, 500);
-                        }, 1000);
-                    } else {
-                        // Re-enable select after successful update
-                        select.disabled = false;
-                        select.style.opacity = '1';
-                    }
+                    // Re-enable select after successful update
+                    select.disabled = false;
+                    select.style.opacity = '1';
                 } catch (error) {
                     console.error(`[Orders] Error updating status:`, error);
                     alert(`Failed to update order status: ${error.message}`);
@@ -107,12 +95,11 @@ async function refreshOrdersList() {
             Array.from(ordersContainer.querySelectorAll('.order-card')).map(card => card.dataset.orderId)
         );
 
-        // Get new order IDs from the server
-        const activeOrders = orders.filter(order => order.status !== 'completed' && order.status !== 'cancelled');
-        const newOrderIds = new Set(activeOrders.map(order => order._id));
+        // Get new order IDs from the server (all orders, not just active)
+        const newOrderIds = new Set(orders.map(order => order._id));
 
         // Update existing order cards or create new ones
-        activeOrders.forEach(order => {
+        orders.forEach(order => {
             const existingCard = ordersContainer.querySelector(`[data-order-id="${order._id}"]`);
             if (existingCard) {
                 // Check if status has changed
@@ -129,7 +116,7 @@ async function refreshOrdersList() {
             }
         });
 
-        // Remove orders that are no longer in the active list
+        // Remove orders that are no longer in the list
         Array.from(ordersContainer.querySelectorAll('.order-card')).forEach(card => {
             if (!newOrderIds.has(card.dataset.orderId)) {
                 card.remove();
@@ -137,8 +124,8 @@ async function refreshOrdersList() {
         });
 
         // Show "no orders" message if empty
-        if (activeOrders.length === 0 && ordersContainer.children.length === 0) {
-            ordersContainer.innerHTML = '<p>No active orders.</p>';
+        if (orders.length === 0 && ordersContainer.children.length === 0) {
+            ordersContainer.innerHTML = '<p>No orders.</p>';
         }
     } catch (error) {
         console.error('Error refreshing orders:', error);
@@ -149,12 +136,11 @@ function renderOrders(orders) {
     const ordersContainer = document.getElementById('ordersContainer');
     ordersContainer.innerHTML = '';
     if (orders.length === 0) {
-        ordersContainer.innerHTML = '<p>No active orders.</p>';
+        ordersContainer.innerHTML = '<p>No orders.</p>';
         return;
     }
-    // Filter out completed or cancelled orders from the initial render
-    const activeOrders = orders.filter(order => order.status !== 'completed' && order.status !== 'cancelled');
-    activeOrders.forEach(order => {
+    // Render all orders (including cancelled and completed)
+    orders.forEach(order => {
         const orderCard = createOrderCard(order);
         ordersContainer.appendChild(orderCard);
     });

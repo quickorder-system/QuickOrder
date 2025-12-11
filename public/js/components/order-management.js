@@ -148,10 +148,6 @@ class OrderManagement {
                 if (typeof updateStatistics === 'function') {
                     updateStatistics();
                 }
-
-                // Fade out and remove card after animation
-                card.style.opacity = '0';
-                setTimeout(() => card.remove(), 300);
             } catch (error) {
                 console.error('Error cancelling order:', error);
                 alert('Failed to cancel order. Please try again.');
