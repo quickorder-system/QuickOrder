@@ -279,8 +279,19 @@ function cancelOrder(btn) {
   if (!confirm('Are you sure you want to cancel this order?')) return;
   const card = btn.closest('.order-card');
   if (!card) return;
-  card.style.opacity = '0';
-  setTimeout(() => card.remove(), 300);
+  
+  // Change status to cancelled instead of removing the card
+  const badge = card.querySelector('.status-badge');
+  if (badge) {
+    badge.className = 'status-badge cancelled';
+    badge.textContent = 'Cancelled';
+  }
+  
+  // Update the actions to show only a note that order is cancelled
+  const actionsDiv = card.querySelector('.order-actions');
+  if (actionsDiv) {
+    actionsDiv.innerHTML = `<span class="cancelled-note">Order Cancelled</span>`;
+  }
 }
 
 // Orders search and status filter
