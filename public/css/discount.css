@@ -657,6 +657,61 @@
     margin-left: 0;
 }
 
+/* Discount Status Row with Badge */
+.discount-status-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    align-items: center;
+}
+
+.verification-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.verification-badge.approved {
+    background-color: #4caf50;
+    color: white;
+}
+
+.verification-badge.approved i {
+    font-size: 0.9rem;
+}
+
+.verification-badge.pending {
+    background-color: #ff9800;
+    color: white;
+}
+
+.verification-badge.pending i {
+    font-size: 0.9rem;
+}
+
+/* Disabled state for pending eligibility */
+.discount-option.disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.discount-option.disabled:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+}
+
+.discount-option.disabled input[type="radio"] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 /* Applied Discount Display */
 .applied-discount {
     background: rgba(255, 255, 255, 0.15);

@@ -181,6 +181,14 @@
                                     <input type="file" id="scDocument" name="scDocument" accept="image/*,.pdf" required>
                                     <small style="color: #666;">Upload a clear photo or scan of your SC ID (PNG, JPG, or PDF)</small>
                                 </div>
+                                <!-- SC Verification Status -->
+                                <div id="scVerificationStatus" style="display: none; margin-top: 15px; padding: 12px; border-radius: 6px; background-color: #f5f5f5;">
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                        <span id="scStatusIcon" style="font-size: 1.5em;"></span>
+                                        <strong id="scStatusText" style="color: #666;"></strong>
+                                    </div>
+                                    <small id="scStatusMessage" style="color: #999;"></small>
+                                </div>
                             </div>
                         </div>
 
@@ -203,6 +211,14 @@
                                     <label for="pwdDocument">ID Document/Photo <span style="color: red;">*</span> (Required)</label>
                                     <input type="file" id="pwdDocument" name="pwdDocument" accept="image/*,.pdf" required>
                                     <small style="color: #666;">Upload a clear photo or scan of your PWD ID (PNG, JPG, or PDF)</small>
+                                </div>
+                                <!-- PWD Verification Status -->
+                                <div id="pwdVerificationStatus" style="display: none; margin-top: 15px; padding: 12px; border-radius: 6px; background-color: #f5f5f5;">
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                        <span id="pwdStatusIcon" style="font-size: 1.5em;"></span>
+                                        <strong id="pwdStatusText" style="color: #666;"></strong>
+                                    </div>
+                                    <small id="pwdStatusMessage" style="color: #999;"></small>
                                 </div>
                             </div>
                         </div>
@@ -420,10 +436,14 @@
                 document.getElementById('isSeniorCitizen').checked = true;
                 document.getElementById('scDetails').style.display = 'block';
                 document.getElementById('pwdDetails').style.display = 'none';
+                // Show SC verification status
+                showEligibilityStatus('sc', customerProfile.scVerified);
             } else if (customerProfile.isPWD === true) {
                 document.getElementById('isPWD').checked = true;
                 document.getElementById('pwdDetails').style.display = 'block';
                 document.getElementById('scDetails').style.display = 'none';
+                // Show PWD verification status
+                showEligibilityStatus('pwd', customerProfile.pwdVerified);
             } else {
                 document.getElementById('noEligibility').checked = true;
                 document.getElementById('scDetails').style.display = 'none';
@@ -554,6 +574,49 @@
                 email: document.getElementById('email').value
             });
             authUIUtils.clearMessages(alertMessage.parentElement);
+        });
+
+        /**
+         * Show eligibility verification status
+         */
+        function showEligibilityStatus(type, isVerified) {
+            const statusDiv = document.getElementById(`${type}VerificationStatus`);
+            const statusIcon = document.getElementById(`${type}StatusIcon`);
+            const statusText = document.getElementById(`${type}StatusText`);
+            const statusMessage = document.getElementById(`${type}StatusMessage`);
+
+            if (!statusDiv) return;
+
+            statusDiv.style.display = 'block';
+
+            if (isVerified) {
+                // Approved status
+                statusDiv.style.backgroundColor = '#e8f5e9';
+                statusDiv.style.borderLeft = '4px solid #4caf50';
+                statusIcon.textContent = '✅';
+                statusIcon.style.color = '#4caf50';
+                statusText.textContent = 'Approved';
+                statusText.style.color = '#2e7d32';
+                statusMessage.textContent = 'Your eligibility has been approved by the admin. You can now use the automatic discount.';
+            } else {
+                // Pending status
+                statusDiv.style.backgroundColor = '#fff3e0';
+                statusDiv.style.borderLeft = '4px solid #ff9800';
+                statusIcon.textContent = '⏳';
+                statusIcon.style.color = '#ff9800';
+                statusText.textContent = 'Pending Verification';
+                statusText.style.color = '#e65100';
+                statusMessage.textContent = 'Your document has been submitted. The admin will review it shortly.';
+            }
+        }
+
+        // Listen for eligibility radio changes to update status display
+        document.querySelectorAll('input[name="eligibilityType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Hide all status displays
+                document.getElementById('scVerificationStatus').style.display = 'none';
+                document.getElementById('pwdVerificationStatus').style.display = 'none';
+            });
         });
     </script>
 </body>

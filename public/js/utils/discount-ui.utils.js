@@ -72,8 +72,17 @@ const discountUIUtils = {
         const icon = discount.type === 'SC' ? '<i class="fas fa-user-tie"></i>' : '<i class="fas fa-wheelchair"></i>';
         const typeLabel = discount.type === 'SC' ? 'Senior Citizen' : 'PWD';
         
+        // Add verification status badge
+        const statusBadge = discount.isVerified 
+            ? `<span class="verification-badge approved" title="Your ${typeLabel} eligibility is approved"><i class="fas fa-check-circle"></i> Approved</span>`
+            : `<span class="verification-badge pending" title="Your ${typeLabel} eligibility is pending admin approval"><i class="fas fa-hourglass-half"></i> Pending</span>`;
+        
+        // Disable radio button if not verified
+        const disabledAttr = discount.isVerified ? '' : 'disabled';
+        const disabledClass = discount.isVerified ? '' : ' disabled';
+        
         return `
-            <label class="discount-option" data-discount-id="${discount.id}">
+            <label class="discount-option${disabledClass}" data-discount-id="${discount.id}" title="${!discount.isVerified ? 'Your eligibility is pending admin verification. You\'ll be able to use this discount once approved.' : ''}">
                 <input 
                     type="radio" 
                     name="automaticDiscount" 
@@ -82,6 +91,7 @@ const discountUIUtils = {
                     data-discount-code="${discount.code}"
                     data-discount-value="${discount.discountValue}"
                     data-discount-type-name="${discount.discountType}"
+                    ${disabledAttr}
                 >
                 <span class="discount-option-content">
                     <span class="discount-option-header">
@@ -90,6 +100,7 @@ const discountUIUtils = {
                         <span class="discount-option-amount">${discount.discountValue}% OFF</span>
                     </span>
                     <span class="discount-option-description">${discount.description}</span>
+                    <span class="discount-status-row">${statusBadge}</span>
                 </span>
             </label>
         `;

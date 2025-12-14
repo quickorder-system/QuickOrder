@@ -469,7 +469,8 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
                     type: 'SC',
                     discountValue: scDiscount.discountValue,
                     discountType: scDiscount.discountType,
-                    isVerified: user.customerProfile?.scVerified || false
+                    isVerified: user.customerProfile?.scVerified || false,
+                    verificationStatus: user.customerProfile?.scVerified ? 'approved' : 'pending'
                 });
             }
         }
@@ -492,7 +493,10 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
                     type: 'PWD',
                     discountValue: pwdDiscount.discountValue,
                     discountType: pwdDiscount.discountType,
-                    isVerified: user.customerProfile?.pwdVerified || false
+                    isVerified: user.customerProfile?.pwdVerified || false,
+                    verificationStatus: user.customerProfile?.pwdVerified ? 'approved' : 'pending'
+                });
+            }
                 });
             }
         }
@@ -538,6 +542,15 @@ router.post('/apply-automatic', auth, async (req, res, next) => {
 
         if (!isEligible) {
             throw new BadRequestError(`You are not eligible for ${discountType} discount`);
+        }
+
+        // Check if eligibility is verified by admin
+        const isVerified = discountType === 'SC' ? 
+            user.customerProfile?.scVerified : 
+            user.customerProfile?.pwdVerified;
+
+        if (!isVerified) {
+            throw new BadRequestError(`Your ${discountType} eligibility is not yet approved. Please wait for admin verification.`);
         }
 
         // Check preference
@@ -702,6 +715,43 @@ router.get('/eligibility-stats', [auth, authorize(['admin', 'owner'])], async (r
         });
     } catch (error) {
         logger.error('Error fetching eligibility stats:', error);
+        next(error);
+    }
+});
+
+/**
+ * @route GET /api/discounts/eligibility-status
+ * @description Get current user's SC/PWD eligibility status
+ * @access Private (customer only)
+ */
+router.get('/eligibility-status', auth, async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id);
+        
+        if (!user) {
+            throw new BadRequestError('User not found');
+        }
+
+        res.json({
+            success: true,
+            eligibility: {
+                sc: {
+                    claimed: user.customerProfile?.isSeniorCitizen || false,
+                    verified: user.customerProfile?.scVerified || false,
+                    id: user.customerProfile?.scId || null,
+                    document: user.customerProfile?.scDocument || null,
+                    verifiedAt: user.customerProfile?.verifiedAt || null
+                },
+                pwd: {
+                    claimed: user.customerProfile?.isPWD || false,
+                    verified: user.customerProfile?.pwdVerified || false,
+                    id: user.customerProfile?.pwdId || null,
+                    document: user.customerProfile?.pwdDocument || null,
+                    verifiedAt: user.customerProfile?.verifiedAt || null
+                }
+            }
+        });
+    } catch (error) {
         next(error);
     }
 });
