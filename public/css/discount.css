@@ -563,3 +563,200 @@
         padding: 20px;
     }
 }
+
+/* ============================================
+   AUTOMATIC DISCOUNTS (SC/PWD) STYLES
+   ============================================ */
+
+.automatic-discounts-box {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.automatic-discounts-box .discount-label {
+    margin-bottom: 12px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.eligible-discounts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.discount-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.discount-option:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.discount-option input[type="radio"] {
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: white;
+}
+
+.discount-option input[type="radio"]:checked + .discount-option-content {
+    opacity: 1;
+}
+
+.discount-option-content {
+    flex: 1;
+    opacity: 0.95;
+}
+
+.discount-option-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: white;
+}
+
+.discount-option-header i {
+    font-size: 1.1rem;
+}
+
+.discount-option-title {
+    flex: 1;
+}
+
+.discount-option-amount {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.discount-option-description {
+    display: block;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-left: 0;
+}
+
+/* Applied Discount Display */
+.applied-discount {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 15px;
+}
+
+.discount-badge {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    justify-content: space-between;
+}
+
+.discount-code {
+    font-weight: 700;
+    font-size: 16px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+}
+
+.discount-amount {
+    font-weight: 700;
+    font-size: 16px;
+    color: #fff;
+}
+
+.btn-remove-discount {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 18px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-remove-discount:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Discount Message */
+.discount-message {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+.discount-message.success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #a8ff7a;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.discount-message.error {
+    background: rgba(244, 67, 54, 0.2);
+    color: #ff7a7a;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .discount-section {
+        padding: 15px;
+        margin: 15px 0;
+    }
+
+    .discount-label {
+        font-size: 16px;
+    }
+
+    .discount-option {
+        padding: 10px;
+    }
+
+    .discount-option-header {
+        font-size: 14px;
+    }
+
+    .discount-option-description {
+        font-size: 0.8rem;
+    }
+
+    .discount-input-group {
+        flex-direction: column;
+    }
+
+    .btn-apply-discount {
+        width: 100%;
+    }
+
+    .discount-badge {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}

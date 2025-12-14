@@ -5,12 +5,25 @@
 
 const discountUIUtils = {
     /**
-     * Create discount input HTML section
+     * Create discount input HTML section with automatic discount support
      * @returns {string} HTML for discount input section
      */
     createDiscountInputSection() {
         return `
             <div class="discount-section" id="discountSection">
+                <!-- Automatic Discounts (SC/PWD) -->
+                <div id="automaticDiscountsContainer" style="display: none;">
+                    <div class="automatic-discounts-box">
+                        <h4 class="discount-label">
+                            <i class="fas fa-gift"></i> Your Eligible Discounts
+                        </h4>
+                        <div id="eligibleDiscountsList" class="eligible-discounts-list">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual Discount Code -->
                 <div class="discount-input-container">
                     <h4 class="discount-label">💰 Have a Discount Code?</h4>
                     <div class="discount-input-group">
@@ -49,6 +62,58 @@ const discountUIUtils = {
             </div>
         `;
     },
+
+    /**
+     * Create HTML for a single eligible discount option
+     * @param {Object} discount - Discount object
+     * @returns {string} HTML for discount option
+     */
+    createEligibleDiscountOption(discount) {
+        const icon = discount.type === 'SC' ? '<i class="fas fa-user-tie"></i>' : '<i class="fas fa-wheelchair"></i>';
+        const typeLabel = discount.type === 'SC' ? 'Senior Citizen' : 'PWD';
+        
+        return `
+            <label class="discount-option" data-discount-id="${discount.id}">
+                <input 
+                    type="radio" 
+                    name="automaticDiscount" 
+                    value="${discount.id}"
+                    data-discount-type="${discount.type}"
+                    data-discount-code="${discount.code}"
+                    data-discount-value="${discount.discountValue}"
+                    data-discount-type-name="${discount.discountType}"
+                >
+                <span class="discount-option-content">
+                    <span class="discount-option-header">
+                        ${icon}
+                        <span class="discount-option-title">${typeLabel} Discount</span>
+                        <span class="discount-option-amount">${discount.discountValue}% OFF</span>
+                    </span>
+                    <span class="discount-option-description">${discount.description}</span>
+                </span>
+            </label>
+        `;
+    },
+
+    /**
+     * Show message (success or error)
+     * @param {string} message - Message text
+     * @param {string} type - 'success' or 'error'
+     */
+    showMessage(message, type = 'success') {
+        const messageEl = document.getElementById('discountMessage');
+        if (!messageEl) return;
+        
+        messageEl.textContent = message;
+        messageEl.className = `discount-message ${type}`;
+        messageEl.style.display = 'block';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            messageEl.style.display = 'none';
+        }, 5000);
+    }
+};
 
     /**
      * Create discount admin panel HTML

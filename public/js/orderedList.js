@@ -170,20 +170,11 @@ function bindQuantityButtons() {
 }
 
 // Initialize discount UI
-function initializeDiscountUI() {
+async function initializeDiscountUI() {
     const discountSection = document.getElementById('discountSection');
     if (!discountSection) return;
     
-    const html = discountUIUtils.createDiscountInputSection(
-        'Apply Discount Code',
-        'Enter your discount code to get savings on your order',
-        handleApplyDiscount,
-        () => {
-            appliedDiscount = null;
-            checkItem();
-        }
-    );
-    
+    const html = discountUIUtils.createDiscountInputSection();
     discountSection.innerHTML = html;
     
     // Bind apply button
@@ -191,9 +182,125 @@ function initializeDiscountUI() {
     if (applyBtn) {
         applyBtn.addEventListener('click', handleApplyDiscount);
     }
+
+    // Load and display eligible automatic discounts
+    try {
+        const eligibleData = await customerService.getEligibleDiscounts();
+        if (eligibleData && eligibleData.discounts && eligibleData.discounts.length > 0) {
+            displayEligibleDiscounts(eligibleData.discounts);
+        }
+    } catch (error) {
+        console.log('No eligible discounts available:', error.message);
+    }
+
+    // Bind automatic discount selection
+    const discountRadios = document.querySelectorAll('input[name="automaticDiscount"]');
+    discountRadios.forEach(radio => {
+        radio.addEventListener('change', handleSelectAutomaticDiscount);
+    });
 }
 
-// Handle discount application
+// Display eligible discounts
+function displayEligibleDiscounts(discounts) {
+    const container = document.getElementById('automaticDiscountsContainer');
+    const listContainer = document.getElementById('eligibleDiscountsList');
+    
+    if (!container || !listContainer) return;
+
+    if (discounts.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    // Create HTML for each eligible discount
+    let html = '';
+    discounts.forEach(discount => {
+        html += discountUIUtils.createEligibleDiscountOption(discount);
+    });
+
+    listContainer.innerHTML = html;
+    container.style.display = 'block';
+
+    // Re-bind radio button change events
+    const radios = listContainer.querySelectorAll('input[type="radio"]');
+    radios.forEach(radio => {
+        radio.addEventListener('change', handleSelectAutomaticDiscount);
+    });
+}
+
+// Handle automatic discount selection
+async function handleSelectAutomaticDiscount(e) {
+    const radio = e.target;
+    const discountType = radio.getAttribute('data-discount-type');
+    const discountCode = radio.getAttribute('data-discount-code');
+    
+    try {
+        const { subtotal } = calculateTotal();
+        const response = await discountService.applyAutomaticDiscount(discountType, subtotal);
+        
+        appliedDiscount = response.discount;
+        stateService.setAppliedDiscount(appliedDiscount);
+        
+        // Hide manual input when automatic discount is selected
+        document.getElementById('discountCode').style.display = 'none';
+        document.getElementById('applyDiscountBtn').style.display = 'none';
+        
+        // Show applied discount display
+        updateAppliedDiscountDisplay(appliedDiscount);
+        
+        const discountAmount = appliedDiscount.discountAmount || 0;
+        discountUIUtils.showMessage(`✓ ${discountType} discount applied! Saving ₱${discountAmount.toFixed(2)}`, 'success');
+        checkItem();
+    } catch (error) {
+        console.error('Automatic discount error:', error);
+        discountUIUtils.showMessage(error.message || 'Failed to apply discount', 'error');
+        e.target.checked = false;
+        appliedDiscount = null;
+    }
+}
+
+// Update applied discount display
+function updateAppliedDiscountDisplay(discount) {
+    const displayDiv = document.getElementById('appliedDiscountDisplay');
+    const codeSpan = document.getElementById('appliedCode');
+    const amountSpan = document.getElementById('discountAmount');
+    const removeBtn = document.getElementById('removeDiscountBtn');
+
+    if (!displayDiv) return;
+
+    const discountAmount = discount.discountAmount || 0;
+    codeSpan.textContent = `${discount.code}`;
+    amountSpan.textContent = `- ₱${discountAmount.toFixed(2)}`;
+
+    displayDiv.style.display = 'block';
+
+    if (removeBtn) {
+        removeBtn.onclick = handleRemoveDiscount;
+    }
+}
+
+// Handle discount removal
+function handleRemoveDiscount() {
+    appliedDiscount = null;
+    stateService.setAppliedDiscount(null);
+    
+    // Reset UI
+    document.getElementById('discountCode').value = '';
+    document.getElementById('discountCode').disabled = false;
+    document.getElementById('discountCode').style.display = 'inline-block';
+    document.getElementById('applyDiscountBtn').style.display = 'inline-block';
+    document.getElementById('appliedDiscountDisplay').style.display = 'none';
+    
+    // Uncheck all discount radios
+    document.querySelectorAll('input[name="automaticDiscount"]').forEach(radio => {
+        radio.checked = false;
+    });
+    
+    discountUIUtils.showMessage('Discount removed', 'success');
+    checkItem();
+}
+
+// Handle manual discount application
 async function handleApplyDiscount() {
     const codeInput = document.getElementById('discountCode');
     const code = codeInput?.value?.trim();
@@ -207,16 +314,22 @@ async function handleApplyDiscount() {
         const { subtotal } = calculateTotal();
         const response = await discountService.validateCode(code, subtotal);
         
-        // Extract discount data from response (response format: { message, discount: {...} })
+        // Extract discount data from response
         const discountData = response.discount || response;
         
         appliedDiscount = discountData;
-        // Save discount to state service
         stateService.setAppliedDiscount(discountData);
         
         codeInput.disabled = true;
         document.getElementById('applyDiscountBtn').style.display = 'none';
-        document.getElementById('removeDiscountBtn').style.display = 'inline-block';
+        
+        // Uncheck automatic discount radios
+        document.querySelectorAll('input[name="automaticDiscount"]').forEach(radio => {
+            radio.checked = false;
+        });
+        
+        // Show applied discount display
+        updateAppliedDiscountDisplay(appliedDiscount);
         
         const discountAmount = appliedDiscount.discountAmount || 0;
         discountUIUtils.showMessage(`✓ Discount applied! Saving ₱${discountAmount.toFixed(2)}`, 'success');
