@@ -531,17 +531,41 @@ function formatDate(date) {
 
 /**
  * @route GET /api/reports/popular-items
- * @description Get popular items based on completed orders
+ * @description Get popular items based on completed orders within optional date range
+ * @query startDate - Optional start date (ISO 8601 format: YYYY-MM-DD)
+ * @query endDate - Optional end date (ISO 8601 format: YYYY-MM-DD)
  * @access Public
  * @returns {Object} List of items ranked by order count
  */
 router.get('/popular-items', async (req, res) => {
     try {
+        const { startDate, endDate } = req.query;
+        
+        // Build match query
+        let matchQuery = {
+            status: 'complete'
+        };
+        
+        // Add date range filter if provided
+        if (startDate || endDate) {
+            matchQuery.createdAt = {};
+            
+            if (startDate) {
+                const [sYear, sMonth, sDay] = startDate.split('-').map(Number);
+                const start = new Date(sYear, sMonth - 1, sDay, 0, 0, 0, 0);
+                matchQuery.createdAt.$gte = start;
+            }
+            
+            if (endDate) {
+                const [eYear, eMonth, eDay] = endDate.split('-').map(Number);
+                const end = new Date(eYear, eMonth - 1, eDay, 23, 59, 59, 999);
+                matchQuery.createdAt.$lte = end;
+            }
+        }
+        
         const popularItems = await Order.aggregate([
             {
-                $match: {
-                    status: 'complete'
-                }
+                $match: matchQuery
             },
             {
                 $unwind: '$items'

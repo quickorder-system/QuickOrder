@@ -680,11 +680,20 @@ function renderPaymentChart(data) {
 }
 
 /**
- * Fetch most ordered items from API
+ * Fetch most ordered items from API with optional date filtering
  */
 async function fetchAndRenderMostOrderedItems() {
   try {
-    const response = await fetch('/api/reports/popular-items');
+    const startDate = document.getElementById('reportStartDate')?.value;
+    const endDate = document.getElementById('reportEndDate')?.value;
+    
+    // Build URL with date filters if available
+    let url = '/api/reports/popular-items';
+    if (startDate && endDate) {
+      url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+    
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch popular items');
     
     const data = await response.json();

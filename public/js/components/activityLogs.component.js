@@ -341,12 +341,12 @@ class ActivityLogsComponent {
 
       // Add table header with proper column widths for landscape
       const columns = ['Timestamp', 'User', 'Role', 'Action', 'Description', 'Details'];
-      const columnWidths = [30, 18, 12, 18, 48, 12];
-      const rowHeight = 7;
-      const headerHeight = 8;
+      const columnWidths = [35, 20, 16, 18, 55, 12];
+      const rowHeight = 8;
+      const headerHeight = 10;
 
       // Draw header
-      doc.setFontSize(9);
+      doc.setFontSize(10);
       doc.setFillColor(60, 90, 140);
       doc.setTextColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
@@ -354,7 +354,7 @@ class ActivityLogsComponent {
       let columnX = margin;
       columns.forEach((col, idx) => {
         doc.rect(columnX, yPosition, columnWidths[idx], headerHeight, 'F');
-        doc.text(col, columnX + 1.5, yPosition + 3.5, { maxWidth: columnWidths[idx] - 3, align: 'left' });
+        doc.text(col, columnX + 1, yPosition + 4.5, { maxWidth: columnWidths[idx] - 2, align: 'left' });
         columnX += columnWidths[idx];
       });
 
@@ -367,19 +367,19 @@ class ActivityLogsComponent {
       let rowCount = 0;
       logs.forEach((log) => {
         const timestamp = formatTimestamp(log.createdAt);
-        const user = (log.username || log.userId || '-').substring(0, 12);
-        const role = (log.page || 'Unknown').substring(0, 10);
-        const action = formatAction(log.action).substring(0, 15);
-        const description = (log.description || '-').substring(0, 35);
+        const user = (log.username || log.userId || '-').substring(0, 16);
+        const role = (log.page || 'Unknown').substring(0, 14);
+        const action = formatAction(log.action).substring(0, 16);
+        const description = (log.description || '-').substring(0, 45);
         const details = log.details ? 'View' : '-';
 
         // Check if we need a new page (more generous spacing)
-        if (yPosition + rowHeight > pageHeight - margin - 5) {
+        if (yPosition + rowHeight + 2 > pageHeight - margin) {
           doc.addPage();
           yPosition = margin + 5;
 
           // Repeat header on new page
-          doc.setFontSize(9);
+          doc.setFontSize(10);
           doc.setFillColor(60, 90, 140);
           doc.setTextColor(255, 255, 255);
           doc.setFont(undefined, 'bold');
@@ -387,7 +387,7 @@ class ActivityLogsComponent {
           columnX = margin;
           columns.forEach((col, idx) => {
             doc.rect(columnX, yPosition, columnWidths[idx], headerHeight, 'F');
-            doc.text(col, columnX + 1.5, yPosition + 3.5, { maxWidth: columnWidths[idx] - 3, align: 'left' });
+            doc.text(col, columnX + 1, yPosition + 4.5, { maxWidth: columnWidths[idx] - 2, align: 'left' });
             columnX += columnWidths[idx];
           });
 
@@ -399,17 +399,26 @@ class ActivityLogsComponent {
 
         columnX = margin;
 
-        // Draw cell borders with light gray
-        doc.setDrawColor(220, 220, 220);
-        doc.setLineWidth(0.15);
+        // Draw cell borders with alternating background
+        if (rowCount % 2 === 1) {
+          doc.setFillColor(245, 247, 250);
+          for (let i = 0; i < columnWidths.length; i++) {
+            const cellX = columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + margin;
+            doc.rect(cellX, yPosition, columnWidths[i], rowHeight, 'F');
+          }
+        }
+
+        // Draw borders
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
         for (let i = 0; i < columnWidths.length; i++) {
           const cellX = columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + margin;
           doc.rect(cellX, yPosition, columnWidths[i], rowHeight);
         }
 
-        // Add text with proper vertical centering
-        doc.setTextColor(40, 40, 40);
-        const textY = yPosition + 2.2;
+        // Add text with proper positioning
+        doc.setTextColor(20, 20, 20);
+        const textY = yPosition + 2.5;
 
         // Timestamp
         doc.text(timestamp, columnX + 1, textY, { maxWidth: columnWidths[0] - 2, align: 'left' });
@@ -434,7 +443,7 @@ class ActivityLogsComponent {
         // Details
         doc.text(details, columnX + 1, textY, { maxWidth: columnWidths[5] - 2, align: 'left' });
 
-        yPosition += rowHeight;
+        yPosition += rowHeight + 0.5;
         rowCount++;
       });
 
