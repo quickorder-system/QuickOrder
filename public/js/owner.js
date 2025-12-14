@@ -765,7 +765,7 @@ async function fetchAndRenderDiscountReport() {
   try {
     const startDate = document.getElementById('reportStartDate')?.value;
     const endDate = document.getElementById('reportEndDate')?.value;
-    const filterType = document.getElementById('discountTypeFilter')?.value || 'all';
+    let filterType = document.getElementById('discountTypeFilter')?.value;
 
     if (!startDate || !endDate) {
       return;
@@ -778,9 +778,13 @@ async function fetchAndRenderDiscountReport() {
     const ordersData = await response.json();
     const orders = Array.isArray(ordersData) ? ordersData : ordersData.orders || [];
 
+    console.log('[Discount Report] Fetched', orders.length, 'orders, filter:', filterType);
+
     // Process discount data
     const discountData = processDiscountData(orders, filterType);
     
+    console.log('[Discount Report] Processed data:', discountData);
+
     // Render metrics and table
     renderDiscountMetrics(discountData);
     renderDiscountTable(discountData.discounts);
@@ -839,13 +843,22 @@ function processDiscountData(orders, filterType) {
   });
 
   // Filter discounts based on filterType
+  // filterType can be: undefined, "", "manual", "sc", "pwd"
   let filteredDiscounts = allDiscounts;
   if (filterType && filterType !== '') {
-    filteredDiscounts = allDiscounts.filter(d => d.type === filterType);
+    // Only filter if a specific type is selected
+    filteredDiscounts = allDiscounts.filter(d => {
+      if (filterType === 'manual') return d.type === 'manual';
+      if (filterType === 'sc') return d.type === 'SC';
+      if (filterType === 'pwd') return d.type === 'PWD';
+      return true;
+    });
   }
 
   // Sort by date descending
   filteredDiscounts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  console.log(`[Discount Report] Processing: ${allDiscounts.length} total discounts, ${filteredDiscounts.length} after filter "${filterType}"`);
 
   return {
     totalAmount,
