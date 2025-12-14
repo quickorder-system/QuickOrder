@@ -384,4 +384,147 @@ router.put('/addresses/:addressId/default', auth, async (req, res, next) => {
     }
 });
 
+/**
+ * @route PUT /api/customers/profile/eligibility
+ * @description Update customer eligibility profile (SC/PWD status)
+ * @access Private
+ */
+router.put('/profile/eligibility', auth, async (req, res, next) => {
+    try {
+        const { isSeniorCitizen, isPWD, scId, pwdId } = req.body;
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            throw new BadRequestError('User not found');
+        }
+
+        // Initialize customerProfile if doesn't exist
+        user.customerProfile = user.customerProfile || {};
+
+        // Update eligibility status
+        if (typeof isSeniorCitizen === 'boolean') {
+            user.customerProfile.isSeniorCitizen = isSeniorCitizen;
+            if (isSeniorCitizen && scId) {
+                user.customerProfile.scId = scId;
+            }
+        }
+
+        if (typeof isPWD === 'boolean') {
+            user.customerProfile.isPWD = isPWD;
+            if (isPWD && pwdId) {
+                user.customerProfile.pwdId = pwdId;
+            }
+        }
+
+        user.updatedAt = new Date();
+        await user.save();
+
+        logger.info(`Updated eligibility profile for customer: ${user.email}, SC: ${user.customerProfile.isSeniorCitizen}, PWD: ${user.customerProfile.isPWD}`);
+
+        res.json({
+            message: 'Eligibility profile updated successfully',
+            customerProfile: user.customerProfile,
+            discountPreferences: user.discountPreferences
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route POST /api/customers/verify-eligibility
+ * @description Admin endpoint to verify SC/PWD eligibility
+ * @access Private (admin only)
+ */
+router.post('/verify-eligibility', [auth, require('../middleware/authorization')(['admin'])], async (req, res, next) => {
+    try {
+        const { customerId, eligibilityType, approveStatus } = req.body;
+        const ActivityLog = require('../models/activityLog');
+
+        if (!customerId || !['SC', 'PWD'].includes(eligibilityType) || !['approved', 'rejected'].includes(approveStatus)) {
+            throw new BadRequestError('Invalid parameters: customerId, eligibilityType (SC/PWD), and approveStatus (approved/rejected) required');
+        }
+
+        const customer = await User.findById(customerId);
+        if (!customer) {
+            throw new BadRequestError('Customer not found');
+        }
+
+        // Update verification status
+        const verificationField = eligibilityType === 'SC' ? 'scVerified' : 'pwdVerified';
+        if (approveStatus === 'approved') {
+            customer.customerProfile[verificationField] = true;
+            customer.customerProfile.verifiedAt = new Date();
+        } else {
+            customer.customerProfile[verificationField] = false;
+        }
+
+        customer.updatedAt = new Date();
+        await customer.save();
+
+        // Log activity
+        await ActivityLog.create({
+            userId: req.user.id,
+            action: 'VERIFY_ELIGIBILITY',
+            resourceType: 'User',
+            resourceId: customerId,
+            details: `${approveStatus === 'approved' ? 'Approved' : 'Rejected'} ${eligibilityType} eligibility for customer: ${customer.email}`
+        });
+
+        logger.info(`${eligibilityType} eligibility ${approveStatus} for customer: ${customer.email} by admin: ${req.user.id}`);
+
+        res.json({
+            message: `${eligibilityType} eligibility ${approveStatus}`,
+            customer: {
+                id: customer._id,
+                email: customer.email,
+                name: customer.name,
+                customerProfile: customer.customerProfile
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route PUT /api/customers/discount-preferences
+ * @description Update customer discount preferences
+ * @access Private
+ */
+router.put('/discount-preferences', auth, async (req, res, next) => {
+    try {
+        const { useSCDiscount, usePWDDiscount } = req.body;
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            throw new BadRequestError('User not found');
+        }
+
+        // Initialize discountPreferences if doesn't exist
+        user.discountPreferences = user.discountPreferences || {};
+
+        // Update preferences
+        if (typeof useSCDiscount === 'boolean') {
+            user.discountPreferences.useSCDiscount = useSCDiscount;
+        }
+
+        if (typeof usePWDDiscount === 'boolean') {
+            user.discountPreferences.usePWDDiscount = usePWDDiscount;
+        }
+
+        user.updatedAt = new Date();
+        await user.save();
+
+        logger.info(`Updated discount preferences for customer: ${user.email}`);
+
+        res.json({
+            message: 'Discount preferences updated successfully',
+            discountPreferences: user.discountPreferences
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
 module.exports = router;
