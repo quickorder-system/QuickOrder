@@ -1319,6 +1319,115 @@ router.get('/export-pdf', async (req, res) => {
             doc.fontSize(10).font('Helvetica').text('Error loading most ordered items', { align: 'center' });
         }
 
+        // Discounts Given Section
+        try {
+            doc.addPage();
+            doc.fontSize(14).font('Helvetica-Bold').text('Discounts Given Report', { align: 'center' });
+            doc.moveDown(0.5);
+
+            // Fetch discount data
+            const discountOrders = await Order.find({
+                status: 'complete',
+                'discount.discountAmount': { $gt: 0 },
+                createdAt: { $gte: start, $lte: end }
+            }).select('orderId customerName discount.code discount.discountAmount discount.discountId total createdAt');
+
+            if (discountOrders && discountOrders.length > 0) {
+                // Calculate discount totals by type
+                let totalDiscounts = 0;
+                let manualDiscounts = 0;
+                let scDiscounts = 0;
+                let pwdDiscounts = 0;
+                let manualOrders = 0;
+                let scOrders = 0;
+                let pwdOrders = 0;
+
+                discountOrders.forEach(order => {
+                    const code = order.discount?.code || '';
+                    const amount = order.discount?.discountAmount || 0;
+                    
+                    totalDiscounts += amount;
+                    
+                    if (code.includes('SC-DISCOUNT')) {
+                        scDiscounts += amount;
+                        scOrders++;
+                    } else if (code.includes('PWD-DISCOUNT')) {
+                        pwdDiscounts += amount;
+                        pwdOrders++;
+                    } else {
+                        manualDiscounts += amount;
+                        manualOrders++;
+                    }
+                });
+
+                // Discount Summary
+                doc.fontSize(11).font('Helvetica-Bold').text('Discount Summary');
+                doc.fontSize(10).font('Helvetica');
+                doc.text(`Total Discounts Given: ₱${totalDiscounts.toFixed(2)}`);
+                doc.text(`  • Manual Code Discounts: ₱${manualDiscounts.toFixed(2)} (${manualOrders} orders)`);
+                doc.text(`  • SC Eligibility Discounts: ₱${scDiscounts.toFixed(2)} (${scOrders} orders)`);
+                doc.text(`  • PWD Eligibility Discounts: ₱${pwdDiscounts.toFixed(2)} (${pwdOrders} orders)`);
+                doc.moveDown(0.5);
+
+                // Discount Details Table
+                doc.fontSize(11).font('Helvetica-Bold').text('Discount Details');
+                doc.fontSize(9).font('Helvetica');
+
+                const discTableTop = doc.y;
+                const discCol1 = 50;
+                const discCol2 = 130;
+                const discCol3 = 200;
+                const discCol4 = 270;
+                const discCol5 = 340;
+                const discCol6 = 410;
+
+                // Table header
+                doc.text('Order ID', discCol1, discTableTop);
+                doc.text('Customer', discCol2, discTableTop);
+                doc.text('Type', discCol3, discTableTop);
+                doc.text('Code', discCol4, discTableTop);
+                doc.text('Amount (₱)', discCol5, discTableTop);
+                doc.text('Date', discCol6, discTableTop);
+
+                doc.moveTo(50, discTableTop + 15).lineTo(550, discTableTop + 15).stroke();
+
+                let discY = discTableTop + 20;
+
+                // Add discount rows (limit to 20 per page for readability)
+                discountOrders.slice(0, 20).forEach(order => {
+                    const code = order.discount?.code || 'N/A';
+                    let type = 'Manual';
+                    if (code.includes('SC-DISCOUNT')) {
+                        type = 'SC';
+                    } else if (code.includes('PWD-DISCOUNT')) {
+                        type = 'PWD';
+                    }
+
+                    const date = new Date(order.createdAt).toLocaleDateString();
+                    const amount = (order.discount?.discountAmount || 0).toFixed(2);
+
+                    doc.fontSize(8);
+                    doc.text((order.orderId || 'N/A').substring(0, 12), discCol1, discY);
+                    doc.text((order.customerName || 'Unknown').substring(0, 15), discCol2, discY);
+                    doc.text(type, discCol3, discY);
+                    doc.text(code.substring(0, 15), discCol4, discY);
+                    doc.text(`₱${amount}`, discCol5, discY);
+                    doc.text(date, discCol6, discY);
+
+                    discY += 15;
+                });
+
+                if (discountOrders.length > 20) {
+                    doc.fontSize(8).text(`... and ${discountOrders.length - 20} more discount records`, 50, discY);
+                }
+            } else {
+                doc.fontSize(10).font('Helvetica').text('No discount data available for selected period', { align: 'center' });
+            }
+        } catch (discountError) {
+            logger.error('Error fetching discounts for PDF:', discountError);
+            doc.fontSize(10).font('Helvetica').text('Error loading discount data', { align: 'center' });
+        }
+
         // Old Daily Breakdown Table (removed - keeping payment method version above)
         
 
