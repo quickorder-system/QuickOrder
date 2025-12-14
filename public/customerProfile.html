@@ -298,6 +298,12 @@
 
         let originalFormData = {};
 
+        // Initialize: Remove required from all eligibility fields initially
+        document.getElementById('scId').required = false;
+        document.getElementById('scDocument').required = false;
+        document.getElementById('pwdId').required = false;
+        document.getElementById('pwdDocument').required = false;
+
         // Eligibility radio button event listeners (mutually exclusive)
         document.querySelectorAll('input[name="eligibilityType"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
@@ -305,27 +311,21 @@
                 document.getElementById('scDetails').style.display = 'none';
                 document.getElementById('pwdDetails').style.display = 'none';
                 
-                // Show selected details
+                // Remove required from all fields
+                document.getElementById('scId').required = false;
+                document.getElementById('scDocument').required = false;
+                document.getElementById('pwdId').required = false;
+                document.getElementById('pwdDocument').required = false;
+                
+                // Show selected details and set required
                 if (e.target.value === 'sc') {
                     document.getElementById('scDetails').style.display = 'block';
-                    // Set required on SC fields
                     document.getElementById('scId').required = true;
                     document.getElementById('scDocument').required = true;
-                    document.getElementById('pwdId').required = false;
-                    document.getElementById('pwdDocument').required = false;
                 } else if (e.target.value === 'pwd') {
                     document.getElementById('pwdDetails').style.display = 'block';
-                    // Set required on PWD fields
                     document.getElementById('pwdId').required = true;
                     document.getElementById('pwdDocument').required = true;
-                    document.getElementById('scId').required = false;
-                    document.getElementById('scDocument').required = false;
-                } else {
-                    // None selected
-                    document.getElementById('scId').required = false;
-                    document.getElementById('scDocument').required = false;
-                    document.getElementById('pwdId').required = false;
-                    document.getElementById('pwdDocument').required = false;
                 }
             });
         });

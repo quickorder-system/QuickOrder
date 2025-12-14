@@ -429,6 +429,7 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
     try {
         const { isSeniorCitizen, isPWD, scId, pwdId } = req.body;
         logger.info(`Eligibility update request from user ${req.user.id}:`, { isSeniorCitizen, isPWD, scId, pwdId, files: req.files });
+        logger.info('Raw body:', req.body);
 
         const user = await User.findById(req.user.id);
         if (!user) {
@@ -438,9 +439,11 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
         // Initialize customerProfile if doesn't exist
         user.customerProfile = user.customerProfile || {};
 
-        // Parse boolean strings from FormData
-        const scBool = isSeniorCitizen === 'true' || isSeniorCitizen === true;
-        const pwdBool = isPWD === 'true' || isPWD === true;
+        // Parse boolean strings from FormData - handle different formats
+        const scBool = isSeniorCitizen === 'true' || isSeniorCitizen === true || isSeniorCitizen === 1;
+        const pwdBool = isPWD === 'true' || isPWD === true || isPWD === 1;
+
+        logger.info('Parsed booleans:', { scBool, pwdBool });
 
         // Validate that both SC and PWD are not true at the same time
         if (scBool && pwdBool) {
