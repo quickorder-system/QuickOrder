@@ -338,94 +338,100 @@ class ActivityLogsComponent {
 
       // Add table header with proper column widths for landscape
       const columns = ['Timestamp', 'User', 'Role', 'Action', 'Description', 'Details'];
-      const columnWidths = [28, 18, 12, 18, 35, 40];
+      const columnWidths = [32, 20, 14, 20, 50, 15];
+      const rowHeight = 6;
+      const headerHeight = 7;
 
-      doc.setFontSize(8);
+      // Draw header
+      doc.setFontSize(9);
       doc.setFillColor(80, 100, 140);
       doc.setTextColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
 
       let columnX = margin;
       columns.forEach((col, idx) => {
-        doc.rect(columnX, yPosition - 3.5, columnWidths[idx], 5, 'F');
-        doc.text(col, columnX + 1, yPosition);
+        doc.rect(columnX, yPosition, columnWidths[idx], headerHeight, 'F');
+        doc.text(col, columnX + 1, yPosition + 4, { maxWidth: columnWidths[idx] - 2, align: 'left' });
         columnX += columnWidths[idx];
       });
 
-      yPosition += 6;
+      yPosition += headerHeight;
       doc.setTextColor(0, 0, 0);
       doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
 
       // Add rows with proper spacing
       let rowCount = 0;
       logs.forEach((log) => {
         const timestamp = formatTimestamp(log.createdAt);
-        const user = (log.username || log.userId || '-').substring(0, 12);
-        const role = (log.page || 'Unknown').substring(0, 10);
-        const action = formatAction(log.action).substring(0, 15);
-        const description = (log.description || '-').substring(0, 30);
+        const user = (log.username || log.userId || '-').substring(0, 14);
+        const role = (log.page || 'Unknown').substring(0, 12);
+        const action = formatAction(log.action).substring(0, 18);
+        const description = (log.description || '-').substring(0, 40);
         const details = log.details ? 'View' : '-';
 
         // Check if we need a new page
-        if (yPosition > pageHeight - margin - 5) {
+        if (yPosition + rowHeight > pageHeight - margin - 2) {
           doc.addPage();
           yPosition = margin;
 
           // Repeat header on new page
-          doc.setFontSize(8);
+          doc.setFontSize(9);
           doc.setFillColor(80, 100, 140);
           doc.setTextColor(255, 255, 255);
           doc.setFont(undefined, 'bold');
 
           columnX = margin;
           columns.forEach((col, idx) => {
-            doc.rect(columnX, yPosition - 3.5, columnWidths[idx], 5, 'F');
-            doc.text(col, columnX + 1, yPosition);
+            doc.rect(columnX, yPosition, columnWidths[idx], headerHeight, 'F');
+            doc.text(col, columnX + 1, yPosition + 4, { maxWidth: columnWidths[idx] - 2, align: 'left' });
             columnX += columnWidths[idx];
           });
 
-          yPosition += 6;
+          yPosition += headerHeight;
           doc.setTextColor(0, 0, 0);
           doc.setFont(undefined, 'normal');
+          doc.setFontSize(8);
         }
 
-        doc.setFontSize(7);
         columnX = margin;
 
-        // Draw cells with borders
-        let cellY = yPosition - 2;
-        const rowHeight = 4;
+        // Draw cell borders first
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.2);
+        for (let i = 0; i < columnWidths.length; i++) {
+          const cellX = columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + margin;
+          doc.rect(cellX, yPosition, columnWidths[i], rowHeight);
+        }
+
+        // Then add text with proper positioning
+        doc.setTextColor(0, 0, 0);
+        const textY = yPosition + 2.5;
 
         // Timestamp
-        doc.text(timestamp, columnX + 1, cellY);
-        doc.rect(columnX, yPosition - 3, columnWidths[0], rowHeight);
+        doc.text(timestamp, columnX + 1, textY, { maxWidth: columnWidths[0] - 2, align: 'left' });
         columnX += columnWidths[0];
 
         // User
-        doc.text(user, columnX + 1, cellY);
-        doc.rect(columnX, yPosition - 3, columnWidths[1], rowHeight);
+        doc.text(user, columnX + 1, textY, { maxWidth: columnWidths[1] - 2, align: 'left' });
         columnX += columnWidths[1];
 
         // Role
-        doc.text(role, columnX + 1, cellY);
-        doc.rect(columnX, yPosition - 3, columnWidths[2], rowHeight);
+        doc.text(role, columnX + 1, textY, { maxWidth: columnWidths[2] - 2, align: 'left' });
         columnX += columnWidths[2];
 
         // Action
-        doc.text(action, columnX + 1, cellY);
-        doc.rect(columnX, yPosition - 3, columnWidths[3], rowHeight);
+        doc.text(action, columnX + 1, textY, { maxWidth: columnWidths[3] - 2, align: 'left' });
         columnX += columnWidths[3];
 
         // Description
-        doc.text(description, columnX + 1, cellY);
-        doc.rect(columnX, yPosition - 3, columnWidths[4], rowHeight);
+        doc.text(description, columnX + 1, textY, { maxWidth: columnWidths[4] - 2, align: 'left' });
         columnX += columnWidths[4];
 
         // Details
-        doc.text(details, columnX + 1, cellY);
-        doc.rect(columnX, yPosition - 3, columnWidths[5], rowHeight);
+        doc.text(details, columnX + 1, textY, { maxWidth: columnWidths[5] - 2, align: 'left' });
 
-        yPosition += 4;
+        yPosition += rowHeight;
         rowCount++;
       });
 
