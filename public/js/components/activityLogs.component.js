@@ -369,8 +369,9 @@ class ActivityLogsComponent {
       for (let i = 0; i < headerLabels.length; i++) {
         const cellWidth = columnWidths[i];
         const headerText = headerLabels[i];
-        // Draw text centered in cell
-        doc.text(headerText, columnX + 1, yPosition + 4, { maxWidth: cellWidth - 2, align: 'center' });
+        // Draw text centered in cell - use center x coordinate
+        const centerX = columnX + cellWidth / 2;
+        doc.text(headerText, centerX, yPosition + 7.5, { maxWidth: cellWidth - 2, align: 'center' });
         columnX += cellWidth;
       }
 
@@ -424,7 +425,9 @@ class ActivityLogsComponent {
           
           for (let i = 0; i < headerLabels.length; i++) {
             const cellWidth = columnWidths[i];
-            doc.text(headerLabels[i], columnX + 1, yPosition + 4, { maxWidth: cellWidth - 2, align: 'center' });
+            // Draw text centered in cell - use center x coordinate
+            const centerX = columnX + cellWidth / 2;
+            doc.text(headerLabels[i], centerX, yPosition + 7.5, { maxWidth: cellWidth - 2, align: 'center' });
             columnX += cellWidth;
           }
 
