@@ -345,17 +345,24 @@ class ActivityLogsComponent {
       const rowHeight = 12;
       const headerHeight = 12;
 
-      // Draw header
+      // Draw header with borders
       doc.setFontSize(9);
       doc.setFillColor(60, 90, 140);
       doc.setTextColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
+      doc.setDrawColor(40, 60, 100);
+      doc.setLineWidth(0.5);
 
       let columnX = margin;
       columns.forEach((col, idx) => {
-        doc.rect(columnX, yPosition, columnWidths[idx], headerHeight, 'F');
-        doc.text(col, columnX + 1.5, yPosition + 5.5, { maxWidth: columnWidths[idx] - 3, align: 'left' });
-        columnX += columnWidths[idx];
+        const cellWidth = columnWidths[idx];
+        // Fill with background color
+        doc.rect(columnX, yPosition, cellWidth, headerHeight, 'F');
+        // Draw border
+        doc.rect(columnX, yPosition, cellWidth, headerHeight);
+        // Add text - center vertically
+        doc.text(col, columnX + 1, yPosition + 4, { maxWidth: cellWidth - 2, align: 'left' });
+        columnX += cellWidth;
       });
 
       yPosition += headerHeight;
@@ -370,7 +377,17 @@ class ActivityLogsComponent {
         const user = (log.username || log.userId || '-').substring(0, 14);
         const role = (log.page || 'Unknown').substring(0, 12);
         const action = formatAction(log.action);
-        const description = (log.description || '-') + (log.details ? ` | Details: ${log.details}` : '');
+        
+        // Handle details - convert object to string if needed
+        let detailsStr = '';
+        if (log.details) {
+          if (typeof log.details === 'object') {
+            detailsStr = JSON.stringify(log.details);
+          } else {
+            detailsStr = String(log.details);
+          }
+        }
+        const description = (log.description || '-') + (detailsStr ? ` | ${detailsStr}` : '');
 
         // Check if we need a new page
         if (yPosition + rowHeight > doc.internal.pageSize.getHeight() - margin) {
@@ -382,12 +399,16 @@ class ActivityLogsComponent {
           doc.setFillColor(60, 90, 140);
           doc.setTextColor(255, 255, 255);
           doc.setFont(undefined, 'bold');
+          doc.setDrawColor(40, 60, 100);
+          doc.setLineWidth(0.5);
 
           columnX = margin;
           columns.forEach((col, idx) => {
-            doc.rect(columnX, yPosition, columnWidths[idx], headerHeight, 'F');
-            doc.text(col, columnX + 1.5, yPosition + 5.5, { maxWidth: columnWidths[idx] - 3, align: 'left' });
-            columnX += columnWidths[idx];
+            const cellWidth = columnWidths[idx];
+            doc.rect(columnX, yPosition, cellWidth, headerHeight, 'F');
+            doc.rect(columnX, yPosition, cellWidth, headerHeight);
+            doc.text(col, columnX + 1, yPosition + 4, { maxWidth: cellWidth - 2, align: 'left' });
+            columnX += cellWidth;
           });
 
           yPosition += headerHeight;
