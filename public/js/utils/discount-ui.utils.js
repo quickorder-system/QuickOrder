@@ -112,16 +112,44 @@ const discountUIUtils = {
      * @param {string} type - 'success' or 'error'
      */
     showMessage(message, type = 'success') {
-        const messageEl = document.getElementById('discountMessage');
-        if (!messageEl) return;
+        // Try to find existing message element
+        let messageEl = document.getElementById('discountMessage');
         
-        messageEl.textContent = message;
-        messageEl.className = `discount-message ${type}`;
-        messageEl.style.display = 'block';
+        // If not found, create a temporary alert
+        if (!messageEl) {
+            // Create a simple alert div at the top of discount section
+            const discountSection = document.getElementById('discountSection');
+            if (discountSection) {
+                messageEl = document.createElement('div');
+                messageEl.id = 'discountMessage';
+                messageEl.className = `discount-message ${type}`;
+                messageEl.textContent = message;
+                messageEl.style.cssText = `
+                    display: block;
+                    padding: 12px 16px;
+                    margin: 8px 0;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    ${type === 'success' ? 'background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;' : 'background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;'}
+                `;
+                discountSection.insertBefore(messageEl, discountSection.firstChild);
+            } else {
+                // Fallback: use browser alert
+                alert(`[${type.toUpperCase()}] ${message}`);
+                return;
+            }
+        } else {
+            messageEl.textContent = message;
+            messageEl.className = `discount-message ${type}`;
+            messageEl.style.display = 'block';
+        }
         
         // Auto-hide after 5 seconds
         setTimeout(() => {
-            messageEl.style.display = 'none';
+            if (messageEl) {
+                messageEl.style.display = 'none';
+            }
         }, 5000);
     },
 
@@ -318,27 +346,6 @@ const discountUIUtils = {
                 </div>
             </div>
         `;
-    },
-
-    /**
-     * Show discount message (success or error)
-     * @param {string} message - Message to display
-     * @param {string} type - 'success' or 'error'
-     * @param {HTMLElement} container - Where to show the message
-     */
-    showMessage(message, type, container) {
-        if (!container) return;
-
-        container.textContent = message;
-        container.className = `discount-message ${type}`;
-        container.style.display = 'block';
-
-        // Auto-hide error after 5 seconds
-        if (type === 'error') {
-            setTimeout(() => {
-                container.style.display = 'none';
-            }, 5000);
-        }
     },
 
     /**

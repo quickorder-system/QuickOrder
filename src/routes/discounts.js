@@ -705,11 +705,11 @@ router.get('/eligibility-stats', [auth, authorize(['admin', 'owner'])], async (r
         
         // Count users by eligibility status
         const totalSCUsers = await User.countDocuments({
-            'eligibility.scStatus': 'approved'
+            'customerProfile.scVerified': true
         });
         
         const totalPWDUsers = await User.countDocuments({
-            'eligibility.pwdStatus': 'approved'
+            'customerProfile.pwdVerified': true
         });
         
         // Calculate total discounts given (estimate based on discount usage)
