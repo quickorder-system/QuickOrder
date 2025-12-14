@@ -347,24 +347,30 @@ class ActivityLogsComponent {
 
       // Draw header row with proper rendering
       doc.setFontSize(7);
-      doc.setFont(undefined, 'bold');
-      doc.setFillColor(60, 90, 140);
-      doc.setTextColor(255, 255, 255);
       doc.setDrawColor(40, 60, 100);
       doc.setLineWidth(0.5);
 
       let columnX = margin;
       const headerLabels = ['Timestamp', 'User', 'Role', 'Action', 'Description'];
       
+      // First pass: Draw all backgrounds and borders
       for (let i = 0; i < headerLabels.length; i++) {
         const cellWidth = columnWidths[i];
-        // Fill cell background
-        doc.rect(columnX, yPosition, cellWidth, headerHeight, 'F');
-        // Draw cell border
-        doc.rect(columnX, yPosition, cellWidth, headerHeight);
-        // Add header text - use simpler text rendering
+        doc.setFillColor(60, 90, 140);
+        doc.rect(columnX, yPosition, cellWidth, headerHeight, 'FD');
+        columnX += cellWidth;
+      }
+
+      // Second pass: Draw text with proper color
+      columnX = margin;
+      doc.setTextColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      
+      for (let i = 0; i < headerLabels.length; i++) {
+        const cellWidth = columnWidths[i];
         const headerText = headerLabels[i];
-        doc.text(headerText, columnX + 0.5, yPosition + 4.5, { align: 'left' });
+        // Draw text centered in cell
+        doc.text(headerText, columnX + 1, yPosition + 4, { maxWidth: cellWidth - 2, align: 'center' });
         columnX += cellWidth;
       }
 
@@ -399,18 +405,26 @@ class ActivityLogsComponent {
 
           // Repeat header on new page
           doc.setFontSize(7);
-          doc.setFont(undefined, 'bold');
-          doc.setFillColor(60, 90, 140);
-          doc.setTextColor(255, 255, 255);
           doc.setDrawColor(40, 60, 100);
           doc.setLineWidth(0.5);
 
+          // First pass: Draw all backgrounds and borders
           columnX = margin;
           for (let i = 0; i < headerLabels.length; i++) {
             const cellWidth = columnWidths[i];
-            doc.rect(columnX, yPosition, cellWidth, headerHeight, 'F');
-            doc.rect(columnX, yPosition, cellWidth, headerHeight);
-            doc.text(headerLabels[i], columnX + 0.5, yPosition + 4.5, { align: 'left' });
+            doc.setFillColor(60, 90, 140);
+            doc.rect(columnX, yPosition, cellWidth, headerHeight, 'FD');
+            columnX += cellWidth;
+          }
+
+          // Second pass: Draw text
+          columnX = margin;
+          doc.setTextColor(255, 255, 255);
+          doc.setFont(undefined, 'bold');
+          
+          for (let i = 0; i < headerLabels.length; i++) {
+            const cellWidth = columnWidths[i];
+            doc.text(headerLabels[i], columnX + 1, yPosition + 4, { maxWidth: cellWidth - 2, align: 'center' });
             columnX += cellWidth;
           }
 
