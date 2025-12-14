@@ -434,9 +434,9 @@ router.put('/profile/eligibility', auth, async (req, res, next) => {
 /**
  * @route POST /api/customers/verify-eligibility
  * @description Admin endpoint to verify SC/PWD eligibility
- * @access Private (admin only)
+ * @access Private (admin/owner only)
  */
-router.post('/verify-eligibility', [auth, require('../middleware/authorization')(['admin'])], async (req, res, next) => {
+router.post('/verify-eligibility', [auth, authorize(['admin', 'owner'])], async (req, res, next) => {
     try {
         const { customerId, eligibilityType, approveStatus } = req.body;
         const ActivityLog = require('../models/activityLog');
@@ -523,6 +523,67 @@ router.put('/discount-preferences', auth, async (req, res, next) => {
             discountPreferences: user.discountPreferences
         });
     } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @route GET /api/customers/pending-verifications
+ * @description Get list of customers with pending SC/PWD verification
+ * @access Private (admin/owner only)
+ */
+router.get('/pending-verifications', [auth, authorize(['admin', 'owner'])], async (req, res, next) => {
+    try {
+        // Find users who have claimed SC/PWD but not yet verified
+        const pendingVerifications = await User.find({
+            $or: [
+                {
+                    'customerProfile.isSeniorCitizen': true,
+                    'customerProfile.scVerified': false
+                },
+                {
+                    'customerProfile.isPWD': true,
+                    'customerProfile.pwdVerified': false
+                }
+            ]
+        }).select('_id name email customerProfile').lean();
+
+        // Format the response
+        const formattedRequests = [];
+        
+        pendingVerifications.forEach(user => {
+            if (user.customerProfile.isSeniorCitizen && !user.customerProfile.scVerified) {
+                formattedRequests.push({
+                    id: user._id.toString(),
+                    userName: user.name,
+                    userEmail: user.email,
+                    type: 'Senior Citizen',
+                    idNumber: user.customerProfile.scId || 'N/A',
+                    status: 'pending',
+                    customerId: user._id.toString()
+                });
+            }
+            if (user.customerProfile.isPWD && !user.customerProfile.pwdVerified) {
+                formattedRequests.push({
+                    id: user._id.toString(),
+                    userName: user.name,
+                    userEmail: user.email,
+                    type: 'PWD',
+                    idNumber: user.customerProfile.pwdId || 'N/A',
+                    status: 'pending',
+                    customerId: user._id.toString()
+                });
+            }
+        });
+
+        res.json({
+            success: true,
+            data: formattedRequests,
+            count: formattedRequests.length
+        });
+
+    } catch (error) {
+        logger.error('Error fetching pending verifications:', error);
         next(error);
     }
 });

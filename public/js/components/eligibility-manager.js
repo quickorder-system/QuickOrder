@@ -107,20 +107,56 @@ class EligibilityManager {
         try {
             container.innerHTML = '<p>Loading verification requests...</p>';
 
-            // For now, we'll show a placeholder since the verification requests need to be fetched from backend
-            // This would be implemented with a backend endpoint to fetch pending verifications
-            
-            container.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #999;">
-                    <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p>No pending verification requests at the moment</p>
-                    <p style="font-size: 0.9rem;">Customers will appear here when they submit SC/PWD eligibility claims</p>
-                </div>
-            `;
+            const token = localStorage.getItem('authToken');
+            const response = await fetch('/api/customers/pending-verifications', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch verification requests: ${response.status}`);
+            }
+
+            const result = await response.json();
+            const requests = result.data || [];
+
+            if (requests.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #999;">
+                        <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <p>No pending verification requests at the moment</p>
+                        <p style="font-size: 0.9rem;">Customers will appear here when they submit SC/PWD eligibility claims</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Filter based on selected filters
+            let filtered = requests;
+            if (this.verificationFilter.type) {
+                filtered = filtered.filter(r => r.type === this.verificationFilter.type);
+            }
+            if (this.verificationFilter.status) {
+                filtered = filtered.filter(r => r.status === this.verificationFilter.status);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #999;">
+                        <p>No requests match your filter</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(request => this.createVerificationCard(request)).join('');
 
         } catch (error) {
             console.error('Error loading verification requests:', error);
-            container.innerHTML = '<p style="grid-column: 1 / -1; color: #f44336;">Error loading verification requests</p>';
+            container.innerHTML = '<p style="grid-column: 1 / -1; color: #f44336;">Error loading verification requests: ' + error.message + '</p>';
         }
     }
 
@@ -197,8 +233,29 @@ class EligibilityManager {
 
         try {
             const token = localStorage.getItem('authToken');
-            // This endpoint would be implemented in the backend
-            alert('Verification approved! (Endpoint to be implemented)');
+            const eligibilityType = type.includes('Senior') ? 'SC' : 'PWD';
+            
+            const response = await fetch('/api/customers/verify-eligibility', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    customerId: requestId,
+                    eligibilityType: eligibilityType,
+                    approveStatus: 'approved'
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to approve verification');
+            }
+
+            alert('Verification approved successfully!');
+            this.loadVerificationRequests();
+            this.loadStatistics();
         } catch (error) {
             console.error('Error approving verification:', error);
             alert('Error: ' + error.message);
@@ -213,8 +270,29 @@ class EligibilityManager {
 
         try {
             const token = localStorage.getItem('authToken');
-            // This endpoint would be implemented in the backend
-            alert('Verification rejected! (Endpoint to be implemented)');
+            const eligibilityType = type.includes('Senior') ? 'SC' : 'PWD';
+            
+            const response = await fetch('/api/customers/verify-eligibility', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    customerId: requestId,
+                    eligibilityType: eligibilityType,
+                    approveStatus: 'rejected'
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to reject verification');
+            }
+
+            alert('Verification rejected successfully!');
+            this.loadVerificationRequests();
+            this.loadStatistics();
         } catch (error) {
             console.error('Error rejecting verification:', error);
             alert('Error: ' + error.message);
