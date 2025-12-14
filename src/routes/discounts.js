@@ -689,13 +689,13 @@ router.get('/eligibility-stats', [auth, authorize(['admin', 'owner'])], async (r
         
         // Get SC/PWD eligibility discounts
         const scDiscount = await Discount.findOne({
-            type: 'Senior Citizen',
+            eligibilityType: 'SC',
             isEligibilityBased: true,
             isActive: true
         });
         
         const pwdDiscount = await Discount.findOne({
-            type: 'PWD',
+            eligibilityType: 'PWD',
             isEligibilityBased: true,
             isActive: true
         });

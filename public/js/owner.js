@@ -419,6 +419,29 @@ function exportReportToExcel() {
         }
       });
     }
+
+    // Add Discounts Given section
+    const discountTableBody = document.getElementById('discountTableBody');
+    if (discountTableBody && discountTableBody.rows.length > 0) {
+      csvContent += '\n\nDiscounts Given\n';
+      csvContent += 'Order ID,Customer Name,Discount Type,Code,Discount Amount (₱),Order Total (₱),Date\n';
+      Array.from(discountTableBody.rows).forEach(row => {
+        if (row.cells.length >= 7) {
+          const orderId = row.cells[0]?.textContent.trim() || '';
+          const customerName = row.cells[1]?.textContent.trim() || '';
+          const type = row.cells[2]?.textContent.trim().replace(/\n/g, ' ') || '';
+          const code = row.cells[3]?.textContent.trim() || '';
+          const amount = row.cells[4]?.textContent.trim() || '₱0.00';
+          const total = row.cells[5]?.textContent.trim() || '₱0.00';
+          const date = row.cells[6]?.textContent.trim() || '';
+          
+          // Skip empty rows
+          if (orderId && customerName !== 'No discount data available') {
+            csvContent += `"${orderId}","${customerName}","${type}","${code}",${amount},${total},"${date}"\n`;
+          }
+        }
+      });
+    }
     
     // Create downloadable link
     const link = document.createElement('a');
@@ -736,6 +759,186 @@ function renderMostOrderedItems(items) {
 }
 
 /**
+ * Fetch discount report data and render metrics + table
+ */
+async function fetchAndRenderDiscountReport() {
+  try {
+    const startDate = document.getElementById('reportStartDate')?.value;
+    const endDate = document.getElementById('reportEndDate')?.value;
+    const filterType = document.getElementById('discountFilterType')?.value || 'all';
+
+    if (!startDate || !endDate) {
+      return;
+    }
+
+    // Fetch orders with discount data for the date range
+    const response = await fetch(`/api/orders?status=complete&startDate=${startDate}&endDate=${endDate}`);
+    if (!response.ok) throw new Error('Failed to fetch discount report data');
+
+    const ordersData = await response.json();
+    const orders = Array.isArray(ordersData) ? ordersData : ordersData.orders || [];
+
+    // Process discount data
+    const discountData = processDiscountData(orders, filterType);
+    
+    // Render metrics and table
+    renderDiscountMetrics(discountData);
+    renderDiscountTable(discountData.discounts);
+
+  } catch (error) {
+    console.error('Error fetching discount report:', error);
+    // Show empty state instead of error
+    renderDiscountEmpty();
+  }
+}
+
+/**
+ * Process discount data from orders
+ */
+function processDiscountData(orders, filterType) {
+  let totalAmount = 0;
+  let manualAmount = 0;
+  let scAmount = 0;
+  let pwdAmount = 0;
+  const discounts = [];
+
+  orders.forEach(order => {
+    if (order.discount && order.discount.discountAmount > 0) {
+      const amount = order.discount.discountAmount || 0;
+      const type = order.discount.discountType === 'percentage' ? 'manual' : 
+                   order.discount.code?.includes('SC') ? 'SC' :
+                   order.discount.code?.includes('PWD') ? 'PWD' : 'manual';
+
+      // Only include if matches filter
+      if (filterType === 'all' || filterType === type) {
+        totalAmount += amount;
+        
+        if (type === 'manual') {
+          manualAmount += amount;
+        } else if (type === 'SC') {
+          scAmount += amount;
+        } else if (type === 'PWD') {
+          pwdAmount += amount;
+        }
+
+        discounts.push({
+          orderId: order._id || order.orderId || 'N/A',
+          customerName: order.customerName || order.userId || 'Unknown',
+          type: type,
+          code: order.discount.code || 'N/A',
+          amount: amount,
+          total: order.total || 0,
+          date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'
+        });
+      }
+    }
+  });
+
+  // Sort by date descending
+  discounts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  return {
+    totalAmount,
+    manualAmount,
+    scAmount,
+    pwdAmount,
+    discounts
+  };
+}
+
+/**
+ * Render discount metric cards
+ */
+function renderDiscountMetrics(data) {
+  const container = document.getElementById('discountMetricsContainer');
+  if (!container) return;
+
+  // Update Total Discounts card
+  const totalCard = container.querySelector('.discount-metric-card.total .discount-metric-info .amount');
+  if (totalCard) {
+    totalCard.textContent = `₱${data.totalAmount.toFixed(2)}`;
+  }
+
+  // Update Manual Codes card
+  const manualCard = container.querySelector('.discount-metric-card.manual .discount-metric-info .amount');
+  if (manualCard) {
+    manualCard.textContent = `₱${data.manualAmount.toFixed(2)}`;
+  }
+
+  // Update SC Discounts card
+  const scCard = container.querySelector('.discount-metric-card.sc .discount-metric-info .amount');
+  if (scCard) {
+    scCard.textContent = `₱${data.scAmount.toFixed(2)}`;
+  }
+
+  // Update PWD Discounts card
+  const pwdCard = container.querySelector('.discount-metric-card.pwd .discount-metric-info .amount');
+  if (pwdCard) {
+    pwdCard.textContent = `₱${data.pwdAmount.toFixed(2)}`;
+  }
+
+  console.log('[Discount Report] Metrics updated');
+}
+
+/**
+ * Render discount report table
+ */
+function renderDiscountTable(discounts) {
+  const tableBody = document.getElementById('discountTableBody');
+  if (!tableBody) return;
+
+  if (!discounts || discounts.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">No discount data available for selected period</td></tr>';
+    return;
+  }
+
+  tableBody.innerHTML = discounts.map(discount => `
+    <tr>
+      <td>${discount.orderId}</td>
+      <td>${discount.customerName}</td>
+      <td>
+        <span class="discount-type-badge ${discount.type.toLowerCase()}">
+          ${discount.type === 'manual' ? 'Manual Code' : discount.type}
+        </span>
+      </td>
+      <td>${discount.code}</td>
+      <td class="discount-amount">₱${discount.amount.toFixed(2)}</td>
+      <td>₱${discount.total.toFixed(2)}</td>
+      <td>${discount.date}</td>
+    </tr>
+  `).join('');
+
+  console.log('[Discount Report] Table updated with', discounts.length, 'rows');
+}
+
+/**
+ * Render empty state for discount report
+ */
+function renderDiscountEmpty() {
+  const tableBody = document.getElementById('discountTableBody');
+  if (tableBody) {
+    tableBody.innerHTML = '<tr><td colspan="7"><div class="discount-empty-state"><p>No discount data available</p></div></td></tr>';
+  }
+
+  const container = document.getElementById('discountMetricsContainer');
+  if (container) {
+    const cards = container.querySelectorAll('.discount-metric-info .amount');
+    cards.forEach(card => {
+      card.textContent = '₱0.00';
+    });
+  }
+}
+
+/**
+ * Handle discount filter change
+ */
+function onDiscountFilterChange() {
+  const filterType = document.getElementById('discountFilterType')?.value || 'all';
+  fetchAndRenderDiscountReport();
+  console.log('[Discount Report] Filter changed to:', filterType);
+}
+
+/**
  * Fetch sales data from backend and render chart + metrics
  */
 async function fetchAndRenderSalesReport() {
@@ -781,6 +984,9 @@ async function fetchAndRenderSalesReport() {
     
     // Fetch and render most ordered items
     fetchAndRenderMostOrderedItems();
+
+    // Fetch and render discount report
+    fetchAndRenderDiscountReport();
 
   } catch (error) {
     console.error('Error fetching sales report:', error);

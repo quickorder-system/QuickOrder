@@ -495,6 +495,89 @@
         <canvas id="paymentChart"></canvas>
       </div>
 
+      <!-- Discounts Given Section -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fas fa-tag"></i>
+            Discounts Given Report
+          </h3>
+          <div class="discount-filters">
+            <select class="filter-select" id="discountTypeFilter" title="Filter by discount type">
+              <option value="">All Discount Types</option>
+              <option value="manual">Manual Code</option>
+              <option value="sc">Senior Citizen</option>
+              <option value="pwd">PWD</option>
+            </select>
+          </div>
+        </div>
+        <div class="discount-report-grid">
+          <div class="discount-metric-card">
+            <div class="metric-icon">
+              <i class="fas fa-percentage"></i>
+            </div>
+            <div class="metric-content">
+              <div class="metric-label">Total Discounts Given</div>
+              <div class="metric-value" id="totalDiscountsGiven">₱0.00</div>
+            </div>
+          </div>
+
+          <div class="discount-metric-card">
+            <div class="metric-icon manual">
+              <i class="fas fa-code"></i>
+            </div>
+            <div class="metric-content">
+              <div class="metric-label">Manual Code Discounts</div>
+              <div class="metric-value" id="manualCodeDiscounts">₱0.00</div>
+              <div class="metric-subtext" id="manualCodeCount">0 orders</div>
+            </div>
+          </div>
+
+          <div class="discount-metric-card">
+            <div class="metric-icon sc">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="metric-content">
+              <div class="metric-label">SC Eligibility Discounts</div>
+              <div class="metric-value" id="scEligibilityDiscounts">₱0.00</div>
+              <div class="metric-subtext" id="scEligibilityCount">0 orders</div>
+            </div>
+          </div>
+
+          <div class="discount-metric-card">
+            <div class="metric-icon pwd">
+              <i class="fas fa-wheelchair"></i>
+            </div>
+            <div class="metric-content">
+              <div class="metric-label">PWD Eligibility Discounts</div>
+              <div class="metric-value" id="pwdEligibilityDiscounts">₱0.00</div>
+              <div class="metric-subtext" id="pwdEligibilityCount">0 orders</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="discount-table-container">
+          <table class="discount-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Discount Type</th>
+                <th>Discount Code/Type</th>
+                <th>Discount Amount</th>
+                <th>Order Total</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="discountTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: #999;">Loading discount data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Most Ordered Items Section -->
       <div class="chart-container">
         <div class="chart-header">

@@ -199,3 +199,283 @@ body.dark-mode .payment-method-info .percentage {
 body.dark-mode .payment-method-info .order-count {
     color: #94a3b8;
 }
+
+/* Discount Report Section */
+.discount-report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.discount-metric-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border-left: 3px solid #667eea;
+}
+
+.discount-metric-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.discount-metric-card.total {
+    border-left-color: #667eea;
+}
+
+.discount-metric-card.manual {
+    border-left-color: #f59e0b;
+}
+
+.discount-metric-card.sc {
+    border-left-color: #8b5cf6;
+}
+
+.discount-metric-card.pwd {
+    border-left-color: #ef4444;
+}
+
+.discount-metric-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    color: white;
+}
+
+.discount-metric-card.total .discount-metric-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.discount-metric-card.manual .discount-metric-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.discount-metric-card.sc .discount-metric-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.discount-metric-card.pwd .discount-metric-icon {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.discount-metric-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.discount-metric-info h4 {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.discount-metric-info .amount {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Dark mode support for discount report */
+body.dark-mode .discount-metric-card {
+    background: #1e293b;
+}
+
+body.dark-mode .discount-metric-info h4 {
+    color: #94a3b8;
+}
+
+body.dark-mode .discount-metric-info .amount {
+    color: #e2e8f0;
+}
+
+/* Discount Filters */
+.discount-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.discount-filters label {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+.discount-filters select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: white;
+    color: #1e293b;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.discount-filters select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .discount-filters label {
+    color: #e2e8f0;
+}
+
+body.dark-mode .discount-filters select {
+    background-color: #0f172a;
+    color: #e2e8f0;
+    border-color: #334155;
+}
+
+body.dark-mode .discount-filters select:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Discount Table */
+.discount-table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.discount-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.discount-table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.discount-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.discount-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s;
+}
+
+.discount-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.discount-table td {
+    padding: 1rem;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+.discount-type-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.discount-type-badge.manual {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.discount-type-badge.sc {
+    background: #ede9fe;
+    color: #581c87;
+}
+
+.discount-type-badge.pwd {
+    background: #fee2e2;
+    color: #7f1d1d;
+}
+
+.discount-amount {
+    font-weight: 700;
+    color: #10b981;
+}
+
+/* Empty State */
+.discount-empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+}
+
+.discount-empty-state p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Dark mode support for discount table */
+body.dark-mode .discount-table-container {
+    background: #1e293b;
+}
+
+body.dark-mode .discount-table thead {
+    background: #0f172a;
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .discount-table th {
+    color: #cbd5e0;
+}
+
+body.dark-mode .discount-table tbody tr {
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .discount-table tbody tr:hover {
+    background-color: #0f172a;
+}
+
+body.dark-mode .discount-table td {
+    color: #e2e8f0;
+}
+
+body.dark-mode .discount-type-badge.manual {
+    background: #78350f;
+    color: #fef3c7;
+}
+
+body.dark-mode .discount-type-badge.sc {
+    background: #3f0f5c;
+    color: #ede9fe;
+}
+
+body.dark-mode .discount-type-badge.pwd {
+    background: #5f1313;
+    color: #fee2e2;
+}
+
+body.dark-mode .discount-empty-state {
+    color: #94a3b8;
+}
