@@ -223,6 +223,14 @@ function showTab(tabId, clickedButton) {
       }
       window.discountManager.init();
     }
+  } else if (tabId === 'eligibilityTab') {
+    // Initialize eligibility manager for SC/PWD management
+    if (typeof EligibilityManager !== 'undefined') {
+      if (!window.eligibilityManager) {
+        window.eligibilityManager = new EligibilityManager('owner');
+      }
+      window.eligibilityManager.loadStatistics();
+    }
   }
 }
 

@@ -55,13 +55,17 @@
       <i class="fas fa-chart-line"></i>
       Reports
     </button>
-    <button class="tab-btn" data-tab="activityLogsTab">
-      <i class="fas fa-history"></i>
-      Activity Logs
-    </button>
     <button class="tab-btn" data-tab="discountsTab">
       <i class="fas fa-tag"></i>
       Discounts
+    </button>
+    <button class="tab-btn" data-tab="eligibilityTab">
+      <i class="fas fa-gift"></i>
+      SC/PWD Management
+    </button>
+    <button class="tab-btn" data-tab="activityLogsTab">
+      <i class="fas fa-history"></i>
+      Activity Logs
     </button>
   </nav>
 
@@ -524,6 +528,86 @@
       <div id="discountPanelContainer"></div>
     </div>
 
+    <!-- SC/PWD Eligibility Management Tab -->
+    <div id="eligibilityTab" class="tab-content">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-gift"></i>
+          SC/PWD Eligibility Management
+        </h2>
+      </div>
+
+      <!-- Setup Default Discounts Section -->
+      <div class="eligibility-setup-section">
+        <div class="setup-card">
+          <h3>Quick Setup</h3>
+          <p>Create default SC/PWD discounts for the year</p>
+          <div class="setup-inputs">
+            <div class="form-group">
+              <label for="scPercentage">SC Discount %</label>
+              <input type="number" id="scPercentage" value="20" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label for="pwdPercentage">PWD Discount %</label>
+              <input type="number" id="pwdPercentage" value="15" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label for="discountYear">Year</label>
+              <input type="number" id="discountYear" value="2026" min="2025">
+            </div>
+            <button class="btn-primary" id="setupDiscountsBtn">
+              <i class="fas fa-magic"></i> Setup Default Discounts
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage Statistics Section -->
+      <div class="eligibility-stats-section">
+        <div class="section-subheader">
+          <h3>Usage Statistics</h3>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Total SC Users</div>
+              <div class="stat-value" id="totalSCUsers">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-wheelchair"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Total PWD Users</div>
+              <div class="stat-value" id="totalPWDUsers">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">SC Discounts Given</div>
+              <div class="stat-value" id="totalSCDiscounts">₱0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">PWD Discounts Given</div>
+              <div class="stat-value" id="totalPWDDiscounts">₱0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- Add/Edit Item Modal -->
@@ -626,6 +710,7 @@
   <!-- Scripts -->
   <script src="js/services/api.service.js"></script>
   <script src="js/services/order.service.js"></script>
+  <script src="js/services/customer.service.js"></script>
   <script src="js/services/activityLogger.js"></script>
   <script src="js/services/category.service.js"></script>
   <script src="js/services/discount.service.js"></script>
@@ -635,6 +720,7 @@
   <script src="js/components/order-management.js"></script>
   <script src="js/components/category-manager.js"></script>
   <script src="js/components/discount-manager.js"></script>
+  <script src="js/components/eligibility-manager.js"></script>
   <script src="js/utils/discount-ui.utils.js"></script>
   <script src="js/orders.js"></script>
   <script src="js/inventory.js"></script>
