@@ -427,8 +427,8 @@ class EligibilityManager {
             if (data.stats) {
                 document.getElementById('totalSCUsers').textContent = data.stats.totalSCUsers || '0';
                 document.getElementById('totalPWDUsers').textContent = data.stats.totalPWDUsers || '0';
-                document.getElementById('totalSCDiscounts').textContent = `₱${(data.stats.totalSCDiscountsGiven || 0).toFixed(2)}`;
-                document.getElementById('totalPWDDiscounts').textContent = `₱${(data.stats.totalPWDDiscountsGiven || 0).toFixed(2)}`;
+                document.getElementById('totalSCDiscounts').textContent = `₱${(data.stats.totalSCDiscounts || 0).toFixed(2)}`;
+                document.getElementById('totalPWDDiscounts').textContent = `₱${(data.stats.totalPWDDiscounts || 0).toFixed(2)}`;
             }
         } catch (error) {
             console.error('Error loading statistics:', error);

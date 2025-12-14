@@ -689,6 +689,7 @@ router.get('/eligibility-stats', [auth, authorize(['admin', 'owner'])], async (r
     try {
         const User = require('../models/user');
         const Discount = require('../models/discount');
+        const Order = require('../models/order');
         
         // Get SC/PWD eligibility discounts
         const scDiscount = await Discount.findOne({
@@ -712,22 +713,48 @@ router.get('/eligibility-stats', [auth, authorize(['admin', 'owner'])], async (r
             'customerProfile.pwdVerified': true
         });
         
-        // Calculate total discounts given (estimate based on discount usage)
+        // Calculate total discounts given from completed orders
         let totalSCDiscounts = 0;
         let totalPWDDiscounts = 0;
         
+        // Sum discounts from completed orders that used SC eligibility
         if (scDiscount) {
-            const scUsage = await DiscountUsage.countDocuments({
-                discountId: scDiscount._id
-            });
-            totalSCDiscounts = scUsage * (scDiscount.discountPercentage || 0);
+            const scOrdersResult = await Order.aggregate([
+                {
+                    $match: {
+                        'discount.discountId': scDiscount._id,
+                        status: 'complete'
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalAmount: { $sum: '$discount.discountAmount' }
+                    }
+                }
+            ]);
+            
+            totalSCDiscounts = scOrdersResult.length > 0 ? scOrdersResult[0].totalAmount : 0;
         }
         
+        // Sum discounts from completed orders that used PWD eligibility
         if (pwdDiscount) {
-            const pwdUsage = await DiscountUsage.countDocuments({
-                discountId: pwdDiscount._id
-            });
-            totalPWDDiscounts = pwdUsage * (pwdDiscount.discountPercentage || 0);
+            const pwdOrdersResult = await Order.aggregate([
+                {
+                    $match: {
+                        'discount.discountId': pwdDiscount._id,
+                        status: 'complete'
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalAmount: { $sum: '$discount.discountAmount' }
+                    }
+                }
+            ]);
+            
+            totalPWDDiscounts = pwdOrdersResult.length > 0 ? pwdOrdersResult[0].totalAmount : 0;
         }
         
         res.json({
