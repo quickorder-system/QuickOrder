@@ -467,9 +467,14 @@ router.post('/verify-eligibility', [auth, authorize(['admin', 'owner'])], async 
         await ActivityLog.create({
             userId: req.user.id,
             action: 'VERIFY_ELIGIBILITY',
-            resourceType: 'User',
-            resourceId: customerId,
-            details: `${approveStatus === 'approved' ? 'Approved' : 'Rejected'} ${eligibilityType} eligibility for customer: ${customer.email}`
+            page: 'ADMIN',
+            description: `${approveStatus === 'approved' ? 'Approved' : 'Rejected'} ${eligibilityType} eligibility for customer: ${customer.email}`,
+            details: {
+                customerId: customerId,
+                eligibilityType: eligibilityType,
+                approveStatus: approveStatus,
+                customerEmail: customer.email
+            }
         });
 
         logger.info(`${eligibilityType} eligibility ${approveStatus} for customer: ${customer.email} by admin: ${req.user.id}`);

@@ -35,6 +35,7 @@ const activityLogSchema = new mongoose.Schema({
       'GENERATE_REPORT',
       'LOGIN',
       'LOGOUT',
+      'VERIFY_ELIGIBILITY',
       'OTHER'
     ],
     index: true
