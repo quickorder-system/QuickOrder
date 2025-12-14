@@ -1,10 +1,11 @@
 /**
- * Admin Eligibility Manager
- * Handles SC/PWD discount management and verification
+ * Eligibility Manager
+ * Handles SC/PWD discount management and verification for Admin and Owner
  */
 
-class AdminEligibilityManager {
-    constructor() {
+class EligibilityManager {
+    constructor(role = 'admin') {
+        this.role = role;
         this.verificationFilter = {
             status: '',
             type: ''
@@ -55,17 +56,20 @@ class AdminEligibilityManager {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up...';
 
             const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('Authentication token not found. Please login again.');
+            }
+
             const response = await fetch('/api/discounts/setup-eligibility-discounts', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-auth-token': token
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     scPercentage,
                     pwdPercentage,
-                    startYear: year - 1,
-                    endYear: year
+                    year
                 })
             });
 
@@ -223,16 +227,29 @@ class AdminEligibilityManager {
     async loadStatistics() {
         try {
             const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.warn('No authentication token found');
+                return;
+            }
             
-            // These would be fetched from backend API
-            // For now, initialize with zeros
-            document.getElementById('totalSCUsers').textContent = '0';
-            document.getElementById('totalPWDUsers').textContent = '0';
-            document.getElementById('totalSCDiscounts').textContent = '₱0';
-            document.getElementById('totalPWDDiscounts').textContent = '₱0';
+            const response = await fetch('/api/discounts/eligibility-stats', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-            // Placeholder message
-            console.log('Statistics loaded (placeholder)');
+            if (!response.ok) {
+                console.warn('Failed to load statistics:', response.status);
+                return;
+            }
+
+            const data = await response.json();
+            if (data.stats) {
+                document.getElementById('totalSCUsers').textContent = data.stats.totalSCUsers || '0';
+                document.getElementById('totalPWDUsers').textContent = data.stats.totalPWDUsers || '0';
+                document.getElementById('totalSCDiscounts').textContent = `₱${(data.stats.totalSCDiscountsGiven || 0).toFixed(2)}`;
+                document.getElementById('totalPWDDiscounts').textContent = `₱${(data.stats.totalPWDDiscountsGiven || 0).toFixed(2)}`;
+            }
         } catch (error) {
             console.error('Error loading statistics:', error);
         }

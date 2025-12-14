@@ -436,17 +436,20 @@ function showTab(tabId, clickedButton) {
     document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
   }
   
-    if (tabId === 'ordersTab') {
-  
-      loadOrders(); // Assuming loadOrders is defined globally or imported
-  
-    } else if (tabId === 'inventoryTab') {
-  
-      renderInventory();
-  
+  if (tabId === 'ordersTab') {
+    loadOrders(); // Assuming loadOrders is defined globally or imported
+  } else if (tabId === 'inventoryTab') {
+    renderInventory();
+  } else if (tabId === 'eligibilityTab') {
+    // Initialize eligibility manager for admin
+    if (typeof EligibilityManager !== 'undefined') {
+      if (!window.eligibilityManager) {
+        window.eligibilityManager = new EligibilityManager('admin');
+      }
+      window.eligibilityManager.loadStatistics();
     }
-  
   }
+}
   
   
   

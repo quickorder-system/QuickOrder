@@ -113,7 +113,6 @@ const discountUIUtils = {
             messageEl.style.display = 'none';
         }, 5000);
     }
-};
 
     /**
      * Create discount admin panel HTML
@@ -386,7 +385,7 @@ const discountUIUtils = {
             btn.textContent = disable ? 'Validating...' : 'Apply';
         }
     }
-};
+}
 
 // Export for use in modules
 if (typeof module !== 'undefined' && module.exports) {
