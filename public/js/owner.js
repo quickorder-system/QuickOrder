@@ -805,9 +805,15 @@ function processDiscountData(orders, filterType) {
   orders.forEach(order => {
     if (order.discount && order.discount.discountAmount > 0) {
       const amount = order.discount.discountAmount || 0;
-      const type = order.discount.discountType === 'percentage' ? 'manual' : 
-                   order.discount.code?.includes('SC') ? 'SC' :
-                   order.discount.code?.includes('PWD') ? 'PWD' : 'manual';
+      const code = order.discount.code || '';
+      
+      // Determine discount type based on code patterns
+      let type = 'manual';
+      if (code.includes('SC-DISCOUNT')) {
+        type = 'SC';
+      } else if (code.includes('PWD-DISCOUNT')) {
+        type = 'PWD';
+      }
 
       // Only include if matches filter
       if (filterType === 'all' || filterType === type) {
@@ -822,10 +828,10 @@ function processDiscountData(orders, filterType) {
         }
 
         discounts.push({
-          orderId: order._id || order.orderId || 'N/A',
+          orderId: order.orderId || order._id || 'N/A',
           customerName: order.customerName || order.userId || 'Unknown',
           type: type,
-          code: order.discount.code || 'N/A',
+          code: code,
           amount: amount,
           total: order.total || 0,
           date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'

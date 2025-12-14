@@ -22,12 +22,34 @@ const { validateOrder } = require('../middleware/validation');
 
 /**
  * @route GET /api/orders
- * @description Get all orders
+ * @description Get all orders with optional filtering by status and date range
  * @access Private
  */
 router.get('/', async (req, res) => {
     try {
-        const orders = await Order.find().sort({ date: -1 });
+        const { status, startDate, endDate } = req.query;
+        const filter = {};
+
+        // Filter by status if provided
+        if (status) {
+            filter.status = status;
+        }
+
+        // Filter by date range if provided
+        if (startDate || endDate) {
+            filter.createdAt = {};
+            if (startDate) {
+                filter.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                // Add 1 day to endDate to include entire day
+                const end = new Date(endDate);
+                end.setDate(end.getDate() + 1);
+                filter.createdAt.$lt = end;
+            }
+        }
+
+        const orders = await Order.find(filter).sort({ createdAt: -1 });
         res.json(orders);
     } catch (error) {
         logger.error('Error fetching orders:', error);
