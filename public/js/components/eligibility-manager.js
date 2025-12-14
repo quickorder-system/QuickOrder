@@ -186,7 +186,8 @@ class EligibilityManager {
             <div class="verification-document-preview">
                 <label>Uploaded Document:</label>
                 <div class="document-preview-container">
-                    <img src="${request.document}" alt="ID Document" class="document-image" onerror="this.src='/image/placeholder.png'">
+                    <img src="${request.document}" alt="ID Document" class="document-image clickable-document" onclick="window.eligibilityManager.openDocumentModal('${request.document}', '${request.userName}')" onerror="this.src='/image/placeholder.png'" style="cursor: pointer;">
+                    <span class="image-hint">Click to enlarge</span>
                 </div>
                 <a href="${request.document}" target="_blank" class="document-link">
                     <i class="fas fa-download"></i> Download Document
@@ -260,6 +261,70 @@ class EligibilityManager {
             'rejected': 'Rejected'
         };
         return statusMap[status] || status;
+    }
+
+    /**
+     * Open document in modal
+     */
+    openDocumentModal(documentUrl, customerName) {
+        // Create modal if it doesn't exist
+        let modal = document.getElementById('documentModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'documentModal';
+            modal.className = 'document-modal';
+            modal.innerHTML = `
+                <div class="document-modal-content">
+                    <button class="document-modal-close" onclick="window.eligibilityManager.closeDocumentModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="document-modal-header">
+                        <h3 id="documentModalTitle"></h3>
+                    </div>
+                    <div class="document-modal-body">
+                        <img id="documentModalImage" src="" alt="Document" class="document-modal-image">
+                    </div>
+                    <div class="document-modal-footer">
+                        <a id="documentModalDownload" href="" target="_blank" class="btn-download-full">
+                            <i class="fas fa-download"></i> Download Full Size
+                        </a>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeDocumentModal();
+                }
+            });
+            
+            // Close modal on ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.closeDocumentModal();
+                }
+            });
+        }
+        
+        // Populate modal with image data
+        document.getElementById('documentModalTitle').textContent = `ID Document - ${customerName}`;
+        document.getElementById('documentModalImage').src = documentUrl;
+        document.getElementById('documentModalDownload').href = documentUrl;
+        
+        // Show modal
+        modal.classList.add('show');
+    }
+
+    /**
+     * Close document modal
+     */
+    closeDocumentModal() {
+        const modal = document.getElementById('documentModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
     }
 
     /**

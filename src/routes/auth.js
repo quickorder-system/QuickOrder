@@ -669,5 +669,59 @@ router.post('/customer/logout', auth, async (req, res, next) => {
     }
 });
 
+/**
+ * @route POST /api/auth/promote-to-admin
+ * @description Promote current user to admin role (one-time setup, requires authentication)
+ * @access Private
+ */
+router.post('/promote-to-admin', auth, async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update user role to admin
+        user.role = 'admin';
+        await user.save();
+
+        logger.info(`User promoted to admin: ${user.email}`);
+        
+        // Generate new token with admin role
+        const payload = {
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role
+            }
+        };
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '24h' },
+            (err, token) => {
+                if (err) {
+                    logger.error('Token generation error:', err);
+                    throw err;
+                }
+                res.json({ 
+                    message: 'Successfully promoted to admin',
+                    token, 
+                    user: { 
+                        id: user.id, 
+                        email: user.email, 
+                        role: user.role 
+                    } 
+                });
+            }
+        );
+    } catch (error) {
+        logger.error('Promote to admin error:', error);
+        next(error);
+    }
+});
+
 module.exports = router;
 
