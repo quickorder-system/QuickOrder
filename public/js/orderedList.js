@@ -242,8 +242,18 @@ async function handleSelectAutomaticDiscount(e) {
         stateService.setAppliedDiscount(appliedDiscount);
         
         // Hide manual input when automatic discount is selected
-        document.getElementById('discountCode').style.display = 'none';
-        document.getElementById('applyDiscountBtn').style.display = 'none';
+        const discountCodeInput = document.getElementById('discountCode');
+        const applyBtn = document.getElementById('applyDiscountBtn');
+        
+        if (discountCodeInput) {
+            discountCodeInput.style.display = 'none';
+            discountCodeInput.value = ''; // Clear any previous manual code
+            discountCodeInput.disabled = true;
+        }
+        if (applyBtn) {
+            applyBtn.style.display = 'none';
+            applyBtn.disabled = true;
+        }
         
         // Show applied discount display
         updateAppliedDiscountDisplay(appliedDiscount);
@@ -289,8 +299,14 @@ function handleRemoveDiscount() {
     document.getElementById('discountCode').disabled = false;
     document.getElementById('discountCode').style.display = 'inline-block';
     document.getElementById('applyDiscountBtn').style.display = 'inline-block';
+    document.getElementById('applyDiscountBtn').disabled = false;
     document.getElementById('appliedDiscountDisplay').style.display = 'none';
     
+    // Re-enable automatic discount radios
+    document.querySelectorAll('input[name="automaticDiscount"]').forEach(radio => {
+        radio.checked = false;
+        radio.disabled = false;
+    });
     // Uncheck all discount radios
     document.querySelectorAll('input[name="automaticDiscount"]').forEach(radio => {
         radio.checked = false;

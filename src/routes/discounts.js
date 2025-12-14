@@ -448,6 +448,22 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
             throw new BadRequestError('User not found');
         }
 
+        // Ensure discountPreferences are initialized
+        if (!user.discountPreferences) {
+            user.discountPreferences = {
+                useSCDiscount: true,
+                usePWDDiscount: true
+            };
+        }
+
+        // Ensure all preference fields exist with defaults
+        if (typeof user.discountPreferences.useSCDiscount === 'undefined') {
+            user.discountPreferences.useSCDiscount = true;
+        }
+        if (typeof user.discountPreferences.usePWDDiscount === 'undefined') {
+            user.discountPreferences.usePWDDiscount = true;
+        }
+
         const now = new Date();
         const eligibleDiscounts = [];
 
@@ -456,12 +472,12 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
             isSC: user.customerProfile?.isSeniorCitizen,
             pwdVerified: user.customerProfile?.pwdVerified,
             scVerified: user.customerProfile?.scVerified,
-            usePWDDiscount: user.discountPreferences?.usePWDDiscount,
-            useSCDiscount: user.discountPreferences?.useSCDiscount
+            usePWDDiscount: user.discountPreferences.usePWDDiscount,
+            useSCDiscount: user.discountPreferences.useSCDiscount
         });
 
         // Check if user is Senior Citizen and preference is enabled
-        if (user.customerProfile?.isSeniorCitizen && user.discountPreferences?.useSCDiscount) {
+        if (user.customerProfile?.isSeniorCitizen && user.discountPreferences.useSCDiscount) {
             const scDiscount = await Discount.findOne({
                 eligibilityType: 'SC',
                 isEligibilityBased: true,
@@ -470,7 +486,7 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
                 endDate: { $gte: now }
             });
 
-            logger.info(`SC Discount search result:`, scDiscount ? 'found' : 'not found');
+            logger.info(`SC Discount search result:`, scDiscount ? `found: ${scDiscount.code}` : 'not found');
 
             if (scDiscount) {
                 eligibleDiscounts.push({
@@ -487,7 +503,7 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
         }
 
         // Check if user is PWD and preference is enabled
-        if (user.customerProfile?.isPWD && user.discountPreferences?.usePWDDiscount) {
+        if (user.customerProfile?.isPWD && user.discountPreferences.usePWDDiscount) {
             const pwdDiscount = await Discount.findOne({
                 eligibilityType: 'PWD',
                 isEligibilityBased: true,
@@ -496,7 +512,7 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
                 endDate: { $gte: now }
             });
 
-            logger.info(`PWD Discount search result:`, pwdDiscount ? 'found' : 'not found');
+            logger.info(`PWD Discount search result:`, pwdDiscount ? `found: ${pwdDiscount.code}` : 'not found');
 
             if (pwdDiscount) {
                 eligibleDiscounts.push({
@@ -512,7 +528,7 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
             }
         }
 
-        logger.info(`Retrieved eligible discounts for user: ${req.user.id}`, { count: eligibleDiscounts.length });
+        logger.info(`Retrieved eligible discounts for user: ${req.user.id}`, { count: eligibleDiscounts.length, discounts: eligibleDiscounts.map(d => d.code) });
 
         res.json({
             message: 'Eligible discounts retrieved',

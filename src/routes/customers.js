@@ -46,10 +46,19 @@ const eligibilityUpload = multer({
  */
 router.get('/profile', auth, async (req, res, next) => {
     try {
-        const user = await User.findById(req.user.id).select('-password -emailVerificationToken -passwordResetToken');
+        let user = await User.findById(req.user.id).select('-password -emailVerificationToken -passwordResetToken');
         
         if (!user) {
             throw new BadRequestError('User not found');
+        }
+
+        // Ensure discountPreferences are initialized with defaults
+        if (!user.discountPreferences) {
+            user.discountPreferences = {
+                useSCDiscount: true,
+                usePWDDiscount: true
+            };
+            await user.save();
         }
 
         res.json(user);
