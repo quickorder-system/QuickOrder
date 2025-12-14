@@ -639,4 +639,71 @@ router.put('/toggle-automatic', auth, async (req, res, next) => {
     }
 });
 
+/**
+ * @route GET /api/discounts/eligibility-stats
+ * @description Get SC/PWD eligibility statistics
+ * @access Private (requires admin or owner role)
+ */
+router.get('/eligibility-stats', [auth, authorize(['admin', 'owner'])], async (req, res, next) => {
+    try {
+        const User = require('../models/user');
+        const Discount = require('../models/discount');
+        
+        // Get SC/PWD eligibility discounts
+        const scDiscount = await Discount.findOne({
+            type: 'Senior Citizen',
+            isEligibilityBased: true,
+            isActive: true
+        });
+        
+        const pwdDiscount = await Discount.findOne({
+            type: 'PWD',
+            isEligibilityBased: true,
+            isActive: true
+        });
+        
+        // Count users by eligibility status
+        const totalSCUsers = await User.countDocuments({
+            'eligibility.scStatus': 'approved'
+        });
+        
+        const totalPWDUsers = await User.countDocuments({
+            'eligibility.pwdStatus': 'approved'
+        });
+        
+        // Calculate total discounts given (estimate based on discount usage)
+        let totalSCDiscounts = 0;
+        let totalPWDDiscounts = 0;
+        
+        if (scDiscount) {
+            const scUsage = await DiscountUsage.countDocuments({
+                discountId: scDiscount._id
+            });
+            totalSCDiscounts = scUsage * (scDiscount.discountPercentage || 0);
+        }
+        
+        if (pwdDiscount) {
+            const pwdUsage = await DiscountUsage.countDocuments({
+                discountId: pwdDiscount._id
+            });
+            totalPWDDiscounts = pwdUsage * (pwdDiscount.discountPercentage || 0);
+        }
+        
+        res.json({
+            success: true,
+            stats: {
+                totalSCUsers,
+                totalPWDUsers,
+                scDiscountRate: scDiscount?.discountPercentage || 0,
+                pwdDiscountRate: pwdDiscount?.discountPercentage || 0,
+                totalSCDiscounts: Math.round(totalSCDiscounts * 100) / 100,
+                totalPWDDiscounts: Math.round(totalPWDDiscounts * 100) / 100
+            }
+        });
+    } catch (error) {
+        logger.error('Error fetching eligibility stats:', error);
+        next(error);
+    }
+});
+
 module.exports = router;
