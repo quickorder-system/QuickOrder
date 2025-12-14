@@ -116,11 +116,16 @@ class EligibilityManager {
                 }
             });
 
+            console.log('Verification requests response status:', response.status);
+
             if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('API Error:', response.status, errorData);
                 throw new Error(`Failed to fetch verification requests: ${response.status}`);
             }
 
             const result = await response.json();
+            console.log('Verification requests result:', result);
             const requests = result.data || [];
 
             if (requests.length === 0) {
@@ -156,6 +161,7 @@ class EligibilityManager {
 
         } catch (error) {
             console.error('Error loading verification requests:', error);
+            console.error('Error stack:', error.stack);
             container.innerHTML = '<p style="grid-column: 1 / -1; color: #f44336;">Error loading verification requests: ' + error.message + '</p>';
         }
     }
