@@ -96,6 +96,48 @@ const userSchema = new mongoose.Schema({
             default: true
         }
     },
+    // Customer eligibility for automatic discounts
+    customerProfile: {
+        isSeniorCitizen: {
+            type: Boolean,
+            default: false
+        },
+        isPWD: {
+            type: Boolean,
+            default: false
+        },
+        scId: {
+            type: String,
+            default: null
+        },
+        pwdId: {
+            type: String,
+            default: null
+        },
+        scVerified: {
+            type: Boolean,
+            default: false
+        },
+        pwdVerified: {
+            type: Boolean,
+            default: false
+        },
+        verifiedAt: {
+            type: Date,
+            default: null
+        }
+    },
+    // Customer preferences for discount usage
+    discountPreferences: {
+        useSCDiscount: {
+            type: Boolean,
+            default: true
+        },
+        usePWDDiscount: {
+            type: Boolean,
+            default: true
+        }
+    },
     lastLogin: {
         type: Date,
         default: null

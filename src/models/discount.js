@@ -63,6 +63,20 @@ const discountSchema = new mongoose.Schema({
             ref: 'Category'
         }
     ],
+    // Eligibility-based discount fields (for SC/PWD)
+    isEligibilityBased: {
+        type: Boolean,
+        default: false
+    },
+    eligibilityType: {
+        type: String,
+        enum: ['SC', 'PWD', 'general', null],
+        default: null
+    },
+    requiresVerification: {
+        type: Boolean,
+        default: false
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
