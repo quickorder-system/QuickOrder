@@ -339,6 +339,36 @@ const customerService = {
     },
 
     /**
+     * Update customer eligibility profile with file upload
+     */
+    updateEligibilityWithFile: async (formData) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('Not authenticated');
+            }
+
+            const response = await fetch('/api/customers/profile/eligibility', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to update eligibility');
+            }
+
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    /**
      * Update discount preferences
      */
     updateDiscountPreferences: async (preferences) => {

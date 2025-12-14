@@ -110,7 +110,15 @@ const userSchema = new mongoose.Schema({
             type: String,
             default: null
         },
+        scDocument: {
+            type: String,
+            default: null
+        },
         pwdId: {
+            type: String,
+            default: null
+        },
+        pwdDocument: {
             type: String,
             default: null
         },

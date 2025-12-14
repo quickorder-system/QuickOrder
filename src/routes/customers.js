@@ -2,10 +2,42 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const authorize = require('../middleware/authorization');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const User = require('../models/user');
 const Order = require('../models/order');
 const logger = require('../utils/logger');
 const { BadRequestError } = require('../utils/errors');
+
+// Configure multer for eligibility document uploads
+const eligibilityStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'eligibility');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${req.user.id}-${Date.now()}-${file.originalname}`);
+  }
+});
+
+const eligibilityUpload = multer({
+  storage: eligibilityStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      cb(new Error('Invalid file type. Only JPEG, PNG, and PDF are allowed.'));
+    } else {
+      cb(null, true);
+    }
+  }
+});
 
 /**
  * @route GET /api/customers/profile
@@ -390,9 +422,13 @@ router.put('/addresses/:addressId/default', auth, async (req, res, next) => {
  * @description Update customer eligibility profile (SC/PWD status)
  * @access Private
  */
-router.put('/profile/eligibility', auth, async (req, res, next) => {
+router.put('/profile/eligibility', auth, eligibilityUpload.fields([
+    { name: 'scDocument', maxCount: 1 },
+    { name: 'pwdDocument', maxCount: 1 }
+]), async (req, res, next) => {
     try {
         const { isSeniorCitizen, isPWD, scId, pwdId } = req.body;
+        logger.info(`Eligibility update request from user ${req.user.id}:`, { isSeniorCitizen, isPWD, scId, pwdId, files: req.files });
 
         const user = await User.findById(req.user.id);
         if (!user) {
@@ -402,24 +438,57 @@ router.put('/profile/eligibility', auth, async (req, res, next) => {
         // Initialize customerProfile if doesn't exist
         user.customerProfile = user.customerProfile || {};
 
-        // Update eligibility status
-        if (typeof isSeniorCitizen === 'boolean') {
-            user.customerProfile.isSeniorCitizen = isSeniorCitizen;
-            if (isSeniorCitizen && scId) {
-                user.customerProfile.scId = scId;
-            }
+        // Parse boolean strings from FormData
+        const scBool = isSeniorCitizen === 'true' || isSeniorCitizen === true;
+        const pwdBool = isPWD === 'true' || isPWD === true;
+
+        // Validate that both SC and PWD are not true at the same time
+        if (scBool && pwdBool) {
+            throw new BadRequestError('You can only claim either SC or PWD, not both');
         }
 
-        if (typeof isPWD === 'boolean') {
-            user.customerProfile.isPWD = isPWD;
-            if (isPWD && pwdId) {
-                user.customerProfile.pwdId = pwdId;
+        // Update eligibility status
+        user.customerProfile.isSeniorCitizen = scBool;
+        user.customerProfile.isPWD = pwdBool;
+
+        // Update SC eligibility
+        if (scBool) {
+            if (!scId) {
+                throw new BadRequestError('SC ID is required');
             }
+            if (!req.files?.scDocument?.[0]) {
+                throw new BadRequestError('SC document is required');
+            }
+            user.customerProfile.scId = scId;
+            user.customerProfile.scDocument = `/uploads/eligibility/${req.files.scDocument[0].filename}`;
+            user.customerProfile.scVerified = false; // Reset verification status
+        } else {
+            user.customerProfile.scId = null;
+            user.customerProfile.scDocument = null;
+            user.customerProfile.scVerified = false;
+        }
+
+        // Update PWD eligibility
+        if (pwdBool) {
+            if (!pwdId) {
+                throw new BadRequestError('PWD ID is required');
+            }
+            if (!req.files?.pwdDocument?.[0]) {
+                throw new BadRequestError('PWD document is required');
+            }
+            user.customerProfile.pwdId = pwdId;
+            user.customerProfile.pwdDocument = `/uploads/eligibility/${req.files.pwdDocument[0].filename}`;
+            user.customerProfile.pwdVerified = false; // Reset verification status
+        } else {
+            user.customerProfile.pwdId = null;
+            user.customerProfile.pwdDocument = null;
+            user.customerProfile.pwdVerified = false;
         }
 
         user.updatedAt = new Date();
         await user.save();
 
+        logger.info(`Updated eligibility profile for customer: ${user.email}, SC: ${user.customerProfile.isSeniorCitizen}, PWD: ${user.customerProfile.isPWD}`);
         logger.info(`Updated eligibility profile for customer: ${user.email}, SC: ${user.customerProfile.isSeniorCitizen}, PWD: ${user.customerProfile.isPWD}`);
 
         res.json({

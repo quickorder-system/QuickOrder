@@ -158,13 +158,13 @@
                 <!-- Eligibility for Automatic Discounts -->
                 <div class="form-section">
                     <h3>Eligibility for Automatic Discounts</h3>
-                    <p class="section-help-text">Claim your eligibility to receive automatic discounts on your orders</p>
+                    <p class="section-help-text">Claim your eligibility to receive automatic discounts on your orders. Select one category and provide required documentation.</p>
                     
                     <div class="eligibility-section">
                         <!-- Senior Citizen -->
                         <div class="eligibility-group">
                             <label class="eligibility-label">
-                                <input type="checkbox" id="isSeniorCitizen" name="isSeniorCitizen">
+                                <input type="radio" id="isSeniorCitizen" name="eligibilityType" value="sc">
                                 <span class="eligibility-title">
                                     <i class="fas fa-user-tie"></i> Senior Citizen
                                     <span class="discount-badge">20% OFF</span>
@@ -173,8 +173,13 @@
                             </label>
                             <div class="eligibility-details" id="scDetails" style="display: none;">
                                 <div class="form-group">
-                                    <label for="scId">Senior Citizen ID (Optional)</label>
-                                    <input type="text" id="scId" name="scId" placeholder="Enter your SC ID number">
+                                    <label for="scId">Senior Citizen ID <span style="color: red;">*</span> (Required)</label>
+                                    <input type="text" id="scId" name="scId" placeholder="Enter your SC ID number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="scDocument">ID Document/Photo <span style="color: red;">*</span> (Required)</label>
+                                    <input type="file" id="scDocument" name="scDocument" accept="image/*,.pdf" required>
+                                    <small style="color: #666;">Upload a clear photo or scan of your SC ID (PNG, JPG, or PDF)</small>
                                 </div>
                             </div>
                         </div>
@@ -182,7 +187,7 @@
                         <!-- PWD -->
                         <div class="eligibility-group">
                             <label class="eligibility-label">
-                                <input type="checkbox" id="isPWD" name="isPWD">
+                                <input type="radio" id="isPWD" name="eligibilityType" value="pwd">
                                 <span class="eligibility-title">
                                     <i class="fas fa-wheelchair"></i> Person with Disability (PWD)
                                     <span class="discount-badge">15% OFF</span>
@@ -191,10 +196,26 @@
                             </label>
                             <div class="eligibility-details" id="pwdDetails" style="display: none;">
                                 <div class="form-group">
-                                    <label for="pwdId">PWD ID (Optional)</label>
-                                    <input type="text" id="pwdId" name="pwdId" placeholder="Enter your PWD ID number">
+                                    <label for="pwdId">PWD ID <span style="color: red;">*</span> (Required)</label>
+                                    <input type="text" id="pwdId" name="pwdId" placeholder="Enter your PWD ID number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pwdDocument">ID Document/Photo <span style="color: red;">*</span> (Required)</label>
+                                    <input type="file" id="pwdDocument" name="pwdDocument" accept="image/*,.pdf" required>
+                                    <small style="color: #666;">Upload a clear photo or scan of your PWD ID (PNG, JPG, or PDF)</small>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- None -->
+                        <div class="eligibility-group">
+                            <label class="eligibility-label">
+                                <input type="radio" id="noEligibility" name="eligibilityType" value="none" checked>
+                                <span class="eligibility-title">
+                                    <i class="fas fa-times-circle"></i> None
+                                </span>
+                                <span class="eligibility-description">I don't have SC or PWD eligibility</span>
+                            </label>
                         </div>
                     </div>
 
@@ -277,13 +298,36 @@
 
         let originalFormData = {};
 
-        // Eligibility checkbox event listeners
-        document.getElementById('isSeniorCitizen')?.addEventListener('change', (e) => {
-            document.getElementById('scDetails').style.display = e.target.checked ? 'block' : 'none';
-        });
-
-        document.getElementById('isPWD')?.addEventListener('change', (e) => {
-            document.getElementById('pwdDetails').style.display = e.target.checked ? 'block' : 'none';
+        // Eligibility radio button event listeners (mutually exclusive)
+        document.querySelectorAll('input[name="eligibilityType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Hide all details first
+                document.getElementById('scDetails').style.display = 'none';
+                document.getElementById('pwdDetails').style.display = 'none';
+                
+                // Show selected details
+                if (e.target.value === 'sc') {
+                    document.getElementById('scDetails').style.display = 'block';
+                    // Set required on SC fields
+                    document.getElementById('scId').required = true;
+                    document.getElementById('scDocument').required = true;
+                    document.getElementById('pwdId').required = false;
+                    document.getElementById('pwdDocument').required = false;
+                } else if (e.target.value === 'pwd') {
+                    document.getElementById('pwdDetails').style.display = 'block';
+                    // Set required on PWD fields
+                    document.getElementById('pwdId').required = true;
+                    document.getElementById('pwdDocument').required = true;
+                    document.getElementById('scId').required = false;
+                    document.getElementById('scDocument').required = false;
+                } else {
+                    // None selected
+                    document.getElementById('scId').required = false;
+                    document.getElementById('scDocument').required = false;
+                    document.getElementById('pwdId').required = false;
+                    document.getElementById('pwdDocument').required = false;
+                }
+            });
         });
 
         // Check authentication
@@ -364,8 +408,18 @@
 
             // Populate eligibility fields
             const customerProfile = profile.customerProfile || {};
-            document.getElementById('isSeniorCitizen').checked = customerProfile.isSeniorCitizen || false;
-            document.getElementById('isPWD').checked = customerProfile.isPWD || false;
+            
+            // Set radio button based on SC/PWD status
+            if (customerProfile.isSeniorCitizen) {
+                document.getElementById('isSeniorCitizen').checked = true;
+                document.getElementById('scDetails').style.display = 'block';
+            } else if (customerProfile.isPWD) {
+                document.getElementById('isPWD').checked = true;
+                document.getElementById('pwdDetails').style.display = 'block';
+            } else {
+                document.getElementById('noEligibility').checked = true;
+            }
+            
             document.getElementById('scId').value = customerProfile.scId || '';
             document.getElementById('pwdId').value = customerProfile.pwdId || '';
 
@@ -393,6 +447,10 @@
         }
 
         function getFormData() {
+            const eligibilityType = document.querySelector('input[name="eligibilityType"]:checked')?.value;
+            const scDocument = document.getElementById('scDocument')?.files[0];
+            const pwdDocument = document.getElementById('pwdDocument')?.files[0];
+            
             return {
                 name: document.getElementById('name').value,
                 address: {
@@ -405,10 +463,13 @@
                     notifications: document.getElementById('emailNotifications').checked,
                     smsNotifications: document.getElementById('smsNotifications').checked
                 },
-                isSeniorCitizen: document.getElementById('isSeniorCitizen').checked,
-                isPWD: document.getElementById('isPWD').checked,
+                eligibilityType: eligibilityType,
+                isSeniorCitizen: eligibilityType === 'sc',
+                isPWD: eligibilityType === 'pwd',
                 scId: document.getElementById('scId').value,
+                scDocument: scDocument,
                 pwdId: document.getElementById('pwdId').value,
+                pwdDocument: pwdDocument,
                 useSCDiscount: document.getElementById('useSCDiscount').checked,
                 usePWDDiscount: document.getElementById('usePWDDiscount').checked
             };
@@ -444,14 +505,25 @@
                         isSeniorCitizen: formData.isSeniorCitizen,
                         isPWD: formData.isPWD,
                         scId: formData.scId,
-                        pwdId: formData.pwdId
+                        pwdId: formData.pwdId,
+                        hasScDocument: !!formData.scDocument,
+                        hasPwdDocument: !!formData.pwdDocument
                     });
-                    await customerService.updateEligibility({
-                        isSeniorCitizen: formData.isSeniorCitizen,
-                        isPWD: formData.isPWD,
-                        scId: formData.scId,
-                        pwdId: formData.pwdId
-                    });
+                    
+                    // Use FormData for file upload
+                    const eligibilityFormData = new FormData();
+                    eligibilityFormData.append('isSeniorCitizen', formData.isSeniorCitizen);
+                    eligibilityFormData.append('isPWD', formData.isPWD);
+                    eligibilityFormData.append('scId', formData.scId);
+                    eligibilityFormData.append('pwdId', formData.pwdId);
+                    if (formData.scDocument) {
+                        eligibilityFormData.append('scDocument', formData.scDocument);
+                    }
+                    if (formData.pwdDocument) {
+                        eligibilityFormData.append('pwdDocument', formData.pwdDocument);
+                    }
+                    
+                    await customerService.updateEligibilityWithFile(eligibilityFormData);
                 }
 
                 // Update discount preferences
