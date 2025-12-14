@@ -420,6 +420,7 @@
             authUIUtils.clearMessages(alertMessage.parentElement);
 
             const formData = getFormData();
+            console.log('Form data before submit:', formData);
 
             // Validate name
             if (!formData.name || formData.name.trim().length < 2) {
@@ -439,6 +440,12 @@
 
                 // Update eligibility profile
                 if (formData.isSeniorCitizen || formData.isPWD) {
+                    console.log('Submitting eligibility:', {
+                        isSeniorCitizen: formData.isSeniorCitizen,
+                        isPWD: formData.isPWD,
+                        scId: formData.scId,
+                        pwdId: formData.pwdId
+                    });
                     await customerService.updateEligibility({
                         isSeniorCitizen: formData.isSeniorCitizen,
                         isPWD: formData.isPWD,
