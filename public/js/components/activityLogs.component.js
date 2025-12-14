@@ -307,7 +307,7 @@ class ActivityLogsComponent {
 
       const { jsPDF } = jspdf;
       const doc = new jsPDF({
-        orientation: 'landscape',
+        orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
@@ -339,14 +339,14 @@ class ActivityLogsComponent {
       doc.text(`Filters - Action: ${this.filters.action || 'All'} | Date Range: ${this.filters.startDate || 'N/A'} to ${this.filters.endDate || 'N/A'}`, margin, yPosition);
       yPosition += 10;
 
-      // Add table header with proper column widths for landscape
-      const columns = ['Timestamp', 'User', 'Role', 'Action', 'Description', 'Details'];
-      const columnWidths = [35, 20, 16, 18, 55, 12];
-      const rowHeight = 8;
-      const headerHeight = 10;
+      // Add table with all columns visible in portrait mode
+      const columns = ['Timestamp', 'User', 'Role', 'Action', 'Description'];
+      const columnWidths = [28, 15, 12, 18, 110];
+      const rowHeight = 12;
+      const headerHeight = 12;
 
       // Draw header
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setFillColor(60, 90, 140);
       doc.setTextColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
@@ -354,32 +354,31 @@ class ActivityLogsComponent {
       let columnX = margin;
       columns.forEach((col, idx) => {
         doc.rect(columnX, yPosition, columnWidths[idx], headerHeight, 'F');
-        doc.text(col, columnX + 1, yPosition + 4.5, { maxWidth: columnWidths[idx] - 2, align: 'left' });
+        doc.text(col, columnX + 1.5, yPosition + 5.5, { maxWidth: columnWidths[idx] - 3, align: 'left' });
         columnX += columnWidths[idx];
       });
 
-      yPosition += headerHeight + 1;
+      yPosition += headerHeight;
       doc.setTextColor(0, 0, 0);
       doc.setFont(undefined, 'normal');
-      doc.setFontSize(8.5);
+      doc.setFontSize(7.5);
 
-      // Add rows with better spacing
+      // Add rows
       let rowCount = 0;
       logs.forEach((log) => {
         const timestamp = formatTimestamp(log.createdAt);
-        const user = (log.username || log.userId || '-').substring(0, 16);
-        const role = (log.page || 'Unknown').substring(0, 14);
-        const action = formatAction(log.action).substring(0, 16);
-        const description = (log.description || '-').substring(0, 45);
-        const details = log.details ? 'View' : '-';
+        const user = (log.username || log.userId || '-').substring(0, 14);
+        const role = (log.page || 'Unknown').substring(0, 12);
+        const action = formatAction(log.action);
+        const description = (log.description || '-') + (log.details ? ` | Details: ${log.details}` : '');
 
-        // Check if we need a new page (more generous spacing)
-        if (yPosition + rowHeight + 2 > pageHeight - margin) {
+        // Check if we need a new page
+        if (yPosition + rowHeight > doc.internal.pageSize.getHeight() - margin) {
           doc.addPage();
-          yPosition = margin + 5;
+          yPosition = margin;
 
           // Repeat header on new page
-          doc.setFontSize(10);
+          doc.setFontSize(9);
           doc.setFillColor(60, 90, 140);
           doc.setTextColor(255, 255, 255);
           doc.setFont(undefined, 'bold');
@@ -387,63 +386,58 @@ class ActivityLogsComponent {
           columnX = margin;
           columns.forEach((col, idx) => {
             doc.rect(columnX, yPosition, columnWidths[idx], headerHeight, 'F');
-            doc.text(col, columnX + 1, yPosition + 4.5, { maxWidth: columnWidths[idx] - 2, align: 'left' });
+            doc.text(col, columnX + 1.5, yPosition + 5.5, { maxWidth: columnWidths[idx] - 3, align: 'left' });
             columnX += columnWidths[idx];
           });
 
-          yPosition += headerHeight + 1;
+          yPosition += headerHeight;
           doc.setTextColor(0, 0, 0);
           doc.setFont(undefined, 'normal');
-          doc.setFontSize(8.5);
+          doc.setFontSize(7.5);
         }
 
-        columnX = margin;
-
-        // Draw cell borders with alternating background
-        if (rowCount % 2 === 1) {
+        // Draw alternating row background
+        if (rowCount % 2 === 0) {
           doc.setFillColor(245, 247, 250);
-          for (let i = 0; i < columnWidths.length; i++) {
-            const cellX = columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + margin;
-            doc.rect(cellX, yPosition, columnWidths[i], rowHeight, 'F');
-          }
+          doc.rect(margin, yPosition, columnWidths.reduce((a, b) => a + b, 0), rowHeight, 'F');
         }
 
         // Draw borders
         doc.setDrawColor(200, 200, 200);
-        doc.setLineWidth(0.3);
+        doc.setLineWidth(0.2);
+        columnX = margin;
         for (let i = 0; i < columnWidths.length; i++) {
-          const cellX = columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + margin;
-          doc.rect(cellX, yPosition, columnWidths[i], rowHeight);
+          doc.rect(columnX, yPosition, columnWidths[i], rowHeight);
+          columnX += columnWidths[i];
         }
 
-        // Add text with proper positioning
-        doc.setTextColor(20, 20, 20);
-        const textY = yPosition + 2.5;
+        // Add text
+        doc.setTextColor(0, 0, 0);
+        columnX = margin;
 
         // Timestamp
-        doc.text(timestamp, columnX + 1, textY, { maxWidth: columnWidths[0] - 2, align: 'left' });
+        doc.text(timestamp, columnX + 1, yPosition + 3.5, { maxWidth: columnWidths[0] - 2, align: 'left' });
         columnX += columnWidths[0];
 
         // User
-        doc.text(user, columnX + 1, textY, { maxWidth: columnWidths[1] - 2, align: 'left' });
+        doc.text(user, columnX + 1, yPosition + 3.5, { maxWidth: columnWidths[1] - 2, align: 'left' });
         columnX += columnWidths[1];
 
         // Role
-        doc.text(role, columnX + 1, textY, { maxWidth: columnWidths[2] - 2, align: 'left' });
+        doc.text(role, columnX + 1, yPosition + 3.5, { maxWidth: columnWidths[2] - 2, align: 'left' });
         columnX += columnWidths[2];
 
         // Action
-        doc.text(action, columnX + 1, textY, { maxWidth: columnWidths[3] - 2, align: 'left' });
+        doc.text(action, columnX + 1, yPosition + 3.5, { maxWidth: columnWidths[3] - 2, align: 'left' });
         columnX += columnWidths[3];
 
-        // Description
-        doc.text(description, columnX + 1, textY, { maxWidth: columnWidths[4] - 2, align: 'left' });
-        columnX += columnWidths[4];
+        // Description (full width with details)
+        const splitDescription = doc.splitTextToSize(description, columnWidths[4] - 2);
+        doc.text(splitDescription, columnX + 1, yPosition + 3.5, { maxWidth: columnWidths[4] - 2, align: 'left' });
 
-        // Details
-        doc.text(details, columnX + 1, textY, { maxWidth: columnWidths[5] - 2, align: 'left' });
-
-        yPosition += rowHeight + 0.5;
+        yPosition += rowHeight;
+        rowCount++;
+      });        yPosition += rowHeight;
         rowCount++;
       });
 
