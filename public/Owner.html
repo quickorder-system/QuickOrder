@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/owner.css">
   <link rel="stylesheet" href="css/pages/owner.css">
   <link rel="stylesheet" href="css/category-management.css">
+  <link rel="stylesheet" href="css/admin.css">
   <link href="css/discount.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
@@ -538,55 +539,50 @@
       </div>
 
       <!-- Setup Default Discounts Section -->
-      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; color: white;">
-        <h3 style="margin-top: 0; color: white; font-size: 1.3rem;">
-          <i class="fas fa-wand-magic-sparkles"></i> Quick Setup
-        </h3>
-        <p style="margin: 0 0 1.5rem 0; opacity: 0.9;">Create default SC/PWD discounts for the year</p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-          <div>
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem;">SC Discount %</label>
-            <input type="number" id="scPercentage" value="20" min="0" max="100" style="width: 100%; padding: 10px; border: none; border-radius: 6px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid rgba(255, 255, 255, 0.3);">
-          </div>
-          <div>
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem;">PWD Discount %</label>
-            <input type="number" id="pwdPercentage" value="15" min="0" max="100" style="width: 100%; padding: 10px; border: none; border-radius: 6px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid rgba(255, 255, 255, 0.3);">
-          </div>
-          <div>
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem;">Year</label>
-            <input type="number" id="discountYear" value="2026" min="2025" style="width: 100%; padding: 10px; border: none; border-radius: 6px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid rgba(255, 255, 255, 0.3);">
+      <div class="eligibility-setup-section">
+        <div class="setup-card">
+          <h3>Quick Setup</h3>
+          <p>Create default SC/PWD discounts for the year</p>
+          <div class="setup-inputs">
+            <div class="form-group">
+              <label for="scPercentage">SC Discount %</label>
+              <input type="number" id="scPercentage" value="20" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label for="pwdPercentage">PWD Discount %</label>
+              <input type="number" id="pwdPercentage" value="15" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label for="discountYear">Year</label>
+              <input type="number" id="discountYear" value="2026" min="2025">
+            </div>
+            <button class="btn-primary" id="setupDiscountsBtn">
+              <i class="fas fa-magic"></i> Setup Default Discounts
+            </button>
           </div>
         </div>
-        <button class="btn-primary" id="setupDiscountsBtn" style="background: white; color: #667eea; font-weight: 600; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 1rem;">
-          <i class="fas fa-magic"></i> Setup Default Discounts
-        </button>
       </div>
 
       <!-- Verification Requests Section -->
-      <div style="margin-bottom: 2rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h3 style="margin: 0; font-size: 1.2rem;">
-            <i class="fas fa-list-check"></i> Verification Requests
-          </h3>
-          <div style="display: flex; gap: 1rem;">
-            <select id="verificationStatusFilter" style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer;">
+      <div class="eligibility-verification-section">
+        <div class="section-subheader">
+          <h3>Verification Requests</h3>
+          <div class="controls">
+            <select id="verificationStatusFilter" class="filter-select">
               <option value="">All Status</option>
               <option value="pending">Pending</option>
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
             </select>
-            <select id="verificationTypeFilter" style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer;">
+            <select id="verificationTypeFilter" class="filter-select">
               <option value="">All Types</option>
               <option value="SC">Senior Citizen</option>
               <option value="PWD">PWD</option>
             </select>
           </div>
         </div>
-        <div id="verificationRequestsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
-          <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #999;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-            <p>Loading verification requests...</p>
-          </div>
+        <div id="verificationRequestsList" class="verification-requests-list">
+          <p>Loading verification requests...</p>
         </div>
       </div>
 
@@ -620,7 +616,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-label">SC Discounts Given</div>
-              <div class="stat-value" id="totalSCDiscounts">₱0.00</div>
+              <div class="stat-value" id="totalSCDiscounts">₱0</div>
             </div>
           </div>
           <div class="stat-card">
@@ -629,7 +625,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-label">PWD Discounts Given</div>
-              <div class="stat-value" id="totalPWDDiscounts">₱0.00</div>
+              <div class="stat-value" id="totalPWDDiscounts">₱0</div>
             </div>
           </div>
         </div>
