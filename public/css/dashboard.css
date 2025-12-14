@@ -1184,3 +1184,132 @@ body.dark-mode .credits-content li {
         width: 100%;
     }
 }
+
+/* Eligibility Section Styles */
+.eligibility-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.eligibility-group {
+    border: 1px solid var(--border-gray);
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+}
+
+.eligibility-group:hover {
+    border-color: var(--primary-color);
+    background-color: #f9fff9;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+}
+
+.eligibility-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    user-select: none;
+}
+
+.eligibility-label input[type="checkbox"] {
+    margin-top: 5px;
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.eligibility-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 5px;
+}
+
+.eligibility-title i {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+.discount-badge {
+    background-color: var(--success-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-left: auto;
+}
+
+.eligibility-description {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-left: 30px;
+}
+
+.eligibility-details {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-gray);
+}
+
+.eligibility-details .form-group {
+    margin-bottom: 10px;
+}
+
+.section-help-text {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 15px;
+    font-style: italic;
+}
+
+.discount-preferences {
+    background-color: #e8f5e9;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.discount-preferences h4 {
+    margin-bottom: 10px;
+    color: var(--text-dark);
+}
+
+.discount-preferences .checkbox-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+}
+
+.discount-preferences .checkbox-group label input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+    .eligibility-section {
+        gap: 12px;
+    }
+
+    .eligibility-group {
+        padding: 12px;
+    }
+
+    .discount-badge {
+        font-size: 0.7rem;
+        padding: 1px 6px;
+    }
+
+    .eligibility-title {
+        font-size: 0.95rem;
+    }
+
+    .eligibility-description {
+        font-size: 0.85rem;
+    }
+}

@@ -148,9 +148,68 @@
                             <input type="text" id="emailVerified" placeholder="Verified" disabled>
                         </div>
 
-                        <div class="form-group">
+                    <div class="form-group">
                             <label for="memberSince">Member Since</label>
                             <input type="text" id="memberSince" placeholder="Date" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Eligibility for Automatic Discounts -->
+                <div class="form-section">
+                    <h3>Eligibility for Automatic Discounts</h3>
+                    <p class="section-help-text">Claim your eligibility to receive automatic discounts on your orders</p>
+                    
+                    <div class="eligibility-section">
+                        <!-- Senior Citizen -->
+                        <div class="eligibility-group">
+                            <label class="eligibility-label">
+                                <input type="checkbox" id="isSeniorCitizen" name="isSeniorCitizen">
+                                <span class="eligibility-title">
+                                    <i class="fas fa-user-tie"></i> Senior Citizen
+                                    <span class="discount-badge">20% OFF</span>
+                                </span>
+                                <span class="eligibility-description">60 years old and above</span>
+                            </label>
+                            <div class="eligibility-details" id="scDetails" style="display: none;">
+                                <div class="form-group">
+                                    <label for="scId">Senior Citizen ID (Optional)</label>
+                                    <input type="text" id="scId" name="scId" placeholder="Enter your SC ID number">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PWD -->
+                        <div class="eligibility-group">
+                            <label class="eligibility-label">
+                                <input type="checkbox" id="isPWD" name="isPWD">
+                                <span class="eligibility-title">
+                                    <i class="fas fa-wheelchair"></i> Person with Disability (PWD)
+                                    <span class="discount-badge">15% OFF</span>
+                                </span>
+                                <span class="eligibility-description">Registered PWD card holder</span>
+                            </label>
+                            <div class="eligibility-details" id="pwdDetails" style="display: none;">
+                                <div class="form-group">
+                                    <label for="pwdId">PWD ID (Optional)</label>
+                                    <input type="text" id="pwdId" name="pwdId" placeholder="Enter your PWD ID number">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Discount Preferences -->
+                    <div class="discount-preferences" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                        <h4>Discount Preferences</h4>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="useSCDiscount" name="useSCDiscount" checked>
+                                Use SC Discount automatically when available
+                            </label>
+                            <label>
+                                <input type="checkbox" id="usePWDDiscount" name="usePWDDiscount" checked>
+                                Use PWD Discount automatically when available
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -217,6 +276,15 @@
         const logoutBtn = document.getElementById('logoutBtn');
 
         let originalFormData = {};
+
+        // Eligibility checkbox event listeners
+        document.getElementById('isSeniorCitizen')?.addEventListener('change', (e) => {
+            document.getElementById('scDetails').style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('isPWD')?.addEventListener('change', (e) => {
+            document.getElementById('pwdDetails').style.display = e.target.checked ? 'block' : 'none';
+        });
 
         // Check authentication
         window.addEventListener('load', () => {
@@ -294,6 +362,24 @@
             document.getElementById('smsNotifications').checked = 
                 profile.preferences?.smsNotifications === true;
 
+            // Populate eligibility fields
+            const customerProfile = profile.customerProfile || {};
+            document.getElementById('isSeniorCitizen').checked = customerProfile.isSeniorCitizen || false;
+            document.getElementById('isPWD').checked = customerProfile.isPWD || false;
+            document.getElementById('scId').value = customerProfile.scId || '';
+            document.getElementById('pwdId').value = customerProfile.pwdId || '';
+
+            // Populate discount preferences
+            const discountPrefs = profile.discountPreferences || {};
+            document.getElementById('useSCDiscount').checked = discountPrefs.useSCDiscount !== false;
+            document.getElementById('usePWDDiscount').checked = discountPrefs.usePWDDiscount !== false;
+
+            // Toggle eligibility details visibility
+            document.getElementById('scDetails').style.display = 
+                document.getElementById('isSeniorCitizen').checked ? 'block' : 'none';
+            document.getElementById('pwdDetails').style.display = 
+                document.getElementById('isPWD').checked ? 'block' : 'none';
+
             document.getElementById('emailVerified').value = 
                 profile.emailVerified ? 'Verified' : 'Not Verified';
 
@@ -318,7 +404,13 @@
                 preferences: {
                     notifications: document.getElementById('emailNotifications').checked,
                     smsNotifications: document.getElementById('smsNotifications').checked
-                }
+                },
+                isSeniorCitizen: document.getElementById('isSeniorCitizen').checked,
+                isPWD: document.getElementById('isPWD').checked,
+                scId: document.getElementById('scId').value,
+                pwdId: document.getElementById('pwdId').value,
+                useSCDiscount: document.getElementById('useSCDiscount').checked,
+                usePWDDiscount: document.getElementById('usePWDDiscount').checked
             };
         }
 
@@ -338,7 +430,29 @@
             authUIUtils.disableButton(saveBtn, 'Saving...');
 
             try {
-                const response = await customerService.updateProfile(formData);
+                // Update basic profile
+                const profileResponse = await customerService.updateProfile({
+                    name: formData.name,
+                    address: formData.address,
+                    preferences: formData.preferences
+                });
+
+                // Update eligibility profile
+                if (formData.isSeniorCitizen || formData.isPWD) {
+                    await customerService.updateEligibility({
+                        isSeniorCitizen: formData.isSeniorCitizen,
+                        isPWD: formData.isPWD,
+                        scId: formData.scId,
+                        pwdId: formData.pwdId
+                    });
+                }
+
+                // Update discount preferences
+                await customerService.updateDiscountPreferences({
+                    useSCDiscount: formData.useSCDiscount,
+                    usePWDDiscount: formData.usePWDDiscount
+                });
+
                 authUIUtils.showSuccess('Profile updated successfully!', alertMessage);
                 originalFormData = getFormData();
 

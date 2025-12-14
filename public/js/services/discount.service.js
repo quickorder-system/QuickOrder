@@ -196,6 +196,96 @@ const discountService = {
     isValidCodeFormat(code) {
         // Code must be 3-20 alphanumeric characters
         return /^[A-Z0-9]{3,20}$/.test(code.toUpperCase());
+    },
+
+    /**
+     * Get eligible automatic discounts (SC/PWD)
+     * @returns {Promise} List of eligible discounts
+     */
+    async getEligibleDiscounts() {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch('/api/discounts/eligible-discounts', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to fetch eligible discounts');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    /**
+     * Apply automatic discount (SC/PWD)
+     * @param {string} discountType - 'SC' or 'PWD'
+     * @param {number} orderAmount - Current order total
+     * @returns {Promise} Discount details
+     */
+    async applyAutomaticDiscount(discountType, orderAmount) {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch('/api/discounts/apply-automatic', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({
+                    discountType,
+                    orderAmount
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || error.message || 'Failed to apply discount');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    /**
+     * Toggle automatic discount preference
+     * @param {string} discountType - 'SC' or 'PWD'
+     * @param {boolean} enabled - Enable or disable
+     * @returns {Promise} Updated preferences
+     */
+    async toggleAutomaticDiscount(discountType, enabled) {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch('/api/discounts/toggle-automatic', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({
+                    discountType,
+                    enabled
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || error.message || 'Failed to toggle discount');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
     }
 };
 

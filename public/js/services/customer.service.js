@@ -305,5 +305,96 @@ const customerService = {
         } catch (error) {
             throw error;
         }
+    },
+
+    /**
+     * Update customer eligibility profile (SC/PWD)
+     */
+    updateEligibility: async (eligibilityData) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('Not authenticated');
+            }
+
+            const response = await fetch('/api/customers/profile/eligibility', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify(eligibilityData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to update eligibility');
+            }
+
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    /**
+     * Update discount preferences
+     */
+    updateDiscountPreferences: async (preferences) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('Not authenticated');
+            }
+
+            const response = await fetch('/api/customers/discount-preferences', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify(preferences)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to update preferences');
+            }
+
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    /**
+     * Get eligible automatic discounts
+     */
+    getEligibleDiscounts: async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('Not authenticated');
+            }
+
+            const response = await fetch('/api/discounts/eligible-discounts', {
+                method: 'GET',
+                headers: {
+                    'x-auth-token': token
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to fetch eligible discounts');
+            }
+
+            return data;
+        } catch (error) {
+            throw error;
+        }
     }
 };
