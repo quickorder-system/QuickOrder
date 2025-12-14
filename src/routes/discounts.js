@@ -497,8 +497,6 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
                     verificationStatus: user.customerProfile?.pwdVerified ? 'approved' : 'pending'
                 });
             }
-                });
-            }
         }
 
         logger.info(`Retrieved eligible discounts for user: ${req.user.id}`);
