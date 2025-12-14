@@ -46,6 +46,8 @@ const activityLogSchema = new mongoose.Schema({
   },
   description: String,
   details: mongoose.Schema.Types.Mixed,
+  beforeData: mongoose.Schema.Types.Mixed,
+  afterData: mongoose.Schema.Types.Mixed,
   ipAddress: String,
   createdAt: {
     type: Date,

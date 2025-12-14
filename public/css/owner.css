@@ -1979,6 +1979,11 @@ canvas {
   margin-bottom: 24px;
   border-bottom: 2px solid #f0f0f0;
   padding-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .activity-logs-header h3 {
@@ -1988,6 +1993,39 @@ canvas {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.activity-logs-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-export {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.btn-export {
+  background: #28a745;
+  color: white;
+}
+
+.btn-export:hover {
+  background: #218838;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-export:active {
+  transform: scale(0.98);
 }
 
 .activity-logs-filters {
@@ -2104,6 +2142,34 @@ canvas {
   color: #2d3436;
 }
 
+.log-role {
+  font-weight: 500;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.role-badge.admin {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.role-badge.owner {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.role-badge.unknown {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
 .action-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -2119,6 +2185,32 @@ canvas {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.log-before,
+.log-after {
+  max-width: 250px;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.log-before details,
+.log-after details {
+  cursor: pointer;
+}
+
+.log-before summary,
+.log-after summary {
+  color: #667eea;
+  font-weight: 600;
+  padding: 4px 8px;
+  user-select: none;
+}
+
+.log-before summary:hover,
+.log-after summary:hover {
+  background: #f0f0f0;
+  border-radius: 4px;
 }
 
 .log-details details {
