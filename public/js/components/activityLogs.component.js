@@ -437,8 +437,6 @@ class ActivityLogsComponent {
 
         yPosition += rowHeight;
         rowCount++;
-      });        yPosition += rowHeight;
-        rowCount++;
       });
 
       // Save the PDF
