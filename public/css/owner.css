@@ -2283,3 +2283,54 @@ canvas {
   min-width: 100px;
   text-align: center;
 }
+/* Most Ordered Items Table */
+.items-table-container {
+  overflow-x: auto;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.items-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.items-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+.items-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.items-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.items-table td {
+  padding: 1rem;
+  color: #334155;
+  font-weight: 500;
+}
+
+.items-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+#mostOrderedItemsBody td {
+  padding: 1.25rem 1rem;
+}
+
+.items-table tbody tr:nth-child(odd) {
+  background-color: rgba(102, 126, 234, 0.02);
+}

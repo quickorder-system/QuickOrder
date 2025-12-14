@@ -392,8 +392,24 @@ function exportReportToExcel() {
       });
     }
     
+    // Add Most Ordered Items section
+    const mostOrderedBody = document.getElementById('mostOrderedItemsBody');
+    if (mostOrderedBody && mostOrderedBody.rows.length > 0 && mostOrderedBody.rows[0].cells.length > 1) {
+      csvContent += '\n\nMost Ordered Items\n';
+      csvContent += 'Rank,Item Name,Total Orders\n';
+      Array.from(mostOrderedBody.rows).forEach(row => {
+        const rank = row.cells[0]?.textContent.trim() || '';
+        const itemName = row.cells[1]?.textContent.trim() || '';
+        const orderCount = row.cells[2]?.textContent.trim() || '';
+        
+        // Skip header/empty rows
+        if (rank && itemName !== 'No data available') {
+          csvContent += `${rank},"${itemName}",${orderCount}\n`;
+        }
+      });
+    }
+    
     // Create downloadable link
-    const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
     
@@ -664,6 +680,42 @@ function renderPaymentChart(data) {
 }
 
 /**
+ * Fetch most ordered items from API
+ */
+async function fetchAndRenderMostOrderedItems() {
+  try {
+    const response = await fetch('/api/reports/popular-items');
+    if (!response.ok) throw new Error('Failed to fetch popular items');
+    
+    const data = await response.json();
+    renderMostOrderedItems(data.items || []);
+  } catch (error) {
+    console.error('Error fetching most ordered items:', error);
+  }
+}
+
+/**
+ * Render most ordered items in the table
+ */
+function renderMostOrderedItems(items) {
+  const tableBody = document.getElementById('mostOrderedItemsBody');
+  if (!tableBody) return;
+  
+  if (!items || items.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">No items data available</td></tr>';
+    return;
+  }
+  
+  tableBody.innerHTML = items.map((item, index) => `
+    <tr>
+      <td>${index + 1}</td>
+      <td>${item.itemName || 'Unknown Item'}</td>
+      <td><strong>${item.orderCount}</strong></td>
+    </tr>
+  `).join('');
+}
+
+/**
  * Fetch sales data from backend and render chart + metrics
  */
 async function fetchAndRenderSalesReport() {
@@ -706,6 +758,9 @@ async function fetchAndRenderSalesReport() {
 
     // Fetch and render payment breakdown
     fetchAndRenderPaymentBreakdown();
+    
+    // Fetch and render most ordered items
+    fetchAndRenderMostOrderedItems();
 
   } catch (error) {
     console.error('Error fetching sales report:', error);

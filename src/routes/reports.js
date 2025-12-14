@@ -1219,6 +1219,82 @@ router.get('/export-pdf', async (req, res) => {
             });
         }
 
+        // Most Ordered Items Section
+        doc.addPage();
+        doc.fontSize(14).font('Helvetica-Bold').text('Most Ordered Items (All Time)', { align: 'center' });
+        doc.moveDown(0.5);
+
+        try {
+            // Fetch popular items
+            const popularItems = await Order.aggregate([
+                {
+                    $match: {
+                        status: 'complete'
+                    }
+                },
+                {
+                    $unwind: '$items'
+                },
+                {
+                    $group: {
+                        _id: '$items.itemId',
+                        itemId: { $first: '$items.itemId' },
+                        itemName: { $first: '$items.name' },
+                        orderCount: { $sum: '$items.quantity' }
+                    }
+                },
+                {
+                    $sort: { orderCount: -1 }
+                },
+                {
+                    $limit: 15
+                }
+            ]);
+
+            if (popularItems && popularItems.length > 0) {
+                const itemsTableTop = doc.y;
+                const itemCol1 = 80;
+                const itemCol2 = 250;
+                const itemCol3 = 480;
+
+                doc.fontSize(10).font('Helvetica-Bold');
+                doc.text('Rank', itemCol1 - 50, itemsTableTop);
+                doc.text('Item Name', itemCol2 - 120, itemsTableTop);
+                doc.text('Total Orders', itemCol3 - 100, itemsTableTop);
+
+                doc.moveTo(50, itemsTableTop + 15).lineTo(550, itemsTableTop + 15).stroke();
+
+                let itemsY = itemsTableTop + 25;
+                doc.fontSize(9).font('Helvetica');
+
+                popularItems.forEach((item, index) => {
+                    if (itemsY > doc.page.height - 100) {
+                        doc.addPage();
+                        itemsY = 50;
+
+                        // Repeat header
+                        doc.fontSize(10).font('Helvetica-Bold');
+                        doc.text('Rank', itemCol1 - 50, itemsY);
+                        doc.text('Item Name', itemCol2 - 120, itemsY);
+                        doc.text('Total Orders', itemCol3 - 100, itemsY);
+                        doc.moveTo(50, itemsY + 15).lineTo(550, itemsY + 15).stroke();
+                        itemsY += 25;
+                        doc.fontSize(9).font('Helvetica');
+                    }
+
+                    doc.text((index + 1).toString(), itemCol1 - 50, itemsY);
+                    doc.text(item.itemName || 'Unknown', itemCol2 - 120, itemsY, { width: 200 });
+                    doc.text(item.orderCount.toString(), itemCol3 - 100, itemsY);
+                    itemsY += 20;
+                });
+            } else {
+                doc.fontSize(10).font('Helvetica').text('No item data available', { align: 'center' });
+            }
+        } catch (itemError) {
+            logger.error('Error fetching popular items for PDF:', itemError);
+            doc.fontSize(10).font('Helvetica').text('Error loading most ordered items', { align: 'center' });
+        }
+
         // Old Daily Breakdown Table (removed - keeping payment method version above)
         
 
