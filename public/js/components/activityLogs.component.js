@@ -289,37 +289,107 @@ class ActivityLogsComponent {
         return;
       }
 
-      // Create PDF content using a simple approach
-      let pdfContent = `Activity Log Report\nGenerated on: ${new Date().toLocaleString()}\n\n`;
-      pdfContent += `Total Records: ${logs.length}\n`;
-      pdfContent += `Applied Filters - Action: ${this.filters.action || 'All'}, Date Range: ${this.filters.startDate || 'N/A'} to ${this.filters.endDate || 'N/A'}\n\n`;
-      pdfContent += '='.repeat(120) + '\n\n';
+      // Check if jsPDF is available
+      if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
+        alert('jsPDF library not loaded. Please ensure the library is properly included.');
+        return;
+      }
 
-      logs.forEach((log, index) => {
-        pdfContent += `[${index + 1}] ${formatTimestamp(log.createdAt)}\n`;
-        pdfContent += `User: ${log.username || log.userId}\n`;
-        pdfContent += `Role: ${log.page || 'Unknown'}\n`;
-        pdfContent += `Action: ${formatAction(log.action)}\n`;
-        pdfContent += `Description: ${log.description || '-'}\n`;
-        if (log.beforeData) pdfContent += `Before: ${JSON.stringify(log.beforeData)}\n`;
-        if (log.afterData) pdfContent += `After: ${JSON.stringify(log.afterData)}\n`;
-        if (log.details) pdfContent += `Details: ${JSON.stringify(log.details)}\n`;
-        pdfContent += '-'.repeat(120) + '\n\n';
+      const { jsPDF } = jspdf;
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
       });
 
-      // For proper PDF generation, you might want to use a library like jsPDF
-      // For now, we'll create a text file as alternative
-      const blob = new Blob([pdfContent], { type: 'application/pdf' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `activity_logs_${new Date().toISOString().split('T')[0]}.txt`);
-      link.click();
-      
-      alert('PDF exported as text file. For better PDF formatting, integrate jsPDF library.');
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 10;
+      let yPosition = margin;
+
+      // Add header
+      doc.setFontSize(16);
+      doc.text('Activity Log Report', margin, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, margin, yPosition);
+      yPosition += 5;
+      doc.text(`Total Records: ${logs.length}`, margin, yPosition);
+      yPosition += 5;
+      doc.text(`Applied Filters - Action: ${this.filters.action || 'All'}, Date Range: ${this.filters.startDate || 'N/A'} to ${this.filters.endDate || 'N/A'}`, margin, yPosition);
+      yPosition += 10;
+
+      // Add table header
+      const columns = ['Timestamp', 'User', 'Role', 'Action', 'Description'];
+      const columnWidths = {
+        timestamp: 30,
+        user: 25,
+        role: 15,
+        action: 30,
+        description: 50
+      };
+
+      doc.setFontSize(9);
+      doc.setFillColor(100, 120, 150);
+      doc.setTextColor(255, 255, 255);
+
+      let columnX = margin;
+      columns.forEach((col, idx) => {
+        const widths = [30, 25, 15, 30, 50];
+        doc.rect(columnX, yPosition - 4, widths[idx], 6, 'F');
+        doc.text(col, columnX + 2, yPosition);
+        columnX += widths[idx];
+      });
+
+      yPosition += 8;
+      doc.setTextColor(0, 0, 0);
+
+      // Add rows
+      logs.forEach((log) => {
+        const timestamp = formatTimestamp(log.createdAt);
+        const user = log.username || log.userId || '-';
+        const role = log.page || 'Unknown';
+        const action = formatAction(log.action);
+        const description = log.description || '-';
+
+        // Check if we need a new page
+        if (yPosition > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+        }
+
+        doc.setFontSize(8);
+        columnX = margin;
+
+        // Timestamp
+        doc.text(timestamp, columnX + 1, yPosition);
+        columnX += 30;
+
+        // User
+        doc.text(user.substring(0, 15), columnX + 1, yPosition);
+        columnX += 25;
+
+        // Role
+        doc.text(role, columnX + 1, yPosition);
+        columnX += 15;
+
+        // Action
+        doc.text(action.substring(0, 20), columnX + 1, yPosition);
+        columnX += 30;
+
+        // Description
+        const descLines = doc.splitTextToSize(description.substring(0, 40), 48);
+        doc.text(descLines[0] || '-', columnX + 1, yPosition);
+
+        yPosition += (descLines.length > 1 ? descLines.length * 3 : 5);
+      });
+
+      // Save the PDF
+      doc.save(`activity_logs_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
       console.error('Error exporting to PDF:', error);
-      alert('Failed to export logs to PDF');
+      alert('Failed to export logs to PDF: ' + error.message);
     }
   }
 }
