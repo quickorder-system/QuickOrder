@@ -1,0 +1,545 @@
+{
+  "info": {
+    "_postman_id": "phase7-e2e-testing",
+    "name": "QuickOrder - Phase 7 E2E Testing (SC/PWD)",
+    "description": "Comprehensive API testing for SC/PWD automatic discount system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login - Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Owner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"owner@test.com\",\n  \"password\": \"Owner123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Customer (SC)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer.sc@test.com\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Customer (PWD)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer.pwd@test.com\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Customer (Both)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer.both@test.com\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Customer (Normal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer.normal@test.com\",\n  \"password\": \"Pass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Eligibility Endpoints",
+      "item": [
+        {
+          "name": "GET - Eligible Discounts (SC Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sc_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/discounts/eligible-discounts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "eligible-discounts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Eligible Discounts (PWD Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{pwd_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/discounts/eligible-discounts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "eligible-discounts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Eligible Discounts (Normal Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{normal_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/discounts/eligible-discounts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "eligible-discounts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Apply Automatic Discount (SC)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sc_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"discountType\": \"SC\",\n  \"orderAmount\": 500\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discounts/apply-automatic",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "apply-automatic"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Apply Automatic Discount (PWD)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{pwd_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"discountType\": \"PWD\",\n  \"orderAmount\": 600\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discounts/apply-automatic",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "apply-automatic"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT - Toggle Automatic Discount",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sc_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"discountType\": \"SC\",\n  \"enabled\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discounts/toggle-automatic",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "toggle-automatic"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customer Profile",
+      "item": [
+        {
+          "name": "PUT - Update Eligibility (SC)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sc_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isSeniorCitizen\": true,\n  \"scId\": \"SC-2025-001\",\n  \"isPWD\": false,\n  \"pwdId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/profile/eligibility",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "profile", "eligibility"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT - Update Eligibility (Both)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{both_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isSeniorCitizen\": true,\n  \"scId\": \"SC-2025-002\",\n  \"isPWD\": true,\n  \"pwdId\": \"PWD-2025-002\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/customers/profile/eligibility",
+              "host": ["{{base_url}}"],
+              "path": ["api", "customers", "profile", "eligibility"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Setup & Management",
+      "item": [
+        {
+          "name": "POST - Setup Default Discounts (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scPercentage\": 25,\n  \"pwdPercentage\": 18,\n  \"year\": 2026\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discounts/setup-eligibility-discounts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "setup-eligibility-discounts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Eligibility Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/discounts/eligibility-stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "eligibility-stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Owner Setup & Management",
+      "item": [
+        {
+          "name": "POST - Setup Default Discounts (Owner)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scPercentage\": 22,\n  \"pwdPercentage\": 17,\n  \"year\": 2026\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discounts/setup-eligibility-discounts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "setup-eligibility-discounts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Eligibility Statistics (Owner)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{owner_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/discounts/eligibility-stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "eligibility-stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative Test Cases",
+      "item": [
+        {
+          "name": "GET - Eligible (Unauthenticated) - 401",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/discounts/eligible-discounts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "eligible-discounts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Apply Non-Eligible Discount - 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{normal_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"discountType\": \"SC\",\n  \"orderAmount\": 500\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discounts/apply-automatic",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "apply-automatic"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Setup as Customer - 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sc_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scPercentage\": 25,\n  \"pwdPercentage\": 18,\n  \"year\": 2026\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discounts/setup-eligibility-discounts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discounts", "setup-eligibility-discounts"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "owner_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sc_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pwd_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "both_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "normal_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
