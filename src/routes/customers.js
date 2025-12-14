@@ -454,6 +454,19 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
         user.customerProfile.isSeniorCitizen = scBool;
         user.customerProfile.isPWD = pwdBool;
 
+        // Always reset verification status when claiming
+        if (scBool) {
+            user.customerProfile.scVerified = false;
+        } else {
+            user.customerProfile.scVerified = false;
+        }
+
+        if (pwdBool) {
+            user.customerProfile.pwdVerified = false;
+        } else {
+            user.customerProfile.pwdVerified = false;
+        }
+
         // Update SC eligibility
         if (scBool) {
             if (!scId) {
@@ -465,6 +478,9 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             user.customerProfile.scId = scId;
             user.customerProfile.scDocument = `/uploads/eligibility/${req.files.scDocument[0].filename}`;
             user.customerProfile.scVerified = false; // Reset verification status
+            // Clear PWD
+            user.customerProfile.pwdId = null;
+            user.customerProfile.pwdDocument = null;
         } else {
             user.customerProfile.scId = null;
             user.customerProfile.scDocument = null;
@@ -482,6 +498,9 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             user.customerProfile.pwdId = pwdId;
             user.customerProfile.pwdDocument = `/uploads/eligibility/${req.files.pwdDocument[0].filename}`;
             user.customerProfile.pwdVerified = false; // Reset verification status
+            // Clear SC
+            user.customerProfile.scId = null;
+            user.customerProfile.scDocument = null;
         } else {
             user.customerProfile.pwdId = null;
             user.customerProfile.pwdDocument = null;
@@ -624,33 +643,35 @@ router.get('/pending-verifications', [auth, authorize(['admin', 'owner'])], asyn
                     'customerProfile.pwdVerified': false
                 }
             ]
-        }).select('_id name email customerProfile').lean();
+        }).select('_id name email customerProfile').exec();
 
         // Format the response
         const formattedRequests = [];
         
         pendingVerifications.forEach(user => {
-            if (user.customerProfile.isSeniorCitizen && !user.customerProfile.scVerified) {
-                formattedRequests.push({
-                    id: user._id.toString(),
-                    userName: user.name,
-                    userEmail: user.email,
-                    type: 'Senior Citizen',
-                    idNumber: user.customerProfile.scId || 'N/A',
-                    status: 'pending',
-                    customerId: user._id.toString()
-                });
-            }
-            if (user.customerProfile.isPWD && !user.customerProfile.pwdVerified) {
-                formattedRequests.push({
-                    id: user._id.toString(),
-                    userName: user.name,
-                    userEmail: user.email,
-                    type: 'PWD',
-                    idNumber: user.customerProfile.pwdId || 'N/A',
-                    status: 'pending',
-                    customerId: user._id.toString()
-                });
+            if (user && user.customerProfile) {
+                if (user.customerProfile.isSeniorCitizen && !user.customerProfile.scVerified) {
+                    formattedRequests.push({
+                        id: user._id.toString(),
+                        userName: user.name || 'Unknown',
+                        userEmail: user.email || 'undefined',
+                        type: 'Senior Citizen',
+                        idNumber: user.customerProfile.scId || 'N/A',
+                        status: 'pending',
+                        customerId: user._id.toString()
+                    });
+                }
+                if (user.customerProfile.isPWD && !user.customerProfile.pwdVerified) {
+                    formattedRequests.push({
+                        id: user._id.toString(),
+                        userName: user.name || 'Unknown',
+                        userEmail: user.email || 'undefined',
+                        type: 'PWD',
+                        idNumber: user.customerProfile.pwdId || 'N/A',
+                        status: 'pending',
+                        customerId: user._id.toString()
+                    });
+                }
             }
         });
 
