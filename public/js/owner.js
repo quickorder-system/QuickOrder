@@ -765,7 +765,7 @@ async function fetchAndRenderDiscountReport() {
   try {
     const startDate = document.getElementById('reportStartDate')?.value;
     const endDate = document.getElementById('reportEndDate')?.value;
-    const filterType = document.getElementById('discountFilterType')?.value || 'all';
+    const filterType = document.getElementById('discountTypeFilter')?.value || 'all';
 
     if (!startDate || !endDate) {
       return;
@@ -800,7 +800,7 @@ function processDiscountData(orders, filterType) {
   let manualAmount = 0;
   let scAmount = 0;
   let pwdAmount = 0;
-  const discounts = [];
+  const allDiscounts = [];
 
   orders.forEach(order => {
     if (order.discount && order.discount.discountAmount > 0) {
@@ -815,40 +815,45 @@ function processDiscountData(orders, filterType) {
         type = 'PWD';
       }
 
-      // Only include if matches filter
-      if (filterType === 'all' || filterType === type) {
-        totalAmount += amount;
-        
-        if (type === 'manual') {
-          manualAmount += amount;
-        } else if (type === 'SC') {
-          scAmount += amount;
-        } else if (type === 'PWD') {
-          pwdAmount += amount;
-        }
-
-        discounts.push({
-          orderId: order.orderId || order._id || 'N/A',
-          customerName: order.customerName || order.userId || 'Unknown',
-          type: type,
-          code: code,
-          amount: amount,
-          total: order.total || 0,
-          date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'
-        });
+      // Always add to total
+      totalAmount += amount;
+      
+      if (type === 'manual') {
+        manualAmount += amount;
+      } else if (type === 'SC') {
+        scAmount += amount;
+      } else if (type === 'PWD') {
+        pwdAmount += amount;
       }
+
+      allDiscounts.push({
+        orderId: order.orderId || order._id || 'N/A',
+        customerName: order.customerName || order.userId || 'Unknown',
+        type: type,
+        code: code,
+        amount: amount,
+        total: order.total || 0,
+        date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'
+      });
     }
   });
 
+  // Filter discounts based on filterType
+  let filteredDiscounts = allDiscounts;
+  if (filterType && filterType !== '') {
+    filteredDiscounts = allDiscounts.filter(d => d.type === filterType);
+  }
+
   // Sort by date descending
-  discounts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  filteredDiscounts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return {
     totalAmount,
     manualAmount,
     scAmount,
     pwdAmount,
-    discounts
+    discounts: filteredDiscounts,
+    allDiscounts: allDiscounts
   };
 }
 
@@ -856,34 +861,46 @@ function processDiscountData(orders, filterType) {
  * Render discount metric cards
  */
 function renderDiscountMetrics(data) {
-  const container = document.getElementById('discountMetricsContainer');
-  if (!container) return;
-
-  // Update Total Discounts card
-  const totalCard = container.querySelector('.discount-metric-card.total .discount-metric-info .amount');
-  if (totalCard) {
-    totalCard.textContent = `₱${data.totalAmount.toFixed(2)}`;
+  // Update Total Discounts Given
+  const totalElement = document.getElementById('totalDiscountsGiven');
+  if (totalElement) {
+    totalElement.textContent = `₱${data.totalAmount.toFixed(2)}`;
   }
 
-  // Update Manual Codes card
-  const manualCard = container.querySelector('.discount-metric-card.manual .discount-metric-info .amount');
-  if (manualCard) {
-    manualCard.textContent = `₱${data.manualAmount.toFixed(2)}`;
+  // Update Manual Code Discounts
+  const manualElement = document.getElementById('manualCodeDiscounts');
+  if (manualElement) {
+    manualElement.textContent = `₱${data.manualAmount.toFixed(2)}`;
+  }
+  const manualCountElement = document.getElementById('manualCodeCount');
+  if (manualCountElement) {
+    const count = data.discounts.filter(d => d.type === 'manual').length;
+    manualCountElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
   }
 
-  // Update SC Discounts card
-  const scCard = container.querySelector('.discount-metric-card.sc .discount-metric-info .amount');
-  if (scCard) {
-    scCard.textContent = `₱${data.scAmount.toFixed(2)}`;
+  // Update SC Eligibility Discounts
+  const scElement = document.getElementById('scEligibilityDiscounts');
+  if (scElement) {
+    scElement.textContent = `₱${data.scAmount.toFixed(2)}`;
+  }
+  const scCountElement = document.getElementById('scEligibilityCount');
+  if (scCountElement) {
+    const count = data.discounts.filter(d => d.type === 'SC').length;
+    scCountElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
   }
 
-  // Update PWD Discounts card
-  const pwdCard = container.querySelector('.discount-metric-card.pwd .discount-metric-info .amount');
-  if (pwdCard) {
-    pwdCard.textContent = `₱${data.pwdAmount.toFixed(2)}`;
+  // Update PWD Eligibility Discounts
+  const pwdElement = document.getElementById('pwdEligibilityDiscounts');
+  if (pwdElement) {
+    pwdElement.textContent = `₱${data.pwdAmount.toFixed(2)}`;
+  }
+  const pwdCountElement = document.getElementById('pwdEligibilityCount');
+  if (pwdCountElement) {
+    const count = data.discounts.filter(d => d.type === 'PWD').length;
+    pwdCountElement.textContent = `${count} order${count !== 1 ? 's' : ''}`;
   }
 
-  console.log('[Discount Report] Metrics updated');
+  console.log('[Discount Report] Metrics updated:', data);
 }
 
 /**
@@ -939,9 +956,8 @@ function renderDiscountEmpty() {
  * Handle discount filter change
  */
 function onDiscountFilterChange() {
-  const filterType = document.getElementById('discountFilterType')?.value || 'all';
   fetchAndRenderDiscountReport();
-  console.log('[Discount Report] Filter changed to:', filterType);
+  console.log('[Discount Report] Filter changed');
 }
 
 /**
