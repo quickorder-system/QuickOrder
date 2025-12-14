@@ -165,10 +165,10 @@ class EligibilityManager {
 
                 ${request.status === 'pending' ? `
                     <div class="verification-actions">
-                        <button class="btn-approve" onclick="adminEligibilityManager.approveVerification('${request.id}', '${request.type}')">
+                        <button class="btn-approve" onclick="window.eligibilityManager.approveVerification('${request.id}', '${request.type}')">
                             <i class="fas fa-check"></i> Approve
                         </button>
-                        <button class="btn-reject" onclick="adminEligibilityManager.rejectVerification('${request.id}', '${request.type}')">
+                        <button class="btn-reject" onclick="window.eligibilityManager.rejectVerification('${request.id}', '${request.type}')">
                             <i class="fas fa-times"></i> Reject
                         </button>
                     </div>
@@ -273,13 +273,3 @@ class EligibilityManager {
         }
     }
 }
-
-// Initialize manager when page is ready
-let adminEligibilityManager;
-document.addEventListener('DOMContentLoaded', () => {
-    const eligibilityTab = document.getElementById('eligibilityTab');
-    if (eligibilityTab) {
-        adminEligibilityManager = new AdminEligibilityManager();
-        adminEligibilityManager.init();
-    }
-});

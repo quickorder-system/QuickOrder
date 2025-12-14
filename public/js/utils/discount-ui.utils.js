@@ -112,7 +112,7 @@ const discountUIUtils = {
         setTimeout(() => {
             messageEl.style.display = 'none';
         }, 5000);
-    }
+    },
 
     /**
      * Create discount admin panel HTML
