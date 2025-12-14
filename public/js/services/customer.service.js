@@ -351,7 +351,7 @@ const customerService = {
             const response = await fetch('/api/customers/profile/eligibility', {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'x-auth-token': token
                 },
                 body: formData
             });

@@ -479,8 +479,11 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             user.customerProfile.scDocument = `/uploads/eligibility/${req.files.scDocument[0].filename}`;
             user.customerProfile.scVerified = false; // Reset verification status
             // Clear PWD
+            user.customerProfile.isSeniorCitizen = true;
+            user.customerProfile.isPWD = false;
             user.customerProfile.pwdId = null;
             user.customerProfile.pwdDocument = null;
+            user.customerProfile.pwdVerified = false;
         } else {
             user.customerProfile.scId = null;
             user.customerProfile.scDocument = null;
@@ -499,8 +502,11 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             user.customerProfile.pwdDocument = `/uploads/eligibility/${req.files.pwdDocument[0].filename}`;
             user.customerProfile.pwdVerified = false; // Reset verification status
             // Clear SC
+            user.customerProfile.isSeniorCitizen = false;
+            user.customerProfile.isPWD = true;
             user.customerProfile.scId = null;
             user.customerProfile.scDocument = null;
+            user.customerProfile.scVerified = false;
         } else {
             user.customerProfile.pwdId = null;
             user.customerProfile.pwdDocument = null;
@@ -511,9 +517,9 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
         await user.save();
 
         logger.info(`Updated eligibility profile for customer: ${user.email}, SC: ${user.customerProfile.isSeniorCitizen}, PWD: ${user.customerProfile.isPWD}`);
-        logger.info(`Updated eligibility profile for customer: ${user.email}, SC: ${user.customerProfile.isSeniorCitizen}, PWD: ${user.customerProfile.isPWD}`);
 
-        res.json({
+        return res.json({
+            success: true,
             message: 'Eligibility profile updated successfully',
             customerProfile: user.customerProfile,
             discountPreferences: user.discountPreferences

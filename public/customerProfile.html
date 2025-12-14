@@ -523,7 +523,8 @@
                         eligibilityFormData.append('pwdDocument', formData.pwdDocument);
                     }
                     
-                    await customerService.updateEligibilityWithFile(eligibilityFormData);
+                    const eligibilityResponse = await customerService.updateEligibilityWithFile(eligibilityFormData);
+                    console.log('Eligibility update response:', eligibilityResponse);
                 }
 
                 // Update discount preferences
@@ -539,11 +540,15 @@
                 const fullAddress = `${formData.address.street}, ${formData.address.city}, ${formData.address.postalCode}`;
                 localStorage.setItem('userAddress', fullAddress);
 
+                // Reset button immediately after success
+                authUIUtils.enableButton(saveBtn);
+
                 // Reload profile
                 setTimeout(() => {
                     loadProfile();
                 }, 1500);
             } catch (error) {
+                console.error('Profile update error:', error);
                 authUIUtils.showError(error.message, alertMessage);
                 authUIUtils.enableButton(saveBtn);
             }
