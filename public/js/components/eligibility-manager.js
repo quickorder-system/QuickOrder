@@ -132,7 +132,7 @@ class EligibilityManager {
                 container.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #999;">
                         <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                        <p>No pending verification requests at the moment</p>
+                        <p>No verification requests found</p>
                         <p style="font-size: 0.9rem;">Customers will appear here when they submit SC/PWD eligibility claims</p>
                     </div>
                 `;
@@ -142,7 +142,7 @@ class EligibilityManager {
             // Filter based on selected filters
             let filtered = requests;
             if (this.verificationFilter.type) {
-                filtered = filtered.filter(r => r.type === this.verificationFilter.type);
+                filtered = filtered.filter(r => r.typeShort === this.verificationFilter.type);
             }
             if (this.verificationFilter.status) {
                 filtered = filtered.filter(r => r.status === this.verificationFilter.status);
@@ -170,18 +170,48 @@ class EligibilityManager {
      * Create verification card HTML
      */
     createVerificationCard(request) {
-        const typeClass = request.type === 'SC' ? 'sc' : 'pwd';
-        const typeLabel = request.type === 'SC' ? 'Senior Citizen' : 'PWD';
+        const typeClass = request.typeShort === 'SC' ? 'sc' : 'pwd';
+        const typeLabel = request.typeShort === 'SC' ? 'Senior Citizen' : 'PWD';
         const statusClass = request.status || 'pending';
+        
+        // Determine status icon
+        const statusIcon = {
+            'pending': '⏳',
+            'approved': '✅',
+            'rejected': '❌'
+        }[request.status] || '❓';
+
+        // Build document preview if available
+        const documentHtml = request.document ? `
+            <div class="verification-document-preview">
+                <label>Uploaded Document:</label>
+                <div class="document-preview-container">
+                    <img src="${request.document}" alt="ID Document" class="document-image" onerror="this.src='/image/placeholder.png'">
+                </div>
+                <a href="${request.document}" target="_blank" class="document-link">
+                    <i class="fas fa-download"></i> Download Document
+                </a>
+            </div>
+        ` : `
+            <div class="verification-document-preview">
+                <label>Document:</label>
+                <p class="no-document">No document uploaded</p>
+            </div>
+        `;
 
         return `
-            <div class="verification-card" data-request-id="${request.id}">
+            <div class="verification-card ${statusClass}" data-request-id="${request.id}">
                 <div class="verification-header">
                     <div class="verification-user">
                         <div class="verification-user-name">${request.userName}</div>
                         <div class="verification-user-email">${request.userEmail}</div>
                     </div>
-                    <span class="verification-type-badge ${typeClass}">${typeLabel}</span>
+                    <div class="verification-header-right">
+                        <span class="verification-type-badge ${typeClass}">${typeLabel}</span>
+                        <span class="verification-status-badge ${statusClass}">
+                            ${statusIcon} ${this.formatStatus(request.status)}
+                        </span>
+                    </div>
                 </div>
                 
                 <div class="verification-body">
@@ -189,32 +219,33 @@ class EligibilityManager {
                         <label>ID Number:</label>
                         <value>${request.idNumber || 'N/A'}</value>
                     </div>
-                    <div class="verification-detail">
-                        <label>Status:</label>
-                        <span class="verification-status ${statusClass}">${this.formatStatus(request.status)}</span>
-                    </div>
-                    <div class="verification-detail">
-                        <label>Submitted:</label>
-                        <value>${new Date(request.submittedAt).toLocaleDateString()}</value>
-                    </div>
-                    ${request.documentUrl ? `
+                    
+                    ${documentHtml}
+                    
+                    ${request.verifiedAt ? `
                         <div class="verification-detail">
-                            <label>Document:</label>
-                            <a href="${request.documentUrl}" target="_blank" style="color: #667eea;">View ID</a>
+                            <label>Verified On:</label>
+                            <value>${new Date(request.verifiedAt).toLocaleDateString()} at ${new Date(request.verifiedAt).toLocaleTimeString()}</value>
                         </div>
                     ` : ''}
                 </div>
 
                 ${request.status === 'pending' ? `
                     <div class="verification-actions">
-                        <button class="btn-approve" onclick="window.eligibilityManager.approveVerification('${request.id}', '${request.type}')">
+                        <button class="btn-approve" onclick="window.eligibilityManager.approveVerification('${request.customerId}', '${request.typeShort}')">
                             <i class="fas fa-check"></i> Approve
                         </button>
-                        <button class="btn-reject" onclick="window.eligibilityManager.rejectVerification('${request.id}', '${request.type}')">
+                        <button class="btn-reject" onclick="window.eligibilityManager.rejectVerification('${request.customerId}', '${request.typeShort}')">
                             <i class="fas fa-times"></i> Reject
                         </button>
                     </div>
-                ` : ''}
+                ` : `
+                    <div class="verification-actions-readonly">
+                        <span class="status-locked">
+                            <i class="fas fa-lock"></i> ${this.formatStatus(request.status)}
+                        </span>
+                    </div>
+                `}
             </div>
         `;
     }

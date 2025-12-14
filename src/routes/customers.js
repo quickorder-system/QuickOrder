@@ -647,21 +647,19 @@ router.put('/discount-preferences', auth, async (req, res, next) => {
 
 /**
  * @route GET /api/customers/pending-verifications
- * @description Get list of customers with pending SC/PWD verification
+ * @description Get list of customers with SC/PWD verification (pending, approved, and rejected)
  * @access Private (admin/owner only)
  */
 router.get('/pending-verifications', [auth, authorize(['admin', 'owner'])], async (req, res, next) => {
     try {
-        // Find users who have claimed SC/PWD but not yet verified
-        const pendingVerifications = await User.find({
+        // Find users who have claimed SC/PWD (regardless of verification status)
+        const allVerifications = await User.find({
             $or: [
                 {
-                    'customerProfile.isSeniorCitizen': true,
-                    'customerProfile.scVerified': false
+                    'customerProfile.isSeniorCitizen': true
                 },
                 {
-                    'customerProfile.isPWD': true,
-                    'customerProfile.pwdVerified': false
+                    'customerProfile.isPWD': true
                 }
             ]
         }).select('_id name email customerProfile').exec();
@@ -669,28 +667,50 @@ router.get('/pending-verifications', [auth, authorize(['admin', 'owner'])], asyn
         // Format the response
         const formattedRequests = [];
         
-        pendingVerifications.forEach(user => {
+        allVerifications.forEach(user => {
             if (user && user.customerProfile) {
-                if (user.customerProfile.isSeniorCitizen && !user.customerProfile.scVerified) {
+                if (user.customerProfile.isSeniorCitizen) {
+                    // Determine status based on verification
+                    let verificationStatus = 'pending';
+                    if (user.customerProfile.scVerified === true) {
+                        verificationStatus = 'approved';
+                    } else if (user.customerProfile.scVerified === false && user.customerProfile.verifiedAt) {
+                        verificationStatus = 'rejected';
+                    }
+
                     formattedRequests.push({
                         id: user._id.toString(),
                         userName: user.name || 'Unknown',
                         userEmail: user.email || 'undefined',
                         type: 'Senior Citizen',
+                        typeShort: 'SC',
                         idNumber: user.customerProfile.scId || 'N/A',
-                        status: 'pending',
-                        customerId: user._id.toString()
+                        document: user.customerProfile.scDocument || null,
+                        status: verificationStatus,
+                        customerId: user._id.toString(),
+                        verifiedAt: user.customerProfile.verifiedAt || null
                     });
                 }
-                if (user.customerProfile.isPWD && !user.customerProfile.pwdVerified) {
+                if (user.customerProfile.isPWD) {
+                    // Determine status based on verification
+                    let verificationStatus = 'pending';
+                    if (user.customerProfile.pwdVerified === true) {
+                        verificationStatus = 'approved';
+                    } else if (user.customerProfile.pwdVerified === false && user.customerProfile.verifiedAt) {
+                        verificationStatus = 'rejected';
+                    }
+
                     formattedRequests.push({
                         id: user._id.toString(),
                         userName: user.name || 'Unknown',
                         userEmail: user.email || 'undefined',
                         type: 'PWD',
+                        typeShort: 'PWD',
                         idNumber: user.customerProfile.pwdId || 'N/A',
-                        status: 'pending',
-                        customerId: user._id.toString()
+                        document: user.customerProfile.pwdDocument || null,
+                        status: verificationStatus,
+                        customerId: user._id.toString(),
+                        verifiedAt: user.customerProfile.verifiedAt || null
                     });
                 }
             }
@@ -703,7 +723,7 @@ router.get('/pending-verifications', [auth, authorize(['admin', 'owner'])], asyn
         });
 
     } catch (error) {
-        logger.error('Error fetching pending verifications:', error);
+        logger.error('Error fetching verifications:', error);
         next(error);
     }
 });
