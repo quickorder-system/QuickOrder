@@ -484,6 +484,9 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             user.customerProfile.pwdId = null;
             user.customerProfile.pwdDocument = null;
             user.customerProfile.pwdVerified = false;
+            // Enable SC discount preference by default
+            user.discountPreferences = user.discountPreferences || {};
+            user.discountPreferences.useSCDiscount = true;
         } else {
             user.customerProfile.scId = null;
             user.customerProfile.scDocument = null;
@@ -507,6 +510,9 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             user.customerProfile.scId = null;
             user.customerProfile.scDocument = null;
             user.customerProfile.scVerified = false;
+            // Enable PWD discount preference by default
+            user.discountPreferences = user.discountPreferences || {};
+            user.discountPreferences.usePWDDiscount = true;
         } else {
             user.customerProfile.pwdId = null;
             user.customerProfile.pwdDocument = null;

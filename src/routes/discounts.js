@@ -451,6 +451,15 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
         const now = new Date();
         const eligibleDiscounts = [];
 
+        logger.info(`Checking eligible discounts for user ${req.user.id}:`, {
+            isPWD: user.customerProfile?.isPWD,
+            isSC: user.customerProfile?.isSeniorCitizen,
+            pwdVerified: user.customerProfile?.pwdVerified,
+            scVerified: user.customerProfile?.scVerified,
+            usePWDDiscount: user.discountPreferences?.usePWDDiscount,
+            useSCDiscount: user.discountPreferences?.useSCDiscount
+        });
+
         // Check if user is Senior Citizen and preference is enabled
         if (user.customerProfile?.isSeniorCitizen && user.discountPreferences?.useSCDiscount) {
             const scDiscount = await Discount.findOne({
@@ -460,6 +469,8 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
                 startDate: { $lte: now },
                 endDate: { $gte: now }
             });
+
+            logger.info(`SC Discount search result:`, scDiscount ? 'found' : 'not found');
 
             if (scDiscount) {
                 eligibleDiscounts.push({
@@ -485,6 +496,8 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
                 endDate: { $gte: now }
             });
 
+            logger.info(`PWD Discount search result:`, pwdDiscount ? 'found' : 'not found');
+
             if (pwdDiscount) {
                 eligibleDiscounts.push({
                     id: pwdDiscount._id,
@@ -499,13 +512,14 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
             }
         }
 
-        logger.info(`Retrieved eligible discounts for user: ${req.user.id}`);
+        logger.info(`Retrieved eligible discounts for user: ${req.user.id}`, { count: eligibleDiscounts.length });
 
         res.json({
             message: 'Eligible discounts retrieved',
             discounts: eligibleDiscounts
         });
     } catch (error) {
+        logger.error(`Error retrieving eligible discounts:`, error);
         next(error);
     }
 });
