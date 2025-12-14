@@ -247,13 +247,11 @@ router.post('/setup-eligibility-discounts', [auth, authorize(['admin'])], async 
         const startDate = new Date(`${startYear}-01-01`);
         const endDate = new Date(`${endYear}-12-31`);
 
-        // Create SC Discount if it doesn't exist
+        // Create or update SC Discount
         const scDiscountCode = `SC-DISCOUNT-${endYear}`;
-        let scDiscount = await Discount.findOne({ code: scDiscountCode });
-
-        if (!scDiscount) {
-            scDiscount = await Discount.create({
-                code: scDiscountCode,
+        let scDiscount = await Discount.findOneAndUpdate(
+            { code: scDiscountCode },
+            {
                 description: `Senior Citizen Discount - ${scPercentage}% off on all orders`,
                 discountType: 'percentage',
                 discountValue: scPercentage,
@@ -261,7 +259,6 @@ router.post('/setup-eligibility-discounts', [auth, authorize(['admin'])], async 
                 maxDiscountAmount: null,
                 maxUsagePerCustomer: null,
                 maxTotalUsage: null,
-                currentUsage: 0,
                 isActive: true,
                 startDate,
                 endDate,
@@ -269,17 +266,16 @@ router.post('/setup-eligibility-discounts', [auth, authorize(['admin'])], async 
                 eligibilityType: 'SC',
                 requiresVerification: false,
                 createdBy: req.user.id
-            });
-            logger.info(`Created SC discount: ${scDiscountCode} by admin: ${req.user.id}`);
-        }
+            },
+            { upsert: true, new: true }
+        );
+        logger.info(`Setup SC discount: ${scDiscountCode} (${scPercentage}%) by admin: ${req.user.id}`);
 
-        // Create PWD Discount if it doesn't exist
+        // Create or update PWD Discount
         const pwdDiscountCode = `PWD-DISCOUNT-${endYear}`;
-        let pwdDiscount = await Discount.findOne({ code: pwdDiscountCode });
-
-        if (!pwdDiscount) {
-            pwdDiscount = await Discount.create({
-                code: pwdDiscountCode,
+        let pwdDiscount = await Discount.findOneAndUpdate(
+            { code: pwdDiscountCode },
+            {
                 description: `PWD Discount - ${pwdPercentage}% off on all orders`,
                 discountType: 'percentage',
                 discountValue: pwdPercentage,
@@ -287,7 +283,6 @@ router.post('/setup-eligibility-discounts', [auth, authorize(['admin'])], async 
                 maxDiscountAmount: null,
                 maxUsagePerCustomer: null,
                 maxTotalUsage: null,
-                currentUsage: 0,
                 isActive: true,
                 startDate,
                 endDate,
@@ -295,9 +290,10 @@ router.post('/setup-eligibility-discounts', [auth, authorize(['admin'])], async 
                 eligibilityType: 'PWD',
                 requiresVerification: false,
                 createdBy: req.user.id
-            });
-            logger.info(`Created PWD discount: ${pwdDiscountCode} by admin: ${req.user.id}`);
-        }
+            },
+            { upsert: true, new: true }
+        );
+        logger.info(`Setup PWD discount: ${pwdDiscountCode} (${pwdPercentage}%) by admin: ${req.user.id}`);
 
         // Log activity
         await ActivityLog.create({
