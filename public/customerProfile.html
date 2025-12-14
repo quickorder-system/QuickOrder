@@ -408,16 +408,26 @@
 
             // Populate eligibility fields
             const customerProfile = profile.customerProfile || {};
+            console.log('Populating form with customerProfile:', {
+                isSeniorCitizen: customerProfile.isSeniorCitizen,
+                isPWD: customerProfile.isPWD,
+                scId: customerProfile.scId,
+                pwdId: customerProfile.pwdId
+            });
             
             // Set radio button based on SC/PWD status
-            if (customerProfile.isSeniorCitizen) {
+            if (customerProfile.isSeniorCitizen === true) {
                 document.getElementById('isSeniorCitizen').checked = true;
                 document.getElementById('scDetails').style.display = 'block';
-            } else if (customerProfile.isPWD) {
+                document.getElementById('pwdDetails').style.display = 'none';
+            } else if (customerProfile.isPWD === true) {
                 document.getElementById('isPWD').checked = true;
                 document.getElementById('pwdDetails').style.display = 'block';
+                document.getElementById('scDetails').style.display = 'none';
             } else {
                 document.getElementById('noEligibility').checked = true;
+                document.getElementById('scDetails').style.display = 'none';
+                document.getElementById('pwdDetails').style.display = 'none';
             }
             
             document.getElementById('scId').value = customerProfile.scId || '';
@@ -427,12 +437,6 @@
             const discountPrefs = profile.discountPreferences || {};
             document.getElementById('useSCDiscount').checked = discountPrefs.useSCDiscount !== false;
             document.getElementById('usePWDDiscount').checked = discountPrefs.usePWDDiscount !== false;
-
-            // Toggle eligibility details visibility
-            document.getElementById('scDetails').style.display = 
-                document.getElementById('isSeniorCitizen').checked ? 'block' : 'none';
-            document.getElementById('pwdDetails').style.display = 
-                document.getElementById('isPWD').checked ? 'block' : 'none';
 
             document.getElementById('emailVerified').value = 
                 profile.emailVerified ? 'Verified' : 'Not Verified';
@@ -500,32 +504,20 @@
                 });
 
                 // Update eligibility profile
-                if (formData.isSeniorCitizen || formData.isPWD) {
-                    console.log('Submitting eligibility:', {
-                        isSeniorCitizen: formData.isSeniorCitizen,
-                        isPWD: formData.isPWD,
-                        scId: formData.scId,
-                        pwdId: formData.pwdId,
-                        hasScDocument: !!formData.scDocument,
-                        hasPwdDocument: !!formData.pwdDocument
-                    });
-                    
-                    // Use FormData for file upload
-                    const eligibilityFormData = new FormData();
-                    eligibilityFormData.append('isSeniorCitizen', formData.isSeniorCitizen);
-                    eligibilityFormData.append('isPWD', formData.isPWD);
-                    eligibilityFormData.append('scId', formData.scId);
-                    eligibilityFormData.append('pwdId', formData.pwdId);
-                    if (formData.scDocument) {
-                        eligibilityFormData.append('scDocument', formData.scDocument);
-                    }
-                    if (formData.pwdDocument) {
-                        eligibilityFormData.append('pwdDocument', formData.pwdDocument);
-                    }
-                    
-                    const eligibilityResponse = await customerService.updateEligibilityWithFile(eligibilityFormData);
-                    console.log('Eligibility update response:', eligibilityResponse);
+                const eligibilityFormData = new FormData();
+                eligibilityFormData.append('isSeniorCitizen', formData.isSeniorCitizen);
+                eligibilityFormData.append('isPWD', formData.isPWD);
+                eligibilityFormData.append('scId', formData.scId);
+                eligibilityFormData.append('pwdId', formData.pwdId);
+                if (formData.scDocument) {
+                    eligibilityFormData.append('scDocument', formData.scDocument);
                 }
+                if (formData.pwdDocument) {
+                    eligibilityFormData.append('pwdDocument', formData.pwdDocument);
+                }
+                
+                const eligibilityResponse = await customerService.updateEligibilityWithFile(eligibilityFormData);
+                console.log('Eligibility update response:', eligibilityResponse);
 
                 // Update discount preferences
                 await customerService.updateDiscountPreferences({
