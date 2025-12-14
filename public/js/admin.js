@@ -445,8 +445,11 @@ function showTab(tabId, clickedButton) {
     if (typeof EligibilityManager !== 'undefined') {
       if (!window.eligibilityManager) {
         window.eligibilityManager = new EligibilityManager('admin');
+        window.eligibilityManager.init();
+      } else {
+        window.eligibilityManager.loadStatistics();
+        window.eligibilityManager.loadVerificationRequests();
       }
-      window.eligibilityManager.loadStatistics();
     }
   }
 }
