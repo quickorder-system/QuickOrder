@@ -365,7 +365,6 @@ class ActivityLogsComponent {
         doc.text(col, columnX + 0.8, yPosition + 3.5, { maxWidth: cellWidth - 1.6, fontSize: 8.5 });
         columnX += cellWidth;
       });
-      });
 
       yPosition += headerHeight;
       doc.setTextColor(0, 0, 0);
