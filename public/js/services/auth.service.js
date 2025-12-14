@@ -61,6 +61,7 @@ const authService = {
                 localStorage.setItem('userEmail', data.user.email);
                 localStorage.setItem('userName', data.user.name);
                 localStorage.setItem('userId', data.user.id);
+                localStorage.setItem('userRole', data.user.role || 'user');
             }
 
             return data;
