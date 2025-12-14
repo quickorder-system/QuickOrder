@@ -45,7 +45,7 @@ class EligibilityManager {
      */
     async setupDefaultDiscounts() {
         const scPercentage = parseInt(document.getElementById('scPercentage')?.value) || 20;
-        const pwdPercentage = parseInt(document.getElementById('pwdPercentage')?.value) || 15;
+        const pwdPercentage = parseInt(document.getElementById('pwdPercentage')?.value) || 20;
         const year = parseInt(document.getElementById('discountYear')?.value) || 2026;
 
         const btn = document.getElementById('setupDiscountsBtn');

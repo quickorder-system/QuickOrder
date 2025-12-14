@@ -241,7 +241,7 @@ router.get('/', [auth, authorize(['admin', 'owner'])], async (req, res, next) =>
  */
 router.post('/setup-eligibility-discounts', [auth, authorize(['admin'])], async (req, res, next) => {
     try {
-        const { scPercentage = 20, pwdPercentage = 15, startYear = 2025, endYear = 2026 } = req.body;
+        const { scPercentage = 20, pwdPercentage = 20, startYear = 2025, endYear = 2026 } = req.body;
 
         // Set date range for the year
         const startDate = new Date(`${startYear}-01-01`);
