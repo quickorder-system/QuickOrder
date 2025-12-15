@@ -1,8 +1,6 @@
+/* eslint-disable-next-line no-undef */
 const PDFDocument = require('pdfkit');
 const path = require('path');
-
-// Get __dirname for file path resolution
-const __dirname = path.dirname(require.main.filename);
 
 /**
  * Generate a sales invoice PDF as a buffer
@@ -21,6 +19,7 @@ async function generateInvoicePDF(order) {
             doc.on('error', reject);
 
             // Header Section - Logo and Title centered
+            // eslint-disable-next-line no-undef
             const logoPath = path.join(__dirname, '../..', 'public/image/QuickOrder_Logo.png');
             try {
                 // Logo centered horizontally (595 width / 2 = 297.5 center, logo width 100, so start at 248)
