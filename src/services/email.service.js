@@ -113,6 +113,89 @@ function sendViaAPI(to, subject, htmlContent) {
 }
 
 /**
+ * Send email via SendGrid API with attachment
+ */
+function sendViaAPIWithAttachment(to, subject, htmlContent, attachment) {
+    return new Promise((resolve, reject) => {
+        const fromEmail = process.env.EMAIL_FROM || 'noreply@quickorder.com';
+        
+        // Encode PDF buffer to base64
+        const base64Content = attachment.content.toString('base64');
+        
+        const payload = JSON.stringify({
+            personalizations: [
+                {
+                    to: [{ email: to }]
+                }
+            ],
+            from: { email: fromEmail },
+            subject: subject,
+            content: [
+                {
+                    type: 'text/html',
+                    value: htmlContent
+                }
+            ],
+            attachments: [
+                {
+                    content: base64Content,
+                    type: 'application/pdf',
+                    filename: attachment.filename || 'invoice.pdf',
+                    disposition: 'attachment'
+                }
+            ]
+        });
+
+        const options = {
+            hostname: 'api.sendgrid.com',
+            port: 443,
+            path: '/v3/mail/send',
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(payload)
+            }
+        };
+
+        const req = https.request(options, (res) => {
+            let data = '';
+
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            res.on('end', () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    console.log(`[EmailService] ✅ Email with attachment sent via SendGrid API to ${to}`);
+                    logger.info(`Email with attachment sent to ${to}`);
+                    resolve(true);
+                } else {
+                    console.error(`[EmailService] SendGrid API Error (${res.statusCode}):`, data);
+                    logger.error(`SendGrid API error: ${res.statusCode} - ${data}`);
+                    reject(new Error(`SendGrid API returned ${res.statusCode}`));
+                }
+            });
+        });
+
+        req.on('error', (error) => {
+            console.error('[EmailService] ❌ API Request error:', error.message);
+            logger.error(`SendGrid API request error: ${error.message}`);
+            reject(error);
+        });
+
+        // 30 second timeout for HTTP request
+        req.setTimeout(30000, () => {
+            req.destroy();
+            reject(new Error('SendGrid API request timeout'));
+        });
+
+        req.write(payload);
+        req.end();
+    });
+}
+
+/**
  * Verify email configuration is set up correctly
  */
 async function verifyEmailConfig() {
@@ -215,7 +298,14 @@ async function sendEmail(to, subject, htmlContent) {
  */
 async function sendEmailWithAttachment(to, subject, htmlContent, attachment) {
     try {
-        // Check if transporter is initialized
+        console.log(`[EmailService] Preparing to send email with attachment to ${to}`);
+        
+        // Use SendGrid API if available (more reliable)
+        if (useSendGridAPI && process.env.SENDGRID_API_KEY) {
+            return await sendViaAPIWithAttachment(to, subject, htmlContent, attachment);
+        }
+        
+        // Fallback to SMTP transporter
         if (!transporter) {
             console.error('[EmailService] Transporter not initialized - missing configuration');
             logger.error('Email service transporter not initialized');
@@ -229,7 +319,6 @@ async function sendEmailWithAttachment(to, subject, htmlContent, attachment) {
         }
 
         const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@quickorder.com';
-        console.log(`[EmailService] Preparing to send email with attachment to ${to}`);
 
         const mailOptions = {
             from: fromEmail,
