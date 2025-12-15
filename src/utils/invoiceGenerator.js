@@ -1,6 +1,9 @@
 const PDFDocument = require('pdfkit');
 const path = require('path');
 
+// Get __dirname for file path resolution
+const __dirname = path.dirname(require.main.filename);
+
 /**
  * Generate a sales invoice PDF as a buffer
  * @param {Object} order - The order object
@@ -120,7 +123,7 @@ async function generateInvoicePDF(order) {
             }
 
             doc.moveTo(40, itemsY).lineTo(555, itemsY).stroke();
-            doc.moveDown(1);
+            doc.moveDown(1.5);
 
             // Summary Section - Properly Centered
             let discountAmount = order.discount?.discountAmount || 0;
@@ -131,17 +134,16 @@ async function generateInvoicePDF(order) {
             vatAmount = taxableAmount * 0.12;
 
             // Page width is 595, margins are 40 on each side, so usable width is 515
-            // Center the summary in the middle
-            const pageCenter = 297.5;
-            const labelWidth = 120;
-            const valueWidth = 70;
+            // Center the summary - use a fixed centered position
+            const summaryLabelX = 200;
+            const summaryValueX = 420;
 
             doc.fontSize(10).font('Helvetica');
             
             // Subtotal
-            doc.text('Subtotal:', pageCenter - labelWidth - 30, doc.y);
-            doc.text(`₱${subtotalAmount.toFixed(2)}`, pageCenter + 30, doc.y - 15, { width: valueWidth, align: 'right' });
-            doc.moveDown(1.2);
+            doc.text('Subtotal:', summaryLabelX);
+            doc.text(`₱${subtotalAmount.toFixed(2)}`, summaryValueX, doc.y - 15, { width: 80, align: 'right' });
+            doc.moveDown(1.3);
 
             // Discount
             if (discountAmount > 0) {
@@ -154,39 +156,38 @@ async function generateInvoicePDF(order) {
                     discountLabel = order.discount.code;
                 }
                 
-                doc.text('Discount:', pageCenter - labelWidth - 30);
-                doc.text(`-₱${discountAmount.toFixed(2)} (${discountLabel})`, pageCenter + 30, doc.y - 15, { width: valueWidth, align: 'right' });
-                doc.moveDown(1.2);
+                doc.text('Discount:', summaryLabelX);
+                doc.text(`-₱${discountAmount.toFixed(2)} (${discountLabel})`, summaryValueX, doc.y - 15, { width: 80, align: 'right' });
+                doc.moveDown(1.3);
             }
 
             // VAT
-            doc.text('VAT (12%):', pageCenter - labelWidth - 30);
-            doc.text(`₱${vatAmount.toFixed(2)}`, pageCenter + 30, doc.y - 15, { width: valueWidth, align: 'right' });
-            doc.moveDown(1.2);
+            doc.text('VAT (12%):', summaryLabelX);
+            doc.text(`₱${vatAmount.toFixed(2)}`, summaryValueX, doc.y - 15, { width: 80, align: 'right' });
+            doc.moveDown(1.3);
 
             // Total Line
-            doc.moveTo(pageCenter - labelWidth - 30, doc.y).lineTo(pageCenter + valueWidth + 30, doc.y).stroke();
+            doc.moveTo(summaryLabelX - 10, doc.y).lineTo(summaryValueX + 75, doc.y).stroke();
             doc.moveDown(0.8);
 
             doc.fontSize(11).font('Helvetica-Bold');
-            doc.text('Total Amount Due:', pageCenter - labelWidth - 30);
+            doc.text('Total Amount Due:', summaryLabelX);
             const totalAmount = order.total || 0;
-            doc.text(`₱${totalAmount.toFixed(2)}`, pageCenter + 30, doc.y - 15, { width: valueWidth, align: 'right' });
-            doc.moveDown(1.2);
+            doc.text(`₱${totalAmount.toFixed(2)}`, summaryValueX, doc.y - 18, { width: 80, align: 'right' });
+            doc.moveDown(1.3);
 
             // Payment Method
             doc.fontSize(9).font('Helvetica-Bold');
-            doc.text('Payment Method:', pageCenter - labelWidth - 30);
+            doc.text('Payment Method:', summaryLabelX);
             doc.fontSize(9).font('Helvetica');
-            doc.text(order.paymentMethod || 'N/A', pageCenter - labelWidth - 30);
-            doc.moveDown(1.5);
+            doc.text(order.paymentMethod || 'N/A', summaryLabelX);
+            doc.moveDown(2);
 
-            // Footer Message
-            doc.moveDown(3);
+            // Footer Message - Centered
             doc.fontSize(11).font('Helvetica-Bold').text('Thank you for ordering with us!', { align: 'center' });
             doc.fontSize(10).font('Helvetica').text('This serves as your sales invoice.', { align: 'center' });
 
-            // Footer Info
+            // Footer Info - Centered
             doc.moveDown(1);
             doc.fontSize(8).font('Helvetica').text('Quick Order System - Powered by QuickOrder', { align: 'center' });
             doc.text(`Generated: ${new Date().toLocaleString('en-PH')}`, { align: 'center' });
