@@ -302,8 +302,13 @@ async function sendEmailWithAttachment(to, subject, htmlContent, attachment) {
         
         // Use SendGrid API if available (more reliable)
         if (useSendGridAPI && process.env.SENDGRID_API_KEY) {
-            return await sendViaAPIWithAttachment(to, subject, htmlContent, attachment);
+            console.log('[EmailService] Using SendGrid API for attachment');
+            const result = await sendViaAPIWithAttachment(to, subject, htmlContent, attachment);
+            console.log(`[EmailService] SendGrid result: ${result}`);
+            return result;
         }
+        
+        console.log('[EmailService] Using SMTP transporter for attachment');
         
         // Fallback to SMTP transporter
         if (!transporter) {
@@ -319,6 +324,7 @@ async function sendEmailWithAttachment(to, subject, htmlContent, attachment) {
         }
 
         const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@quickorder.com';
+        console.log(`[EmailService] Sending from ${fromEmail} to ${to}`);
 
         const mailOptions = {
             from: fromEmail,
@@ -339,11 +345,14 @@ async function sendEmailWithAttachment(to, subject, htmlContent, attachment) {
             setTimeout(() => reject(new Error('Email send timeout (90s)')), 90000);
         });
 
+        console.log('[EmailService] Sending mail via SMTP...');
         const sendPromise = transporter.sendMail(mailOptions);
         const info = await Promise.race([sendPromise, timeoutPromise]);
+        console.log('[EmailService] ✅ Email with attachment sent via SMTP');
         logger.info(`Email with attachment sent successfully to ${to}`);
         return true;
     } catch (error) {
+        console.error(`[EmailService] ❌ Error sending email with attachment:`, error);
         logger.error(`Failed to send email with attachment to ${to}:`, error.message);
         return false;
     }
@@ -380,18 +389,28 @@ async function sendPreparingEmail(order) {
         const subject = '👨‍🍳 Your Order is Being Prepared';
         const emailTemplate = getPreparingTemplate(order);
         
+        console.log(`[EmailService] Generating invoice for order ${order.orderId}...`);
         // Generate invoice PDF
         const invoicePDF = await invoiceGenerator.generateInvoicePDF(order);
+        console.log(`[EmailService] Invoice generated, PDF size: ${invoicePDF.length} bytes`);
         const invoiceFilename = `${order.orderId}_Invoice.pdf`;
         
+        console.log(`[EmailService] Sending email with invoice attachment to ${order.email}...`);
         // Send email with attachment
-        await sendEmailWithAttachment(order.email, subject, emailTemplate, {
+        const result = await sendEmailWithAttachment(order.email, subject, emailTemplate, {
             filename: invoiceFilename,
             content: invoicePDF
         });
         
-        logger.info(`Preparing email with invoice sent for order ${order.orderId}`);
+        if (result) {
+            logger.info(`Preparing email with invoice sent for order ${order.orderId}`);
+            console.log(`[EmailService] ✅ Preparing email sent successfully for order ${order.orderId}`);
+        } else {
+            console.error(`[EmailService] ❌ Failed to send preparing email for order ${order.orderId}`);
+            logger.error(`Failed to send preparing email for order ${order.orderId}: sendEmailWithAttachment returned false`);
+        }
     } catch (error) {
+        console.error(`[EmailService] ❌ Error in sendPreparingEmail:`, error);
         logger.error(`Failed to send preparing email for order ${order.orderId}:`, error.message);
     }
 }
