@@ -17,18 +17,22 @@ async function generateInvoicePDF(order) {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
 
-            // Header Section - Logo and Title
+            // Header Section - Logo and Title centered
             const logoPath = path.join(__dirname, '../..', 'public/image/QuickOrder_Logo.png');
             try {
-                doc.image(logoPath, 50, 40, { width: 60, height: 60 });
+                // Logo centered horizontally (595 width / 2 = 297.5 center, logo width 100, so start at 248)
+                doc.image(logoPath, 248, 30, { width: 100, height: 100 });
             } catch (err) {
                 // Logo not found, continue without it
                 console.warn('[InvoiceGenerator] Logo file not found, continuing without logo');
             }
 
-            doc.fontSize(24).font('Helvetica-Bold').text('Quick Order', 120, 55, { align: 'left' });
-            doc.fontSize(9).font('Helvetica').text('Sales Invoice', 120, 85);
-            doc.moveDown(2.5);
+            // Move down after logo
+            doc.moveDown(4.5);
+
+            // Quick Order Title - Centered
+            doc.fontSize(24).font('Helvetica-Bold').text('Quick Order', { align: 'center' });
+            doc.moveDown(0.3);
 
             // Company Info - Centered
             doc.fontSize(9).font('Helvetica');
@@ -36,6 +40,10 @@ async function generateInvoicePDF(order) {
             doc.text('Contact: 0912-345-6789', { align: 'center' });
             doc.text('Website: quickorder-production-145f.up.railway.app', { align: 'center' });
             doc.text('Owner: Juan dela Cruz', { align: 'center' });
+            doc.moveDown(0.5);
+
+            // Sales Invoice Title - Centered
+            doc.fontSize(12).font('Helvetica-Bold').text('Sales Invoice', { align: 'center' });
             doc.moveDown(0.5);
 
             // Horizontal Line
@@ -112,10 +120,9 @@ async function generateInvoicePDF(order) {
             }
 
             doc.moveTo(40, itemsY).lineTo(555, itemsY).stroke();
-            itemsY += 15;
+            doc.moveDown(1);
 
-            // Summary Section - Centered
-            const summaryX = 320;
+            // Summary Section - Properly Centered
             let discountAmount = order.discount?.discountAmount || 0;
             let vatAmount = 0;
 
@@ -123,11 +130,18 @@ async function generateInvoicePDF(order) {
             let taxableAmount = subtotalAmount - discountAmount;
             vatAmount = taxableAmount * 0.12;
 
-            doc.fontSize(10).font('Helvetica');
-            doc.text('Subtotal:', summaryX, itemsY, { align: 'center' });
-            doc.text(`₱${subtotalAmount.toFixed(2)}`, summaryX + 150, itemsY, { align: 'right', width: 70 });
+            // Page width is 595, margins are 40 on each side, so usable width is 515
+            // Center the summary in the middle
+            const pageCenter = 297.5;
+            const labelWidth = 120;
+            const valueWidth = 70;
 
-            let summaryY = itemsY + 20;
+            doc.fontSize(10).font('Helvetica');
+            
+            // Subtotal
+            doc.text('Subtotal:', pageCenter - labelWidth - 30, doc.y);
+            doc.text(`₱${subtotalAmount.toFixed(2)}`, pageCenter + 30, doc.y - 15, { width: valueWidth, align: 'right' });
+            doc.moveDown(1.2);
 
             // Discount
             if (discountAmount > 0) {
@@ -140,32 +154,32 @@ async function generateInvoicePDF(order) {
                     discountLabel = order.discount.code;
                 }
                 
-                doc.text('Discount:', summaryX, summaryY, { align: 'center' });
-                doc.text(`-₱${discountAmount.toFixed(2)} (${discountLabel})`, summaryX + 150, summaryY, { align: 'right', width: 70 });
-                summaryY += 20;
+                doc.text('Discount:', pageCenter - labelWidth - 30);
+                doc.text(`-₱${discountAmount.toFixed(2)} (${discountLabel})`, pageCenter + 30, doc.y - 15, { width: valueWidth, align: 'right' });
+                doc.moveDown(1.2);
             }
 
             // VAT
-            doc.text('VAT (12%):', summaryX, summaryY, { align: 'center' });
-            doc.text(`₱${vatAmount.toFixed(2)}`, summaryX + 150, summaryY, { align: 'right', width: 70 });
-            summaryY += 20;
+            doc.text('VAT (12%):', pageCenter - labelWidth - 30);
+            doc.text(`₱${vatAmount.toFixed(2)}`, pageCenter + 30, doc.y - 15, { width: valueWidth, align: 'right' });
+            doc.moveDown(1.2);
 
             // Total Line
-            doc.moveTo(summaryX + 30, summaryY).lineTo(summaryX + 200, summaryY).stroke();
-            summaryY += 10;
+            doc.moveTo(pageCenter - labelWidth - 30, doc.y).lineTo(pageCenter + valueWidth + 30, doc.y).stroke();
+            doc.moveDown(0.8);
 
             doc.fontSize(11).font('Helvetica-Bold');
-            doc.text('Total Amount Due:', summaryX, summaryY, { align: 'center' });
+            doc.text('Total Amount Due:', pageCenter - labelWidth - 30);
             const totalAmount = order.total || 0;
-            doc.text(`₱${totalAmount.toFixed(2)}`, summaryX + 150, summaryY, { align: 'right', width: 70 });
-
-            summaryY += 20;
+            doc.text(`₱${totalAmount.toFixed(2)}`, pageCenter + 30, doc.y - 15, { width: valueWidth, align: 'right' });
+            doc.moveDown(1.2);
 
             // Payment Method
             doc.fontSize(9).font('Helvetica-Bold');
-            doc.text('Payment Method:', summaryX, summaryY, { align: 'center' });
+            doc.text('Payment Method:', pageCenter - labelWidth - 30);
             doc.fontSize(9).font('Helvetica');
-            doc.text(order.paymentMethod || 'N/A', summaryX, summaryY + 15, { align: 'center' });
+            doc.text(order.paymentMethod || 'N/A', pageCenter - labelWidth - 30);
+            doc.moveDown(1.5);
 
             // Footer Message
             doc.moveDown(3);
