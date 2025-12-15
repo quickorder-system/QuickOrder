@@ -258,21 +258,6 @@ async function sendEmailWithAttachment(to, subject, htmlContent, attachment) {
         logger.error(`Failed to send email with attachment to ${to}:`, error.message);
         return false;
     }
-
-        logger.info(`Email sent successfully to ${to}`);
-        console.log(`[EmailService] ✅ Email sent to ${to}: ${info.response || info.messageId}`);
-        return true;
-    } catch (error) {
-        logger.error(`Failed to send email to ${to}:`, error.message);
-        console.error(`[EmailService] ❌ Error sending email to ${to}:`, error.message);
-        
-        // Log more details for debugging
-        if (error.code) console.error(`[EmailService] Error code: ${error.code}`);
-        if (error.response) console.error(`[EmailService] SMTP response: ${error.response}`);
-        if (error.command) console.error(`[EmailService] SMTP command: ${error.command}`);
-        
-        return false;
-    }
 }
 
 /**
