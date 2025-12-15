@@ -14,13 +14,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const orderId = card.dataset.orderId;
                 const oldStatus = select.dataset.previousStatus || Array.from(select.options).find(o => o.selected)?.value;
 
+                // For preparing status, prompt for cashier name
+                let cashierName = null;
+                if (newStatus === 'preparing') {
+                    cashierName = prompt('Please enter your name (cashier):');
+                    if (!cashierName || cashierName.trim() === '') {
+                        alert('Cashier name is required to mark order as preparing.');
+                        select.value = oldStatus;
+                        return;
+                    }
+                    cashierName = cashierName.trim();
+                }
+
                 // Disable select while updating
                 select.disabled = true;
                 select.style.opacity = '0.6';
 
                 try {
                     console.log(`[Orders] Updating order ${orderId} status from ${oldStatus} to ${newStatus}`);
-                    const updatedOrder = await OrderService.updateOrderStatus(orderId, newStatus);
+                    const updatedOrder = await OrderService.updateOrderStatus(orderId, newStatus, cashierName);
                     
                     console.log(`[Orders] Status updated successfully:`, updatedOrder);
 
