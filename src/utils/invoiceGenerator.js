@@ -16,32 +16,38 @@ async function generateInvoicePDF(order) {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
 
-            // Header Section
+            // Header Section - Centered
             doc.fontSize(20).font('Helvetica-Bold').text('Quick Order', { align: 'center' });
             doc.fontSize(12).font('Helvetica').text('Sales Invoice', { align: 'center' });
-            doc.moveDown(0.5);
+            doc.moveDown(0.8);
 
-            // Company Info - Left Side
-            doc.fontSize(10).font('Helvetica');
-            doc.text('289 L. de Guzman St., Concepcion Uno, Marikina City');
-            doc.text('Contact: 0912-345-6789');
-            doc.text('Website: quickorder-production-145f.up.railway.app');
-            doc.text('Owner: Juan dela Cruz');
-            doc.moveDown(0.5);
+            // Company Info and Invoice Details in a table layout
+            const leftColX = 40;
+            const rightColX = 320;
+            const currentY = doc.y;
 
-            // Invoice Details - Right Side (overlay)
-            const rightX = 350;
-            doc.fontSize(9).font('Helvetica-Bold').text('Invoice Number:', rightX, doc.y - 60);
-            doc.fontSize(9).font('Helvetica').text(order.invoiceNumber || 'N/A', rightX + 100, doc.y - 15);
+            // Left column - Company Info
+            doc.fontSize(10).font('Helvetica-Bold').text('Company Information', leftColX);
+            doc.fontSize(9).font('Helvetica');
+            doc.text('289 L. de Guzman St., Concepcion Uno, Marikina City', leftColX, doc.y);
+            doc.text('Contact: 0912-345-6789', leftColX, doc.y);
+            doc.text('Website: quickorder-production-145f.up.railway.app', leftColX, doc.y);
+            doc.text('Owner: Juan dela Cruz', leftColX, doc.y);
 
-            doc.fontSize(9).font('Helvetica-Bold').text('Invoice Date:', rightX, doc.y);
+            // Right column - Invoice Details
+            doc.fontSize(10).font('Helvetica-Bold').text('Invoice Details', rightColX, currentY);
+            doc.fontSize(9).font('Helvetica-Bold').text('Invoice Number:', rightColX, currentY + 20);
+            doc.fontSize(9).font('Helvetica').text(order.invoiceNumber || 'N/A', rightColX, doc.y);
+
+            doc.fontSize(9).font('Helvetica-Bold').text('Invoice Date:', rightColX, doc.y + 3);
             const invoiceDate = order.updatedAt ? new Date(order.updatedAt).toLocaleString('en-PH') : new Date().toLocaleString('en-PH');
-            doc.fontSize(9).font('Helvetica').text(invoiceDate, rightX + 100, doc.y - 15);
+            doc.fontSize(9).font('Helvetica').text(invoiceDate, rightColX, doc.y + 18);
 
-            doc.fontSize(9).font('Helvetica-Bold').text('Cashier:', rightX, doc.y);
-            doc.fontSize(9).font('Helvetica').text(order.cashierName || 'N/A', rightX + 100, doc.y - 15);
+            doc.fontSize(9).font('Helvetica-Bold').text('Cashier:', rightColX, doc.y + 3);
+            doc.fontSize(9).font('Helvetica').text(order.cashierName || 'N/A', rightColX, doc.y + 18);
 
-            doc.moveDown(1.5);
+            doc.y = Math.max(doc.y, currentY + 95);
+            doc.moveDown(0.5);
 
             // Horizontal Line
             doc.moveTo(40, doc.y).lineTo(555, doc.y).stroke();
@@ -64,11 +70,11 @@ async function generateInvoicePDF(order) {
             // Items Table Header
             const tableTop = doc.y;
             const col1 = 40;   // Item
-            const col2 = 280;  // Quantity
-            const col3 = 320;  // Unit Price
+            const col2 = 260;  // Quantity
+            const col3 = 310;  // Unit Price
             const col4 = 420;  // Amount
 
-            doc.fontSize(9).font('Helvetica-Bold');
+            doc.fontSize(10).font('Helvetica-Bold');
             doc.text('Item Description', col1, tableTop);
             doc.text('Qty', col2, tableTop);
             doc.text('Unit Price', col3, tableTop);
@@ -77,7 +83,7 @@ async function generateInvoicePDF(order) {
             doc.moveTo(40, tableTop + 15).lineTo(555, tableTop + 15).stroke();
 
             // Items
-            let itemsY = tableTop + 20;
+            let itemsY = tableTop + 22;
             let subtotalAmount = 0;
 
             if (order.items && order.items.length > 0) {
@@ -93,10 +99,10 @@ async function generateInvoicePDF(order) {
                     }
 
                     doc.fontSize(9).font('Helvetica');
-                    doc.text(itemDesc, col1, itemsY, { width: 230 });
+                    doc.text(itemDesc, col1, itemsY, { width: 210 });
                     doc.text(item.quantity.toString(), col2, itemsY);
                     doc.text(`₱${item.price.toFixed(2)}`, col3, itemsY);
-                    doc.text(`₱${itemTotal.toFixed(2)}`, col4, itemsY);
+                    doc.text(`₱${itemTotal.toFixed(2)}`, col4, itemsY, { align: 'right' });
 
                     itemsY += 25;
                 });
@@ -105,8 +111,8 @@ async function generateInvoicePDF(order) {
             doc.moveTo(40, itemsY).lineTo(555, itemsY).stroke();
             itemsY += 10;
 
-            // Summary Section
-            const summaryX = 350;
+            // Summary Section - Right aligned
+            const summaryX = 360;
             let discountAmount = order.discount?.discountAmount || 0;
             let vatAmount = 0;
 
@@ -115,40 +121,40 @@ async function generateInvoicePDF(order) {
             vatAmount = taxableAmount * 0.12;
 
             doc.fontSize(9).font('Helvetica');
-            doc.text('Subtotal:', summaryX, itemsY);
-            doc.text(`₱${subtotalAmount.toFixed(2)}`, 480, itemsY, { align: 'right' });
+            doc.text('Subtotal:', summaryX, itemsY + 15);
+            doc.text(`₱${subtotalAmount.toFixed(2)}`, 500, itemsY + 15, { align: 'right', width: 55 });
 
-            itemsY += 15;
+            let summaryY = itemsY + 30;
 
             // Discount
             if (discountAmount > 0) {
-                doc.text('Discount:', summaryX, itemsY);
+                doc.text('Discount:', summaryX, summaryY);
                 const discountLabel = order.discount?.code ? `(${order.discount.code})` : '';
-                doc.text(`-₱${discountAmount.toFixed(2)} ${discountLabel}`, 480, itemsY, { align: 'right' });
-                itemsY += 15;
+                doc.text(`-₱${discountAmount.toFixed(2)} ${discountLabel}`, 500, summaryY, { align: 'right', width: 55 });
+                summaryY += 15;
             }
 
             // VAT
-            doc.text('VAT (12%):', summaryX, itemsY);
-            doc.text(`₱${vatAmount.toFixed(2)}`, 480, itemsY, { align: 'right' });
-            itemsY += 15;
+            doc.text('VAT (12%):', summaryX, summaryY);
+            doc.text(`₱${vatAmount.toFixed(2)}`, 500, summaryY, { align: 'right', width: 55 });
+            summaryY += 15;
 
             // Total Line
-            doc.moveTo(summaryX, itemsY).lineTo(540, itemsY).stroke();
-            itemsY += 5;
+            doc.moveTo(summaryX - 5, summaryY).lineTo(555, summaryY).stroke();
+            summaryY += 10;
 
-            doc.fontSize(10).font('Helvetica-Bold');
-            doc.text('Total Amount Due:', summaryX, itemsY);
+            doc.fontSize(11).font('Helvetica-Bold');
+            doc.text('Total Amount Due:', summaryX, summaryY);
             const totalAmount = order.total || 0;
-            doc.text(`₱${totalAmount.toFixed(2)}`, 480, itemsY, { align: 'right' });
+            doc.text(`₱${totalAmount.toFixed(2)}`, 500, summaryY, { align: 'right', width: 55 });
 
-            itemsY += 25;
+            summaryY += 25;
 
             // Payment Method
             doc.fontSize(9).font('Helvetica-Bold');
-            doc.text('Payment Method:', summaryX, itemsY);
+            doc.text('Payment Method:', summaryX, summaryY);
             doc.fontSize(9).font('Helvetica');
-            doc.text(order.paymentMethod || 'N/A', summaryX, itemsY + 15);
+            doc.text(order.paymentMethod || 'N/A', summaryX, summaryY + 15);
 
             // Footer Message
             doc.moveDown(2);
