@@ -1,4 +1,5 @@
 const PDFDocument = require('pdfkit');
+const path = require('path');
 
 /**
  * Generate a sales invoice PDF as a buffer
@@ -16,9 +17,18 @@ async function generateInvoicePDF(order) {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
 
-            // Header Section - Centered Title
-            doc.fontSize(24).font('Helvetica-Bold').text('Quick Order', { align: 'center' });
-            doc.moveDown(0.3);
+            // Header Section - Logo and Title
+            const logoPath = path.join(__dirname, '../..', 'public/image/QuickOrder_Logo.png');
+            try {
+                doc.image(logoPath, 50, 40, { width: 60, height: 60 });
+            } catch (err) {
+                // Logo not found, continue without it
+                console.warn('[InvoiceGenerator] Logo file not found, continuing without logo');
+            }
+
+            doc.fontSize(24).font('Helvetica-Bold').text('Quick Order', 120, 55, { align: 'left' });
+            doc.fontSize(9).font('Helvetica').text('Sales Invoice', 120, 85);
+            doc.moveDown(2.5);
 
             // Company Info - Centered
             doc.fontSize(9).font('Helvetica');
@@ -106,10 +116,13 @@ async function generateInvoicePDF(order) {
             }
 
             doc.moveTo(40, itemsY).lineTo(555, itemsY).stroke();
-            itemsY += 15;
+            itemsY += 20;
 
-            // Summary Section - Centered
-            const summaryX = 320;
+            // Summary Section - Centered with better spacing
+            const summaryStartX = 280;
+            const summaryLabelX = summaryStartX;
+            const summaryValueX = summaryStartX + 180;
+            
             let discountAmount = order.discount?.discountAmount || 0;
             let vatAmount = 0;
 
@@ -118,10 +131,10 @@ async function generateInvoicePDF(order) {
             vatAmount = taxableAmount * 0.12;
 
             doc.fontSize(10).font('Helvetica');
-            doc.text('Subtotal:', summaryX, itemsY, { align: 'center' });
-            doc.text(`₱${subtotalAmount.toFixed(2)}`, summaryX + 150, itemsY, { align: 'right', width: 70 });
+            doc.text('Subtotal:', summaryLabelX, itemsY, { align: 'center', width: 100 });
+            doc.text(`₱${subtotalAmount.toFixed(2)}`, summaryValueX, itemsY, { align: 'right', width: 70 });
 
-            let summaryY = itemsY + 18;
+            let summaryY = itemsY + 22;
 
             // Discount
             if (discountAmount > 0) {
@@ -134,32 +147,32 @@ async function generateInvoicePDF(order) {
                     discountLabel = order.discount.code;
                 }
                 
-                doc.text('Discount:', summaryX, summaryY, { align: 'center' });
-                doc.text(`-₱${discountAmount.toFixed(2)} (${discountLabel})`, summaryX + 150, summaryY, { align: 'right', width: 70 });
-                summaryY += 18;
+                doc.text('Discount:', summaryLabelX, summaryY, { align: 'center', width: 100 });
+                doc.text(`-₱${discountAmount.toFixed(2)} (${discountLabel})`, summaryValueX, summaryY, { align: 'right', width: 70 });
+                summaryY += 22;
             }
 
             // VAT
-            doc.text('VAT (12%):', summaryX, summaryY, { align: 'center' });
-            doc.text(`₱${vatAmount.toFixed(2)}`, summaryX + 150, summaryY, { align: 'right', width: 70 });
-            summaryY += 18;
+            doc.text('VAT (12%):', summaryLabelX, summaryY, { align: 'center', width: 100 });
+            doc.text(`₱${vatAmount.toFixed(2)}`, summaryValueX, summaryY, { align: 'right', width: 70 });
+            summaryY += 22;
 
             // Total Line
-            doc.moveTo(summaryX + 30, summaryY).lineTo(summaryX + 200, summaryY).stroke();
-            summaryY += 10;
+            doc.moveTo(summaryLabelX + 50, summaryY).lineTo(summaryValueX + 70, summaryY).stroke();
+            summaryY += 12;
 
             doc.fontSize(11).font('Helvetica-Bold');
-            doc.text('Total Amount Due:', summaryX, summaryY, { align: 'center' });
+            doc.text('Total Amount Due:', summaryLabelX, summaryY, { align: 'center', width: 100 });
             const totalAmount = order.total || 0;
-            doc.text(`₱${totalAmount.toFixed(2)}`, summaryX + 150, summaryY, { align: 'right', width: 70 });
+            doc.text(`₱${totalAmount.toFixed(2)}`, summaryValueX, summaryY, { align: 'right', width: 70 });
 
             summaryY += 25;
 
             // Payment Method
             doc.fontSize(9).font('Helvetica-Bold');
-            doc.text('Payment Method:', summaryX, summaryY, { align: 'center' });
+            doc.text('Payment Method:', summaryLabelX, summaryY, { align: 'center', width: 100 });
             doc.fontSize(9).font('Helvetica');
-            doc.text(order.paymentMethod || 'N/A', summaryX, summaryY + 15, { align: 'center' });
+            doc.text(order.paymentMethod || 'N/A', summaryLabelX, summaryY + 15, { align: 'center', width: 100 });
 
             // Footer Message
             doc.moveDown(3);
