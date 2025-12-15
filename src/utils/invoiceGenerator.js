@@ -22,8 +22,8 @@ async function generateInvoicePDF(order) {
             // eslint-disable-next-line no-undef
             const logoPath = path.join(__dirname, '../..', 'public/image/QuickOrder_Logo.png');
             try {
-                // Logo centered horizontally (595 width / 2 = 297.5 center, logo width 100, so start at 248)
-                doc.image(logoPath, 248, 30, { width: 100, height: 100 });
+                // Logo centered horizontally (595 width / 2 = 297.5 center, logo width 70, so start at 260)
+                doc.image(logoPath, 260, 35, { width: 70, height: 70 });
             } catch (err) {
                 // Logo not found, continue without it
                 console.warn('[InvoiceGenerator] Logo file not found, continuing without logo');
@@ -122,7 +122,7 @@ async function generateInvoicePDF(order) {
             }
 
             doc.moveTo(40, itemsY).lineTo(555, itemsY).stroke();
-            doc.moveDown(1.5);
+            doc.moveDown(2.5);
 
             // Summary Section - Properly Centered
             let discountAmount = order.discount?.discountAmount || 0;
@@ -183,13 +183,13 @@ async function generateInvoicePDF(order) {
             doc.moveDown(2);
 
             // Footer Message - Centered
-            doc.fontSize(11).font('Helvetica-Bold').text('Thank you for ordering with us!', { align: 'center' });
-            doc.fontSize(10).font('Helvetica').text('This serves as your sales invoice.', { align: 'center' });
+            doc.fontSize(11).font('Helvetica-Bold').text('Thank you for ordering with us!', { align: 'center', width: 515 });
+            doc.fontSize(10).font('Helvetica').text('This serves as your sales invoice.', { align: 'center', width: 515 });
 
             // Footer Info - Centered
             doc.moveDown(1);
-            doc.fontSize(8).font('Helvetica').text('Quick Order System - Powered by QuickOrder', { align: 'center' });
-            doc.text(`Generated: ${new Date().toLocaleString('en-PH')}`, { align: 'center' });
+            doc.fontSize(8).font('Helvetica').text('Quick Order System - Powered by QuickOrder', { align: 'center', width: 515 });
+            doc.text(`Generated: ${new Date().toLocaleString('en-PH')}`, { align: 'center', width: 515 });
 
             // Finalize PDF
             doc.end();
