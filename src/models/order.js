@@ -127,6 +127,14 @@ const orderSchema = new mongoose.Schema({
         enum: ['pending', 'verified', 'rejected'],
         default: 'pending'
     },
+    cashierName: {
+        type: String,
+        default: null
+    },
+    invoiceNumber: {
+        type: String,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

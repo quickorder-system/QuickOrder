@@ -244,6 +244,48 @@ document.getElementById('categoryFilter')?.addEventListener('change', function(e
 function updateOrderStatus(btn, status) {
   const card = btn.closest('.order-card');
   if (!card) return;
+  
+  // For preparing status, prompt for cashier name
+  if (status === 'preparing') {
+    const cashierName = prompt('Please enter your name (cashier):');
+    if (!cashierName || cashierName.trim() === '') {
+      alert('Cashier name is required to mark order as preparing.');
+      return;
+    }
+    
+    // Get order ID from card
+    const orderId = card.dataset.orderId || card.querySelector('.order-id')?.textContent;
+    if (!orderId) {
+      alert('Could not find order ID');
+      return;
+    }
+    
+    // Call API with cashier name
+    OrderService.updateOrderStatus(orderId, status, cashierName.trim())
+      .then(result => {
+        console.log('[Orders] Status updated to preparing:', result);
+        const badge = card.querySelector('.status-badge');
+        if (badge) {
+          badge.className = 'status-badge ' + status;
+          badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        }
+        
+        const actionsDiv = card.querySelector('.order-actions');
+        if (actionsDiv) {
+          actionsDiv.innerHTML = `
+            <button class="action-btn ready" onclick="updateOrderStatus(this, 'ready')">
+              <i class="fas fa-check-double"></i>
+              Mark as Ready
+            </button>
+          `;
+        }
+      })
+      .catch(error => {
+        alert('Error updating order status: ' + error.message);
+      });
+    return;
+  }
+  
   const badge = card.querySelector('.status-badge');
   if (!badge) return;
 

@@ -198,6 +198,66 @@ async function sendEmail(to, subject, htmlContent) {
 
         const sendPromise = transporter.sendMail(mailOptions);
         const info = await Promise.race([sendPromise, timeoutPromise]);
+        logger.info(`Email sent successfully to ${to} via SMTP`);
+        return true;
+    } catch (error) {
+        logger.error(`Failed to send email to ${to}:`, error.message);
+        return false;
+    }
+}
+
+/**
+ * Send email with attachment
+ * @param {string} to - Recipient email
+ * @param {string} subject - Email subject
+ * @param {string} htmlContent - Email HTML content
+ * @param {Object} attachment - Attachment object {filename, content}
+ */
+async function sendEmailWithAttachment(to, subject, htmlContent, attachment) {
+    try {
+        // Check if transporter is initialized
+        if (!transporter) {
+            console.error('[EmailService] Transporter not initialized - missing configuration');
+            logger.error('Email service transporter not initialized');
+            return false;
+        }
+
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+            console.warn('[EmailService] Email service not configured - skipping email send');
+            logger.warn('Email service not configured - skipping email send');
+            return false;
+        }
+
+        const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@quickorder.com';
+        console.log(`[EmailService] Preparing to send email with attachment to ${to}`);
+
+        const mailOptions = {
+            from: fromEmail,
+            to: to,
+            subject: subject,
+            html: htmlContent,
+            attachments: [
+                {
+                    filename: attachment.filename || 'invoice.pdf',
+                    content: attachment.content,
+                    contentType: 'application/pdf'
+                }
+            ]
+        };
+
+        // Set timeout for SMTP sending (90 seconds)
+        const timeoutPromise = new Promise((resolve, reject) => {
+            setTimeout(() => reject(new Error('Email send timeout (90s)')), 90000);
+        });
+
+        const sendPromise = transporter.sendMail(mailOptions);
+        const info = await Promise.race([sendPromise, timeoutPromise]);
+        logger.info(`Email with attachment sent successfully to ${to}`);
+        return true;
+    } catch (error) {
+        logger.error(`Failed to send email with attachment to ${to}:`, error.message);
+        return false;
+    }
 
         logger.info(`Email sent successfully to ${to}`);
         console.log(`[EmailService] ✅ Email sent to ${to}: ${info.response || info.messageId}`);
@@ -242,9 +302,21 @@ async function sendPaymentStatusEmail(order, status) {
  */
 async function sendPreparingEmail(order) {
     try {
+        const invoiceGenerator = require('../utils/invoiceGenerator');
         const subject = '👨‍🍳 Your Order is Being Prepared';
         const emailTemplate = getPreparingTemplate(order);
-        await sendEmail(order.email, subject, emailTemplate);
+        
+        // Generate invoice PDF
+        const invoicePDF = await invoiceGenerator.generateInvoicePDF(order);
+        const invoiceFilename = `${order.orderId}_Invoice.pdf`;
+        
+        // Send email with attachment
+        await sendEmailWithAttachment(order.email, subject, emailTemplate, {
+            filename: invoiceFilename,
+            content: invoicePDF
+        });
+        
+        logger.info(`Preparing email with invoice sent for order ${order.orderId}`);
     } catch (error) {
         logger.error(`Failed to send preparing email for order ${order.orderId}:`, error.message);
     }
@@ -722,6 +794,7 @@ async function sendPasswordResetEmail(user, resetToken) {
 module.exports = {
     verifyEmailConfig,
     sendEmail,
+    sendEmailWithAttachment,
     sendPaymentStatusEmail,
     sendPreparingEmail,
     sendReadyEmail,

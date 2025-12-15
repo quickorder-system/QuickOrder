@@ -39,17 +39,23 @@ class OrderService {
         }
     }
 
-    static async updateOrderStatus(orderId, status) {
+    static async updateOrderStatus(orderId, status, cashierName = null) {
         try {
             const token = localStorage.getItem('token');
             console.log('Token from localStorage:', token ? 'Token exists (' + token.substring(0, 20) + '...)' : 'NO TOKEN FOUND');
+            
+            const body = { status };
+            if (status === 'preparing' && cashierName) {
+                body.cashierName = cashierName;
+            }
+            
             const response = await fetch(`/api/orders/${orderId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'x-auth-token': token || ''
                 },
-                body: JSON.stringify({ status })
+                body: JSON.stringify(body)
             });
 
             if (!response.ok) {

@@ -194,13 +194,18 @@ router.post('/', /*validateOrder,*/ async (req, res) => {
 router.put('/:id/status', auth, async (req, res) => { // Temporarily commented out auth
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, cashierName } = req.body;
         const mongoose = require('mongoose');
         
-        console.log(`[Orders] Updating order ${id} status to ${status}`);
+        console.log(`[Orders] Updating order ${id} status to ${status}, cashier: ${cashierName}`);
         
         if (!['pending', 'preparing', 'ready', 'complete', 'cancelled'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status' });
+        }
+
+        // Validate cashierName for preparing status
+        if (status === 'preparing' && !cashierName) {
+            return res.status(400).json({ message: 'Cashier name is required when updating to preparing status' });
         }
 
         // Get the current order - check if valid ObjectId first
@@ -226,11 +231,17 @@ router.put('/:id/status', auth, async (req, res) => { // Temporarily commented o
         // Update the status
         order.status = status;
         
-        // Determine paymentStatus based on the new order status
+        // Store cashier name and generate invoice number when preparing
         if (status === 'preparing') {
+            order.cashierName = cashierName;
+            // Generate invoice number (INV-YYYYMMDD-XXXXXX)
+            const date = new Date();
+            const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+            const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+            order.invoiceNumber = `INV-${dateStr}-${randomStr}`;
             // When order is marked as preparing, payment is verified
             order.paymentStatus = 'verified';
-            console.log(`[Orders] Setting paymentStatus to 'verified'`);
+            console.log(`[Orders] Setting paymentStatus to 'verified', invoiceNumber: ${order.invoiceNumber}`);
         } else if (status === 'cancelled') {
             // When order is cancelled, payment is rejected
             order.paymentStatus = 'rejected';
