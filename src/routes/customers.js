@@ -532,6 +532,7 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
         await user.save();
 
         logger.info(`Updated eligibility profile for customer: ${user.email}, SC: ${user.customerProfile.isSeniorCitizen}, PWD: ${user.customerProfile.isPWD}`);
+        logger.info(`Saved user document - Checking saved data: SC=${user.customerProfile.isSeniorCitizen}, PWD=${user.customerProfile.isPWD}`);
 
         return res.json({
             success: true,
@@ -652,6 +653,7 @@ router.put('/discount-preferences', auth, async (req, res, next) => {
  */
 router.get('/pending-verifications', [auth, authorize(['admin', 'owner'])], async (req, res, next) => {
     try {
+        console.log('[PendingVerifications] Fetching SC/PWD verification requests...');
         // Find users who have claimed SC/PWD (regardless of verification status)
         const allVerifications = await User.find({
             $or: [
@@ -663,6 +665,11 @@ router.get('/pending-verifications', [auth, authorize(['admin', 'owner'])], asyn
                 }
             ]
         }).select('_id name email customerProfile').exec();
+
+        console.log('[PendingVerifications] Found', allVerifications.length, 'users with SC/PWD claims');
+        allVerifications.forEach(user => {
+            console.log(`  - User ${user.email}: SC=${user.customerProfile?.isSeniorCitizen}, PWD=${user.customerProfile?.isPWD}`);
+        });
 
         // Format the response
         const formattedRequests = [];
