@@ -336,7 +336,7 @@ class EligibilityManager {
 
         try {
             const token = localStorage.getItem('authToken');
-            const eligibilityType = type.includes('Senior') ? 'SC' : 'PWD';
+            const eligibilityType = type === 'SC' ? 'SC' : 'PWD';
             
             const response = await fetch('/api/customers/verify-eligibility', {
                 method: 'POST',
@@ -373,7 +373,7 @@ class EligibilityManager {
 
         try {
             const token = localStorage.getItem('authToken');
-            const eligibilityType = type.includes('Senior') ? 'SC' : 'PWD';
+            const eligibilityType = type === 'SC' ? 'SC' : 'PWD';
             
             const response = await fetch('/api/customers/verify-eligibility', {
                 method: 'POST',
