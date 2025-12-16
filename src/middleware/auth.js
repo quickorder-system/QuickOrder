@@ -13,6 +13,7 @@ module.exports = function(req, res, next) {
 
     // Check if token exists
     if (!token) {
+        console.log('[Auth] No token found in request headers');
         return res.status(401).json({ message: 'No token, authorization denied' });
     }
 
@@ -20,10 +21,11 @@ module.exports = function(req, res, next) {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded.user;
-        console.log('[Auth] Token verified - User:', req.user);
+        console.log('[Auth] Token verified - User ID:', req.user?.id, 'Role:', req.user?.role, 'Username:', req.user?.username);
         next();
     } catch (err) {
         console.log('[Auth] Token verification failed:', err.message);
+        console.log('[Auth] Token being verified:', token.substring(0, 50) + '...');
         res.status(401).json({ message: 'Token is not valid' });
     }
 };
