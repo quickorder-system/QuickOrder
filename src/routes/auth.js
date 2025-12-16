@@ -38,12 +38,15 @@ router.post('/login', validateLogin, async (req, res, next) => {
             }
         };
 
+        console.log('[Auth/Login] User found:', { username: user.username, role: user.role });
+
         jwt.sign(
             payload,
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || '1h' },
             (err, token) => {
                 if (err) throw err;
+                console.log('[Auth/Login] Token generated with role:', user.role);
                 res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
             }
         );
