@@ -589,7 +589,7 @@
 
             statusDiv.style.display = 'block';
 
-            if (isVerified) {
+            if (isVerified === true) {
                 // Approved status
                 statusDiv.style.backgroundColor = '#e8f5e9';
                 statusDiv.style.borderLeft = '4px solid #4caf50';
@@ -598,6 +598,15 @@
                 statusText.textContent = 'Approved';
                 statusText.style.color = '#2e7d32';
                 statusMessage.textContent = 'Your eligibility has been approved by the admin. You can now use the automatic discount.';
+            } else if (isVerified === false) {
+                // Rejected status
+                statusDiv.style.backgroundColor = '#ffebee';
+                statusDiv.style.borderLeft = '4px solid #f44336';
+                statusIcon.textContent = '❌';
+                statusIcon.style.color = '#f44336';
+                statusText.textContent = 'Rejected';
+                statusText.style.color = '#c62828';
+                statusMessage.textContent = 'Your eligibility has been rejected by the admin. Please review and resubmit if needed.';
             } else {
                 // Pending status
                 statusDiv.style.backgroundColor = '#fff3e0';

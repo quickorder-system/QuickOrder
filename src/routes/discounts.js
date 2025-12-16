@@ -492,8 +492,8 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
                     type: 'SC',
                     discountValue: scDiscount.discountValue,
                     discountType: scDiscount.discountType,
-                    isVerified: user.customerProfile?.scVerified || false,
-                    verificationStatus: user.customerProfile?.scVerified ? 'approved' : 'pending'
+                    isVerified: user.customerProfile?.scVerified === true,
+                    verificationStatus: user.customerProfile?.scVerified === true ? 'approved' : (user.customerProfile?.scVerified === false ? 'rejected' : 'pending')
                 });
             }
         }
@@ -518,8 +518,8 @@ router.get('/eligible-discounts', auth, async (req, res, next) => {
                     type: 'PWD',
                     discountValue: pwdDiscount.discountValue,
                     discountType: pwdDiscount.discountType,
-                    isVerified: user.customerProfile?.pwdVerified || false,
-                    verificationStatus: user.customerProfile?.pwdVerified ? 'approved' : 'pending'
+                    isVerified: user.customerProfile?.pwdVerified === true,
+                    verificationStatus: user.customerProfile?.pwdVerified === true ? 'approved' : (user.customerProfile?.pwdVerified === false ? 'rejected' : 'pending')
                 });
             }
         }

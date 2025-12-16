@@ -571,6 +571,7 @@ router.post('/verify-eligibility', [auth, authorize(['admin', 'owner'])], async 
             customer.customerProfile.verifiedAt = new Date();
         } else {
             customer.customerProfile[verificationField] = false;
+            customer.customerProfile.verifiedAt = new Date(); // Set verifiedAt for rejected status too
         }
 
         customer.updatedAt = new Date();

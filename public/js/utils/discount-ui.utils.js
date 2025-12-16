@@ -72,17 +72,29 @@ const discountUIUtils = {
         const icon = discount.type === 'SC' ? '<i class="fas fa-user-tie"></i>' : '<i class="fas fa-wheelchair"></i>';
         const typeLabel = discount.type === 'SC' ? 'Senior Citizen' : 'PWD';
         
-        // Add verification status badge
-        const statusBadge = discount.isVerified 
-            ? `<span class="verification-badge approved" title="Your ${typeLabel} eligibility is approved"><i class="fas fa-check-circle"></i> Approved</span>`
-            : `<span class="verification-badge pending" title="Your ${typeLabel} eligibility is pending admin approval"><i class="fas fa-hourglass-half"></i> Pending</span>`;
+        // Add verification status badge based on verificationStatus field
+        let statusBadge = '';
+        let disabledAttr = '';
+        let disabledClass = '';
+        let tooltipText = '';
         
-        // Disable radio button if not verified
-        const disabledAttr = discount.isVerified ? '' : 'disabled';
-        const disabledClass = discount.isVerified ? '' : ' disabled';
+        if (discount.verificationStatus === 'approved') {
+            statusBadge = `<span class="verification-badge approved" title="Your ${typeLabel} eligibility is approved"><i class="fas fa-check-circle"></i> Approved</span>`;
+            tooltipText = `Your ${typeLabel} eligibility has been approved. You can use this discount!`;
+        } else if (discount.verificationStatus === 'rejected') {
+            statusBadge = `<span class="verification-badge rejected" title="Your ${typeLabel} eligibility was rejected"><i class="fas fa-times-circle"></i> Rejected</span>`;
+            disabledAttr = 'disabled';
+            disabledClass = ' disabled';
+            tooltipText = `Your ${typeLabel} eligibility was rejected. Please review and resubmit if needed.`;
+        } else {
+            statusBadge = `<span class="verification-badge pending" title="Your ${typeLabel} eligibility is pending admin approval"><i class="fas fa-hourglass-half"></i> Pending</span>`;
+            disabledAttr = 'disabled';
+            disabledClass = ' disabled';
+            tooltipText = `Your ${typeLabel} eligibility is pending admin verification. You'll be able to use this discount once approved.`;
+        }
         
         return `
-            <label class="discount-option${disabledClass}" data-discount-id="${discount.id}" title="${!discount.isVerified ? 'Your eligibility is pending admin verification. You\'ll be able to use this discount once approved.' : ''}">
+            <label class="discount-option${disabledClass}" data-discount-id="${discount.id}" title="${tooltipText}">>
                 <input 
                     type="radio" 
                     name="automaticDiscount" 
