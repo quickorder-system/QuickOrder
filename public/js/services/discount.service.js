@@ -111,7 +111,7 @@ const discountService = {
      */
     async createDiscount(discountData) {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await fetch('/api/discounts', {
                 method: 'POST',
                 headers: {
@@ -140,7 +140,7 @@ const discountService = {
      */
     async updateDiscount(discountId, discountData) {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await fetch(`/api/discounts/${discountId}`, {
                 method: 'PUT',
                 headers: {
@@ -168,7 +168,7 @@ const discountService = {
      */
     async deleteDiscount(discountId) {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await fetch(`/api/discounts/${discountId}`, {
                 method: 'DELETE',
                 headers: {

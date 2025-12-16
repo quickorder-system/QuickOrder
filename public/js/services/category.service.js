@@ -16,7 +16,7 @@ const categoryService = {
     // Get all categories (including inactive) - Admin/Owner only
     async getAllCategories() {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await fetch('/api/categories/admin/all', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -43,7 +43,7 @@ const categoryService = {
     // Create new category
     async createCategory(data) {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await fetch('/api/categories', {
                 method: 'POST',
                 headers: {
@@ -66,7 +66,7 @@ const categoryService = {
     // Update category
     async updateCategory(id, data) {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await fetch(`/api/categories/${id}`, {
                 method: 'PUT',
                 headers: {
@@ -89,7 +89,7 @@ const categoryService = {
     // Rename category (quick edit)
     async renameCategory(id, displayName) {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await fetch(`/api/categories/${id}/rename`, {
                 method: 'PATCH',
                 headers: {
@@ -112,7 +112,7 @@ const categoryService = {
     // Delete category
     async deleteCategory(id) {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await fetch(`/api/categories/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -131,7 +131,7 @@ const categoryService = {
     // Reorder categories
     async reorderCategories(categories) {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await fetch('/api/categories/admin/reorder', {
                 method: 'PATCH',
                 headers: {
