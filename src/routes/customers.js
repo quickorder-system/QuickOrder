@@ -486,20 +486,22 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             }
             user.customerProfile.scId = scId;
             user.customerProfile.scDocument = `/uploads/eligibility/${req.files.scDocument[0].filename}`;
-            user.customerProfile.scVerified = false; // Reset verification status
+            user.customerProfile.scVerified = null; // Set to null for pending (not false for rejected)
+            user.customerProfile.scVerifiedAt = null; // Clear the verification timestamp when reapplying
             // Clear PWD
             user.customerProfile.isSeniorCitizen = true;
             user.customerProfile.isPWD = false;
             user.customerProfile.pwdId = null;
             user.customerProfile.pwdDocument = null;
-            user.customerProfile.pwdVerified = false;
+            user.customerProfile.pwdVerified = null;
+            user.customerProfile.pwdVerifiedAt = null;
             // Enable SC discount preference by default
             user.discountPreferences = user.discountPreferences || {};
             user.discountPreferences.useSCDiscount = true;
         } else {
             user.customerProfile.scId = null;
             user.customerProfile.scDocument = null;
-            user.customerProfile.scVerified = false;
+            user.customerProfile.scVerified = null;
         }
 
         // Update PWD eligibility
@@ -512,20 +514,22 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             }
             user.customerProfile.pwdId = pwdId;
             user.customerProfile.pwdDocument = `/uploads/eligibility/${req.files.pwdDocument[0].filename}`;
-            user.customerProfile.pwdVerified = false; // Reset verification status
+            user.customerProfile.pwdVerified = null; // Set to null for pending (not false for rejected)
+            user.customerProfile.pwdVerifiedAt = null; // Clear the verification timestamp when reapplying
             // Clear SC
             user.customerProfile.isSeniorCitizen = false;
             user.customerProfile.isPWD = true;
             user.customerProfile.scId = null;
             user.customerProfile.scDocument = null;
-            user.customerProfile.scVerified = false;
+            user.customerProfile.scVerified = null;
+            user.customerProfile.scVerifiedAt = null;
             // Enable PWD discount preference by default
             user.discountPreferences = user.discountPreferences || {};
             user.discountPreferences.usePWDDiscount = true;
         } else {
             user.customerProfile.pwdId = null;
             user.customerProfile.pwdDocument = null;
-            user.customerProfile.pwdVerified = false;
+            user.customerProfile.pwdVerified = null;
         }
 
         user.updatedAt = new Date();
