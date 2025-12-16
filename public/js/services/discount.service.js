@@ -85,6 +85,7 @@ const discountService = {
     async getActiveDiscounts() {
         try {
             const token = localStorage.getItem('authToken');
+            console.log('[DiscountService] getActiveDiscounts - Token exists:', !!token);
             const response = await fetch('/api/discounts?isActive=true', {
                 method: 'GET',
                 headers: {

@@ -108,6 +108,7 @@ class EligibilityManager {
             container.innerHTML = '<p>Loading verification requests...</p>';
 
             const token = localStorage.getItem('authToken');
+            console.log('[EligibilityManager] loadVerificationRequests - Token exists:', !!token);
             const response = await fetch('/api/customers/pending-verifications', {
                 method: 'GET',
                 headers: {
@@ -407,6 +408,7 @@ class EligibilityManager {
     async loadStatistics() {
         try {
             const token = localStorage.getItem('authToken');
+            console.log('[EligibilityManager] loadStatistics - Token exists:', !!token);
             if (!token) {
                 console.warn('No authentication token found');
                 return;
