@@ -10,17 +10,21 @@ QuickOrder is a full-stack web application designed to streamline restaurant ope
 - Add items to a shopping cart with quantity management
 - Place orders with customer details and email confirmation
 - Upload proof of payment with file validation
-- Real-time order status tracking (Pending → Preparing → Ready → Completed)
+- Real-time order status tracking (Pending  Preparing  Ready  Completed)
 - Order confirmation and receipt generation
-- Payment method selection
+- Payment method selection (GCash, Maya, Cash)
+- Discount code support
+- Order history and tracking
 
 ### Admin & Owner Dashboard
 - **Order Management**: View, update status, and cancel orders in real-time
 - **Inventory Management**: Add, edit, delete menu items with categories
-- **Sales Analytics**: View comprehensive sales reports with multiple time periods
+- **Sales Analytics**: Comprehensive sales reports with multiple time periods
 - **Report Generation**: Daily, weekly, monthly, and yearly sales analytics
-- **Export Functionality**: Export reports to CSV format
-- **User Authentication**: JWT-based login with role-based access control (Admin, Owner, Customer)
+- **Discount Management**: Create and manage discount codes
+- **SC/PWD Eligibility**: Senior Citizen and PWD discount management
+- **Activity Logs**: Track all system activities
+- **User Authentication**: JWT-based login with role-based access control
 - **Email Notifications**: Automated emails for order status updates and confirmations
 
 ## Technologies Used
@@ -28,8 +32,8 @@ QuickOrder is a full-stack web application designed to streamline restaurant ope
 ### Backend
 - **Node.js** v18.20.8
 - **Express.js** v4.21.2
-- **MongoDB Atlas** with Mongoose ODM v7.8.7
-- **SendGrid** HTTP Web API v3 for email delivery
+- **MongoDB** with Mongoose ODM v7.8.7
+- **SendGrid** API v3 for email delivery
 - **JWT** for authentication with 24-hour token expiration
 - **Helmet** for security headers
 - **express-rate-limit** for API rate limiting
@@ -55,88 +59,89 @@ QuickOrder is a full-stack web application designed to streamline restaurant ope
 ### Installation
 
 1. **Clone the repository:**
-   ```bash
+   `bash
    git clone https://github.com/quickorder-system/QuickOrder.git
    cd QuickOrder
-   ```
+   `
 
 2. **Install dependencies:**
-   ```bash
+   `bash
    npm install
-   ```
+   `
 
 3. **Configure environment variables:**
-   Create a `.env` file in the root directory:
-   ```
+   Create a .env file in the root directory:
+   `
    MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/quickorder
    JWT_SECRET=your_jwt_secret_key
    SENDGRID_API_KEY=your_sendgrid_api_key
    SENDGRID_EMAIL=system.quickorder@gmail.com
    PORT=8080
    NODE_ENV=development
-   ```
+   `
 
 4. **Run the application:**
-   ```bash
+   `bash
    npm start
-   ```
+   `
    Development: `http://localhost:8080`
    Production: `https://quickorder-production-145f.up.railway.app`
 
 ## Project Structure
 
-```
+`
 QuickOrder/
-├── public/                          # Frontend assets
-│   ├── css/                        # Stylesheets (base, components, pages)
-│   ├── js/                         # Client-side JavaScript
-│   │   ├── components/             # Reusable components (cart, order-card)
-│   │   ├── services/               # API and state management services
-│   │   ├── utils/                  # Utility functions
-│   │   └── pages/                  # Page-specific scripts
-│   ├── image/                      # Images and assets
-│   ├── uploads/                    # User-uploaded files
-│   └── *.html                      # Page templates
-├── src/                             # Backend source code
-│   ├── middleware/                 # Express middleware
-│   │   ├── auth.js                # JWT authentication
-│   │   ├── authorization.js       # Role-based access control
-│   │   ├── validation.js          # Request validation
-│   │   └── errorHandler.js        # Global error handling
-│   ├── models/                    # Mongoose schemas
-│   │   ├── user.js                # User model (Customer, Admin, Owner)
-│   │   ├── order.js               # Order model with status tracking
-│   │   └── inventory.js           # Menu item model
-│   ├── routes/                    # API endpoints
-│   │   ├── auth.js                # Authentication routes
-│   │   ├── orders.js              # Order CRUD operations
-│   │   ├── inventory.js           # Inventory management
-│   │   ├── reports.js             # Sales analytics endpoints
-│   │   ├── upload.js              # File upload handling
-│   │   └── health.js              # Health check endpoint
-│   ├── services/                  # Business logic services
-│   │   └── email.service.js       # SendGrid email delivery
-│   └── utils/                     # Utility functions
-│       ├── logger.js              # Logging utility
-│       └── errors.js              # Custom error classes
-├── tests/                          # Test files
-├── docker-compose.yml              # Docker configuration
-├── Dockerfile                      # Container image definition
-├── railway.json                    # Railway deployment config
-├── server.js                       # Main application entry point
-├── package.json                    # Dependencies and scripts
-└── README.md                       # This file
-```
+ public/                          # Frontend assets
+    css/                         # Stylesheets
+    js/                          # Client-side JavaScript
+       components/              # Reusable components
+       services/                # API services
+       utils/                   # Utility functions
+       pages/                   # Page-specific scripts
+    image/                       # Images and assets
+    uploads/                     # User-uploaded files
+    *.html                       # Page templates
+ src/                             # Backend source code
+    middleware/                  # Express middleware
+       auth.js                  # JWT authentication
+       authorization.js         # Role-based access control
+       validation.js            # Request validation
+       errorHandler.js          # Global error handling
+    models/                      # Mongoose schemas
+       user.js                  # User model
+       order.js                 # Order model
+       discount.js              # Discount model
+       inventory.js             # Menu item model
+    routes/                      # API endpoints
+       auth.js                  # Authentication routes
+       orders.js                # Order CRUD operations
+       inventory.js             # Inventory management
+       discounts.js             # Discount management
+       reports.js               # Sales analytics endpoints
+       upload.js                # File upload handling
+    services/                    # Business logic services
+       email.service.js         # SendGrid email delivery
+    utils/                       # Utility functions
+    seeds/                       # Database seed data
+ tests/                           # Test files
+ docker-compose.yml               # Docker configuration
+ Dockerfile                       # Container image definition
+ railway.json                     # Railway deployment config
+ server.js                        # Main application entry point
+ package.json                     # Dependencies and scripts
+ README.md                        # This file
+`
 
 ## API Endpoints
 
 ### Authentication
 - `POST /api/auth/login` - User login
 - `POST /api/auth/register` - User registration
+- `POST /api/auth/logout` - User logout
 
 ### Orders
 - `GET /api/orders` - Get all orders (paginated)
-- `GET /api/orders/:id` - Get order by ID (supports both MongoDB ObjectId and custom orderId)
+- `GET /api/orders/:id` - Get order by ID
 - `POST /api/orders` - Create new order
 - `PUT /api/orders/:id/status` - Update order status (Admin/Owner only)
 - `PUT /api/orders/:id/cancel` - Cancel order
@@ -149,6 +154,13 @@ QuickOrder/
 - `PUT /api/inventory/:id` - Update item (Owner only)
 - `DELETE /api/inventory/:id` - Delete item (Owner only)
 
+### Discounts
+- `GET /api/discounts` - Get all discounts
+- `POST /api/discounts` - Create discount (Owner only)
+- `PUT /api/discounts/:id` - Update discount (Owner only)
+- `DELETE /api/discounts/:id` - Delete discount (Owner only)
+- `POST /api/discounts/validate` - Validate discount code
+
 ### Reports
 - `GET /api/reports/daily` - Daily sales report
 - `GET /api/reports/weekly` - Weekly sales report
@@ -159,25 +171,22 @@ QuickOrder/
 ### File Upload
 - `POST /api/upload` - Upload payment proof (multipart/form-data)
 
-### Health
-- `GET /api/health` - Server health check with environment status
-
 ## Deployment
 
-QuickOrder is deployed on **Railway.app** using Docker. The application runs on port 8080 and includes:
-- MongoDB Atlas cloud database
-- SendGrid for email delivery (HTTP API, not SMTP)
-- Auto-scaling capabilities
+QuickOrder is deployed on **Railway.app** using Docker. The application:
+- Runs on port 8080
+- Uses MongoDB Atlas cloud database
+- SendGrid for email delivery
+- Supports auto-scaling
 - Environment-based configuration
-- Health check endpoints
 
 ### Deploying to Railway
 1. Push code to GitHub
-2. Connect Railway to repository
+2. Connect Railway to your repository
 3. Configure environment variables in Railway dashboard
 4. Deploy with `npm start` command
 
-## Key Features Implemented
+## Key Features
 
 ### Security
 - JWT authentication with secure token validation
@@ -190,9 +199,9 @@ QuickOrder is deployed on **Railway.app** using Docker. The application runs on 
 ### Performance
 - MongoDB aggregation pipelines for analytics
 - Indexed database queries for fast retrieval
-- Email delivery via HTTP API (port 443) for reliability
-- 5-second auto-refresh for real-time order updates
+- Real-time order updates with 5-second auto-refresh
 - Lazy loading and code splitting for frontend
+- HTTP API for email delivery (port 443)
 
 ### User Experience
 - Real-time order status updates
@@ -200,14 +209,20 @@ QuickOrder is deployed on **Railway.app** using Docker. The application runs on 
 - Responsive mobile-first design
 - Comprehensive error handling
 - Loading states and user feedback
-- Export functionality for data analysis
+
+## Testing
+
+Run the test suite:
+`bash
+npm test
+`
 
 ## Troubleshooting
 
 ### Email Not Sending
 - Verify SendGrid API key in environment variables
-- Check firewall settings - HTTP API uses port 443
-- Review SendGrid dashboard for bounce/delivery reports
+- Check SendGrid dashboard for bounce/delivery reports
+- Ensure sender email is verified in SendGrid
 
 ### Database Connection Issues
 - Verify MongoDB URI connection string
@@ -217,7 +232,7 @@ QuickOrder is deployed on **Railway.app** using Docker. The application runs on 
 ### Order Status Updates Not Working
 - Verify JWT tokens haven't expired
 - Check authorization middleware for role-based access
-- Review server logs for middleware errors
+- Review server logs for errors
 
 ## Contributing
 
