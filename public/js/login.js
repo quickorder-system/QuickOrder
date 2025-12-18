@@ -28,8 +28,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
     const { token, user } = await response.json();
     console.log('Token received:', token);
-    localStorage.setItem('authToken', token);
-    console.log('Token saved to localStorage:', localStorage.getItem('authToken'));
+    localStorage.setItem('token', token);
+    console.log('Token saved to localStorage:', localStorage.getItem('token'));
     stateService.setUser(user);
 
     const btn = document.querySelector('.login-btn');
