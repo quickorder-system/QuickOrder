@@ -1,22 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
+const cloudinary = require('cloudinary').v2;
+const { Readable } = require('stream');
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '..', '..', 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+// Configure multer for memory storage (we'll upload to Cloudinary)
+const storage = multer.memoryStorage();
 
 const upload = multer({ 
   storage: storage,
@@ -35,7 +31,7 @@ const upload = multer({
 
 // Handle file uploads (for payment screenshots and inventory item images)
 router.post('/', (req, res) => {
-  upload.single('paymentScreenshot')(req, res, (err) => {
+  upload.single('paymentScreenshot')(req, res, async (err) => {
     // Handle multer errors
     if (err) {
       console.error('Multer error:', err);
@@ -55,12 +51,30 @@ router.post('/', (req, res) => {
     }
 
     try {
-      const fileUrl = `/uploads/${req.file.filename}`;
-      console.log('File uploaded successfully:', fileUrl);
-      res.json({ 
-        message: 'File uploaded successfully',
-        fileUrl: fileUrl
-      });
+      // Upload to Cloudinary using buffer
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'quickorder/items',
+          resource_type: 'auto',
+          max_file_size: 5242880 // 5MB
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            return res.status(500).json({ error: 'Failed to upload to Cloudinary: ' + error.message });
+          }
+
+          console.log('File uploaded successfully to Cloudinary:', result.secure_url);
+          res.json({ 
+            message: 'File uploaded successfully',
+            fileUrl: result.secure_url,
+            publicId: result.public_id
+          });
+        }
+      );
+
+      // Convert buffer to stream and pipe to Cloudinary
+      Readable.from(req.file.buffer).pipe(stream);
     } catch (error) {
       console.error('Upload error:', error);
       res.status(500).json({ error: 'Failed to upload file: ' + error.message });
