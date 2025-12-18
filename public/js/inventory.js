@@ -661,6 +661,14 @@
     try {
       let response;
       const token = localStorage.getItem('token');
+      console.log('[Inventory] Token from localStorage:', token ? 'Present' : 'MISSING - User may need to log in again');
+      
+      if (!token) {
+        alert('Authentication token not found. Please log in again.');
+        window.location.href = 'Login.html';
+        return;
+      }
+      
       const headers = {
         'Content-Type': 'application/json',
       };
