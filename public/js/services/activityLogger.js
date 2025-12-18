@@ -86,7 +86,7 @@ const getActivityLogs = async (options = {}) => {
 
 const getActivityStats = async (options = {}) => {
   try {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (!token) return [];
 
     const params = new URLSearchParams();

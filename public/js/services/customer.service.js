@@ -103,7 +103,7 @@ const customerService = {
      */
     getOrderDetails: async (orderId) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -132,7 +132,7 @@ const customerService = {
      */
     changePassword: async (currentPassword, newPassword) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -163,7 +163,7 @@ const customerService = {
      */
     getAddresses: async () => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -192,7 +192,7 @@ const customerService = {
      */
     addAddress: async (addressData) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -223,7 +223,7 @@ const customerService = {
      */
     updateAddress: async (addressId, addressData) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -254,7 +254,7 @@ const customerService = {
      */
     deleteAddress: async (addressId) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -283,7 +283,7 @@ const customerService = {
      */
     setDefaultAddress: async (addressId) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -312,7 +312,7 @@ const customerService = {
      */
     updateEligibility: async (eligibilityData) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -343,7 +343,7 @@ const customerService = {
      */
     updateEligibilityWithFile: async (formData) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -373,7 +373,7 @@ const customerService = {
      */
     updateDiscountPreferences: async (preferences) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -404,7 +404,7 @@ const customerService = {
      */
     getEligibleDiscounts: async () => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }

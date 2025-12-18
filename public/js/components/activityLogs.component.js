@@ -234,7 +234,7 @@ class ActivityLogsComponent {
       }
 
       // Get current user info
-      const authToken = localStorage.getItem('authToken');
+      const authToken = localStorage.getItem('token');
       const currentUser = localStorage.getItem('userName') || 'Unknown';
       const generatedTime = new Date().toLocaleString();
 

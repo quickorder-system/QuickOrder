@@ -55,7 +55,7 @@ class EligibilityManager {
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up...';
 
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Authentication token not found. Please login again.');
             }
@@ -107,7 +107,7 @@ class EligibilityManager {
         try {
             container.innerHTML = '<p>Loading verification requests...</p>';
 
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             console.log('[EligibilityManager] loadVerificationRequests - Token exists:', !!token);
             const response = await fetch('/api/customers/pending-verifications', {
                 method: 'GET',
@@ -335,7 +335,7 @@ class EligibilityManager {
         if (!confirm(`Approve ${type} eligibility for this customer?`)) return;
 
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const eligibilityType = type === 'SC' ? 'SC' : 'PWD';
             
             const response = await fetch('/api/customers/verify-eligibility', {
@@ -372,7 +372,7 @@ class EligibilityManager {
         if (!confirm(`Reject ${type} eligibility for this customer?`)) return;
 
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const eligibilityType = type === 'SC' ? 'SC' : 'PWD';
             
             const response = await fetch('/api/customers/verify-eligibility', {
@@ -407,7 +407,7 @@ class EligibilityManager {
      */
     async loadStatistics() {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             console.log('[EligibilityManager] loadStatistics - Token exists:', !!token);
             if (!token) {
                 console.warn('No authentication token found');

@@ -178,7 +178,7 @@ const authService = {
      */
     getCurrentUser: async () => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
 
             if (!token) {
                 throw new Error('No authentication token found');
@@ -208,7 +208,7 @@ const authService = {
      */
     logout: async () => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
 
             if (token) {
                 await fetch('/api/auth/customer/logout', {
@@ -220,7 +220,7 @@ const authService = {
             }
 
             // Clear localStorage
-            localStorage.removeItem('authToken');
+            localStorage.removeItem('token');
             localStorage.removeItem('userEmail');
             localStorage.removeItem('userName');
             localStorage.removeItem('userId');
@@ -228,7 +228,7 @@ const authService = {
             return { message: 'Logout successful' };
         } catch (error) {
             // Still clear local storage even if API call fails
-            localStorage.removeItem('authToken');
+            localStorage.removeItem('token');
             localStorage.removeItem('userEmail');
             localStorage.removeItem('userName');
             localStorage.removeItem('userId');
@@ -240,14 +240,14 @@ const authService = {
      * Check if user is authenticated
      */
     isAuthenticated: () => {
-        return !!localStorage.getItem('authToken');
+        return !!localStorage.getItem('token');
     },
 
     /**
      * Get authentication token
      */
     getToken: () => {
-        return localStorage.getItem('authToken');
+        return localStorage.getItem('token');
     },
 
     /**

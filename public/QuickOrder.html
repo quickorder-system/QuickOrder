@@ -424,7 +424,7 @@
             alert('Please agree to the Terms of Service before proceeding.');
           } else {
             // Check if user is already logged in
-            const authToken = localStorage.getItem('authToken');
+            const authToken = localStorage.getItem('token');
             window.location.href = authToken ? 'menu.html' : 'customerLogin.html';
           }
         });
@@ -435,7 +435,7 @@
             alert('Please agree to the Terms of Service before proceeding.');
           } else {
             // Check if user is already logged in
-            const authToken = localStorage.getItem('authToken');
+            const authToken = localStorage.getItem('token');
             window.location.href = authToken ? 'menu.html' : 'customerLogin.html';
           }
         });
