@@ -6,7 +6,7 @@
 // Helper function to decode JWT and get username
 const getUsernameFromToken = () => {
   try {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (!token) return null;
     
     // Decode JWT (basic decoding - no verification needed on client)
@@ -23,7 +23,7 @@ const getUsernameFromToken = () => {
 
 const logActivity = async (action, page, description, details = {}) => {
   try {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (!token) {
       console.warn('[ActivityLogger] No token found, skipping log');
       return;
@@ -56,7 +56,7 @@ const logActivity = async (action, page, description, details = {}) => {
 
 const getActivityLogs = async (options = {}) => {
   try {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (!token) return [];
 
     const params = new URLSearchParams();

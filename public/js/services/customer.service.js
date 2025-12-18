@@ -9,7 +9,7 @@ const customerService = {
      */
     getProfile: async () => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -38,7 +38,7 @@ const customerService = {
      */
     updateProfile: async (profileData) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }
@@ -69,7 +69,7 @@ const customerService = {
      */
     getOrders: async (page = 1, limit = 10, status = null) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Not authenticated');
             }

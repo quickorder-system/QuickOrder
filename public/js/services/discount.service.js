@@ -16,7 +16,7 @@ const discountService = {
                 throw new Error('Discount code is required');
             }
 
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch(`/api/discounts/validate/${code}?orderAmount=${orderAmount}`, {
                 method: 'GET',
                 headers: {
@@ -84,7 +84,7 @@ const discountService = {
      */
     async getActiveDiscounts() {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             console.log('[DiscountService] getActiveDiscounts - Token exists:', !!token);
             if (token) {
                 console.log('[DiscountService] Token preview:', token.substring(0, 50) + '...');
@@ -115,7 +115,7 @@ const discountService = {
      */
     async createDiscount(discountData) {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch('/api/discounts', {
                 method: 'POST',
                 headers: {
@@ -144,7 +144,7 @@ const discountService = {
      */
     async updateDiscount(discountId, discountData) {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch(`/api/discounts/${discountId}`, {
                 method: 'PUT',
                 headers: {
@@ -172,7 +172,7 @@ const discountService = {
      */
     async deleteDiscount(discountId) {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch(`/api/discounts/${discountId}`, {
                 method: 'DELETE',
                 headers: {
@@ -208,7 +208,7 @@ const discountService = {
      */
     async getEligibleDiscounts() {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch('/api/discounts/eligible-discounts', {
                 method: 'GET',
                 headers: {
@@ -236,7 +236,7 @@ const discountService = {
      */
     async applyAutomaticDiscount(discountType, orderAmount) {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch('/api/discounts/apply-automatic', {
                 method: 'POST',
                 headers: {
@@ -268,7 +268,7 @@ const discountService = {
      */
     async toggleAutomaticDiscount(discountType, enabled) {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch('/api/discounts/toggle-automatic', {
                 method: 'PUT',
                 headers: {

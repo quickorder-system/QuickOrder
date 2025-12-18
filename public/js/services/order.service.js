@@ -1,7 +1,7 @@
 class OrderService {
     static async getAllOrders() {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch('/api/orders', {
                 method: 'GET',
                 headers: {
@@ -43,7 +43,7 @@ class OrderService {
 
     static async updateOrderStatus(orderId, status, cashierName = null) {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             console.log('Token from localStorage:', token ? 'Token exists (' + token.substring(0, 20) + '...)' : 'NO TOKEN FOUND');
             
             const body = { status };
@@ -74,7 +74,7 @@ class OrderService {
 
     static async cancelOrder(orderId) {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch(`/api/orders/${orderId}/cancel`, {
                 method: 'PUT',
                 headers: {
@@ -97,7 +97,7 @@ class OrderService {
 
     static async deleteOrder(orderId) {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('token');
             const response = await fetch(`/api/orders/${orderId}`, {
                 method: 'DELETE',
                 headers: {
