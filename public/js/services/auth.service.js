@@ -57,7 +57,7 @@ const authService = {
 
             // Store token in localStorage
             if (data.token) {
-                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('token', data.token);
                 localStorage.setItem('userEmail', data.user.email);
                 localStorage.setItem('userName', data.user.name);
                 localStorage.setItem('userId', data.user.id);
