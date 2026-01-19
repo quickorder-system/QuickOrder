@@ -187,7 +187,7 @@ class EligibilityManager {
             <div class="verification-document-preview">
                 <label>Uploaded Document:</label>
                 <div class="document-preview-container">
-                    <img src="${request.document}" alt="ID Document" class="document-image clickable-document" onclick="window.eligibilityManager.openDocumentModal('${request.document}', '${request.userName}')" onerror="this.src='/image/placeholder.png'" style="cursor: pointer;">
+                    <img src="${request.document}" alt="ID Document" class="document-image clickable-document" onclick="window.eligibilityManager.openDocumentModal('${request.document}', '${request.userName}')" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22 font-family=%22Arial%22 font-size=%2212%22%3ENo Image%3C/text%3E%3C/svg%3E'" style="cursor: pointer;">
                     <span class="image-hint">Click to enlarge</span>
                 </div>
                 <a href="${request.document}" target="_blank" class="document-link">

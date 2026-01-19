@@ -5,24 +5,22 @@ const authorize = require('../middleware/authorization');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { Readable } = require('stream');
 const User = require('../models/user');
 const Order = require('../models/order');
 const logger = require('../utils/logger');
 const { BadRequestError } = require('../utils/errors');
 
-// Configure multer for eligibility document uploads
-const eligibilityStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'eligibility');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${req.user.id}-${Date.now()}-${file.originalname}`);
-  }
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+// Configure multer for eligibility document uploads (memory storage for Cloudinary)
+const eligibilityStorage = multer.memoryStorage();
 
 const eligibilityUpload = multer({
   storage: eligibilityStorage,
@@ -38,6 +36,34 @@ const eligibilityUpload = multer({
     }
   }
 });
+
+/**
+ * Upload eligibility document to Cloudinary
+ */
+function uploadEligibilityDocToCloudinary(file, userId, type) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'quickorder/eligibility',
+        resource_type: 'auto',
+        public_id: `${userId}-${type}-${Date.now()}`,
+        max_file_size: 5242880 // 5MB
+      },
+      (error, result) => {
+        if (error) {
+          logger.error(`Cloudinary upload error for ${type} document:`, error);
+          reject(new Error(`Failed to upload ${type} document to Cloudinary: ${error.message}`));
+        } else {
+          logger.info(`${type} document uploaded successfully to Cloudinary:`, result.secure_url);
+          resolve(result.secure_url);
+        }
+      }
+    );
+
+    // Convert buffer to stream and pipe to Cloudinary
+    Readable.from(file.buffer).pipe(stream);
+  });
+}
 
 /**
  * @route GET /api/customers/profile
@@ -484,8 +510,12 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             if (!req.files?.scDocument?.[0]) {
                 throw new BadRequestError('SC document is required');
             }
+            
+            // Upload SC document to Cloudinary
+            const scDocUrl = await uploadEligibilityDocToCloudinary(req.files.scDocument[0], req.user.id, 'sc');
+            
             user.customerProfile.scId = scId;
-            user.customerProfile.scDocument = `/uploads/eligibility/${req.files.scDocument[0].filename}`;
+            user.customerProfile.scDocument = scDocUrl;
             user.customerProfile.scVerified = null; // Set to null for pending (not false for rejected)
             user.customerProfile.scVerifiedAt = null; // Clear the verification timestamp when reapplying
             // Clear PWD
@@ -512,8 +542,12 @@ router.put('/profile/eligibility', auth, eligibilityUpload.fields([
             if (!req.files?.pwdDocument?.[0]) {
                 throw new BadRequestError('PWD document is required');
             }
+            
+            // Upload PWD document to Cloudinary
+            const pwdDocUrl = await uploadEligibilityDocToCloudinary(req.files.pwdDocument[0], req.user.id, 'pwd');
+            
             user.customerProfile.pwdId = pwdId;
-            user.customerProfile.pwdDocument = `/uploads/eligibility/${req.files.pwdDocument[0].filename}`;
+            user.customerProfile.pwdDocument = pwdDocUrl;
             user.customerProfile.pwdVerified = null; // Set to null for pending (not false for rejected)
             user.customerProfile.pwdVerifiedAt = null; // Clear the verification timestamp when reapplying
             // Clear SC
